@@ -5,7 +5,8 @@
 # see the readme doc for details and examples.
 #
 # zxcvbn takes an optional second argument, other_user_inputs, a string of whitespace-delimited
-# words from other inputs on the registration form (such as name, surname, dob, etc).
+# words from other inputs on the registration form (such as name, surname, dob, etc). zxcvbn will
+# penalize any password that contains words from this list.
 ###
 zxcvbn = (password, other_user_inputs) ->
   matching_attacks: ['bruteforce,36', 'letters,12-digits,2', 'word,436-word,1022-digit,2']
