@@ -16,9 +16,10 @@ def main():
     more details at:
     http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/TV/2006/explanation
 
-    the list is separated into pages of 1000 or 2000 terms each. the urls look like this:
-    the first 10k words are separated into pages of 1000 terms each.
-    the remainder is separated into pages of 2000 terms each:
+    the list is separated into pages of 1000 or 2000 terms each.
+    * the first 10k words are separated into pages of 1000 terms each.
+    * the remainder is separated into pages of 2000 terms each:
+    urls look like this:
 
     http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/TV/2006/1-1000
     http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/TV/2006/1001-2000
@@ -38,7 +39,7 @@ def main():
         freq_range = "%d-%d" % (i * 1000 + 1, (i+1) * 1000)
         urls.append(URL_TMPL % freq_range)
 
-    for i in xrange(1,15):
+    for i in xrange(0,15):
         freq_range = "%d-%d" % (10000 + 2 * i * 1000 + 1, 10000 + (2 * i + 2) * 1000)
         urls.append(URL_TMPL % freq_range)
 
@@ -59,7 +60,7 @@ def download(url):
     '''
     scrape friendly: sleep 10 seconds between each request, cache each result.
     '''
-    DOWNLOAD_TMPL = '/tmp/freqlist%s.html'
+    DOWNLOAD_TMPL = '../data/tv_and_movie_freqlist%s.html'
     freq_range = url[url.rindex('/')+1:]
 
     tmp_path = DOWNLOAD_TMPL % freq_range
@@ -99,4 +100,7 @@ def parse_terms(doc):
     return results
 
 if __name__ == '__main__':
+    if os.path.basename(os.getcwd()) != 'scripts':
+        print 'run this from the scripts directory'
+        exit(1)
     main()
