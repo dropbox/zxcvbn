@@ -1,17 +1,23 @@
+# ------------------------------------------------------------------------------
+# omnimatch -- why not try it all ----------------------------------------------
+# ------------------------------------------------------------------------------
 
-build_ranked_dict = (unranked_list) ->
-  result = {}
-  i = 1 # rank starts at 1, not 0
-  for word in unranked_list
-    result[word] = i
-    i += 1
-  result
+omnimatch = (password) ->
+  matches = []
+  for matcher in [
+    bruteforce_match
+    digits_match, year_match, date_match
+    repeat_match, sequence_match,
+    spatial_match,
+    password_match, male_name_match, female_name_match, surname_match, english_match,
+    h4x0r_match
+  ]
+    matches.push.apply matches, matcher(password)
+  matches
 
-ranked_english = build_ranked_dict(english)
-ranked_surnames = build_ranked_dict(surnames)
-ranked_male_names = build_ranked_dict(male_names)
-ranked_female_names = build_ranked_dict(female_names)
-ranked_passwords = build_ranked_dict(passwords)
+# ------------------------------------------------------------------------------
+# spatial match (qwerty/dvorak/keypad) -----------------------------------------
+# ------------------------------------------------------------------------------
 
 spatial_match = (password) ->
   best = []
@@ -53,7 +59,7 @@ spatial_match_helper = (password, graph_name) ->
       if found
         j += 1
       else
-        if j - i > 1
+        if j - i > 2 # only consider length-3 chains and up
           result.push
             pattern: 'spatial'
             ij: [i, j-1]
@@ -63,6 +69,10 @@ spatial_match_helper = (password, graph_name) ->
         break
     i = j
   result
+
+#-------------------------------------------------------------------------------
+# repeats (aaa) and sequences (abcdef) -----------------------------------------
+#-------------------------------------------------------------------------------
 
 repeat_match = (password) ->
   result = []
@@ -74,7 +84,7 @@ repeat_match = (password) ->
       if password[j-1] == password[j]
         j += 1
       else
-        if j - i > 1
+        if j - i > 2 # length-3 chains and up
           result.push
             pattern: 'repeat'
             ij: [i, j-1]
@@ -114,7 +124,7 @@ sequence_match = (password) ->
         if cur_n - prev_n == seq_direction
           j += 1
         else
-          if j - i > 1
+          if j - i > 2 # length-3 chains and up
             result.push
               pattern: 'sequence'
               ij: [i, j-1]
@@ -126,9 +136,52 @@ sequence_match = (password) ->
     i = j
   result
 
-# console.log sequence_match('abccdefg71234567')
-# console.log repeat_match('aaaBBBB77773737cccc')
-# console.log spatial_match('qwertgfdsazxcvbnm,lp-=]\\')
+#-------------------------------------------------------------------------------
+# dictionary matches (common passwords, english, last names, etc) --------------
+#-------------------------------------------------------------------------------
+
+dictionary_match = (password, ranked_dict) ->
+  result = []
+  len = password.length
+  password_lower = password.toLowerCase()
+  for i in [0...len]
+    for j in [i...len]
+      if password_lower[i..j] of ranked_dict
+        word = password_lower[i..j]
+        rank = ranked_dict[word]
+        result.push(
+          pattern: 'dictionary'
+          ij: [i, j]
+          token: password[i..j]
+          matched_word: word
+          rank: rank
+        )
+  result
+
+max_coverage_subset = (matches) ->
+  best_chain = []
+  best_coverage = 0
+  decoder = (chain, rest) ->
+    min_j = Math.min.apply(null, (match.ij[1] for match in rest))
+    for next in rest when next.ij[0] <= min_j
+      next_chain = chain.concat [next]
+      next_rest = (match for match in rest when match.ij[0] > next.ij[1])
+      coverage = 0
+      coverage += match.token.length for match in next_chain
+      if coverage > best_coverage or (coverage == best_coverage and next_chain.length < best_chain.length)
+        best_coverage = coverage
+        best_chain = next_chain
+      decoder(next_chain, next_rest)
+  decoder([], matches)
+  best_chain
+
+build_ranked_dict = (unranked_list) ->
+  result = {}
+  i = 1 # rank starts at 1, not 0
+  for word in unranked_list
+    result[word] = i
+    i += 1
+  result
 
 build_dict_matcher = (dict_name, ranked_dict) ->
   (password) ->
@@ -136,11 +189,21 @@ build_dict_matcher = (dict_name, ranked_dict) ->
     match.dictionary_name = dict_name for match in matches
     matches
 
-english_match = build_dict_matcher('words', ranked_english)
-surname_match = build_dict_matcher('surnames', ranked_surnames)
-male_name_match = build_dict_matcher('male_names', ranked_male_names)
+ranked_english      = build_ranked_dict(english)
+ranked_surnames     = build_ranked_dict(surnames)
+ranked_male_names   = build_ranked_dict(male_names)
+ranked_female_names = build_ranked_dict(female_names)
+ranked_passwords    = build_ranked_dict(passwords)
+
+english_match     = build_dict_matcher('words', ranked_english)
+surname_match     = build_dict_matcher('surnames', ranked_surnames)
+male_name_match   = build_dict_matcher('male_names', ranked_male_names)
 female_name_match = build_dict_matcher('female_names', ranked_female_names)
-password_match = build_dict_matcher('passwords', ranked_passwords)
+password_match    = build_dict_matcher('passwords', ranked_passwords)
+
+#-------------------------------------------------------------------------------
+# dictionary matching with common substitutions (pr0d@dmin instead of prodadmin)
+#-------------------------------------------------------------------------------
 
 h4x0r_table =
   a: ['4', '@']
@@ -248,6 +311,10 @@ h4x0r_match = (password) ->
     match.sub = best_sub
     match
 
+#-------------------------------------------------------------------------------
+# digit regions, years, and dates ----------------------------------------------
+#-------------------------------------------------------------------------------
+
 digits_rx = /\d+/
 digits_match = (password) ->
   for match in findall password, digits_rx
@@ -264,7 +331,7 @@ year_match = (password) ->
     ij: [i, j]
     token: password[i..j]
 
-date_rx = /(\d{1,2})( |-|\/|\.|_)?(\d{1,2}?)\2?(\d{2}|19\d{2}|200\d|201\d)/
+date_rx = /(\d{1,2})( |-|\/|\.|_)?(\d{1,2}?)\2?(19\d{2}|200\d|201\d|\d{2})/
 date_match = (password) ->
   matches = []
   for match in findall password, date_rx
@@ -300,45 +367,9 @@ findall = (password, rx) ->
 
 repeat = (chr, n) -> (chr for i in [1..n]).join('')
 
-###
-# returns a list of objects for every substring of password that is a member of dictionary.
-#
-# ranked_dict must be an object mapping a word to its frequency rank.
-###
-dictionary_match = (password, ranked_dict) ->
-  result = []
-  len = password.length
-  password_lower = password.toLowerCase()
-  for i in [0...len]
-    for j in [i...len]
-      if password_lower[i..j] of ranked_dict
-        word = password_lower[i..j]
-        rank = ranked_dict[word]
-        result.push(
-          pattern: 'dictionary'
-          ij: [i, j]
-          token: password[i..j]
-          matched_word: word
-          rank: rank
-        )
-  result
-
-max_coverage_subset = (matches) ->
-  best_chain = []
-  best_coverage = 0
-  decoder = (chain, rest) ->
-    min_j = Math.min.apply(null, (match.ij[1] for match in rest))
-    for next in rest when next.ij[0] <= min_j
-      next_chain = chain.concat [next]
-      next_rest = (match for match in rest when match.ij[0] > next.ij[1])
-      coverage = 0
-      coverage += match.token.length for match in next_chain
-      if coverage > best_coverage or (coverage == best_coverage and next_chain.length < best_chain.length)
-        best_coverage = coverage
-        best_chain = next_chain
-      decoder(next_chain, next_rest)
-  decoder([], matches)
-  best_chain
+#-------------------------------------------------------------------------------
+# bruteforce: match the whole password and calculate useful numbers ------------
+#-------------------------------------------------------------------------------
 
 bruteforce_match = (password) ->
   [lower, upper, digits, symbols] = [false, false, false, false]
@@ -368,15 +399,6 @@ bruteforce_match = (password) ->
     cardinality: cardinality
   ]
 
-# start = new Date().getTime()
-# console.log english_match('correcthorsebatterystaplecorrecthorsebattery')
-# console.log(new Date().getTime() - start)
-
-# start = new Date().getTime()
-# console.log female_name_match password
-# end = new Date().getTime()
-# console.log end - start
-
-# subs = enumerate_h4x0r_subs(relevent_h4x0r_subtable(password))
-# for sub in subs
-#   console.log english_match(h4x0r_sub(password, sub))
+start = new Date().getTime()
+console.log omnimatch 'correcthorse2211980batterystaple'
+console.log(new Date().getTime() - start)
