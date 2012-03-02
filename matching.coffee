@@ -7,10 +7,11 @@ build_ranked_dict = (unranked_list) ->
     i += 1
   result
 
-ranked_words = build_ranked_dict(word_rank_lookup)
+ranked_english = build_ranked_dict(english)
 ranked_surnames = build_ranked_dict(surnames)
-ranked_male_names = build_ranked_dict(male_first)
-ranked_female_names = build_ranked_dict(female_first)
+ranked_male_names = build_ranked_dict(male_names)
+ranked_female_names = build_ranked_dict(female_names)
+ranked_passwords = build_ranked_dict(passwords)
 
 spatial_match = (password) ->
   best = []
@@ -131,15 +132,15 @@ sequence_match = (password) ->
 
 build_dict_matcher = (dict_name, ranked_dict) ->
   (password) ->
-    console.log password
     matches = max_coverage_subset dictionary_match(password, ranked_dict)
     match.dictionary_name = dict_name for match in matches
     matches
 
-word_match = build_dict_matcher('words', ranked_words)
+english_match = build_dict_matcher('words', ranked_english)
 surname_match = build_dict_matcher('surnames', ranked_surnames)
 male_name_match = build_dict_matcher('male_names', ranked_male_names)
 female_name_match = build_dict_matcher('female_names', ranked_female_names)
+password_match = build_dict_matcher('passwords', ranked_passwords)
 
 h4x0r_table =
   a: ['4', '@']
@@ -226,7 +227,7 @@ h4x0r_match = (password) ->
   best_sub = null
   best_coverage = 0
   for sub in enumerate_h4x0r_subs relevent_h4x0r_subtable(password)
-    candidates = (matcher h4x0r_sub(password, sub) for matcher in [word_match, surname_match, female_name_match, male_name_match])
+    candidates = (matcher h4x0r_sub(password, sub) for matcher in [english_match, surname_match, female_name_match, male_name_match])
     for candidate in candidates
       coverage = 0
       coverage += match.token.length for match in candidate
@@ -241,13 +242,60 @@ h4x0r_match = (password) ->
     match.sub = sub
   best
 
-year_match = (password) ->
-  1
-
+digit_rx = /\d+/
 digit_match = (password) ->
-  1
+  for match in findall password, digit_rx
+    [i, j] = match.ij
+    pattern: 'digit'
+    ij: [i, j]
+    token: password[i..j]
 
-# date match
+year_rx = /\d{2}|19\d{2}|200\d|201\d/
+year_match = (password) ->
+  for match in findall password, year_rx
+    [i, j] = match.ij
+    pattern: 'year'
+    ij: [i, j]
+    token: password[i..j]
+
+date_rx = /(\d{1,2})( |-|\/|\.|_)?(\d{1,2}?)\2?(\d{2}|19\d{2}|200\d|201\d)/
+date_match = (password) ->
+  matches = []
+  for match in findall password, date_rx
+    console.log match
+    if match[0].length <= 4
+      continue # brute-forcing 4-digit numbers is faster than brute-forcing dates
+    [day, month, year] = (parseInt(match[k]) for k in [1,3,4])
+    separator = match[2] or ''
+    if 12 <= month <= 31 and day <= 12
+      [day, month] = [month, day]
+    if day > 31 or month > 12
+      continue
+    [i, j] = match.ij
+    matches.push
+      pattern: 'date'
+      ij: [i, j]
+      token: password[i..j]
+      separator: separator
+      day: day
+      month: month
+      year: year
+  matches
+
+findall = (password, rx) ->
+  matches = []
+  loop
+    match = password.match rx
+    if not match
+      break
+    match.ij = [match.index, match.index + match[0].length - 1]
+    matches.push match
+    password = password.replace match[0], repeat(' ', match[0].length)
+  matches
+
+repeat = (chr, n) -> (chr for i in [1..n]).join('')
+
+console.log date_match 'happytime1311912'
 
 ###
 # returns a list of objects for every substring of password that is a member of dictionary.
@@ -290,14 +338,14 @@ max_coverage_subset = (matches) ->
   best_chain
 
 # start = new Date().getTime()
-# console.log word_match('correcthorsebatterystaplecorrecthorsebattery')
+# console.log english_match('correcthorsebatterystaplecorrecthorsebattery')
 # console.log(new Date().getTime() - start)
 
-start = new Date().getTime()
-console.log female_name_match password
-end = new Date().getTime()
-console.log end - start
+# start = new Date().getTime()
+# console.log female_name_match password
+# end = new Date().getTime()
+# console.log end - start
 
 # subs = enumerate_h4x0r_subs(relevent_h4x0r_subtable(password))
 # for sub in subs
-#   console.log word_match(h4x0r_sub(password, sub))
+#   console.log english_match(h4x0r_sub(password, sub))
