@@ -129,20 +129,23 @@ def get_ranked_common_passwords():
             lst.append(line.strip())
     return lst
 
+def to_ranked_dict(lst):
+    return dict((word, i) for i, word in enumerate(lst))
+
 def filter_short(terms):
     '''
     only keep if brute-force possibilities are greater than this word's rank in the dictionary
     '''
     return [term for i, term in enumerate(terms) if 26**(len(term)) > i]
 
-def filter_dup(list1, lists):
+def filter_dup(lst, lists):
     '''
-    filters list1 to only include terms not present in lists
+    filters lst to only include terms that don't have lower rank in another list
     '''
-    lookup = set()
-    for lst in lists:
-        lookup |= set(lst)
-    return [word for word in list1 if word not in lookup]
+    max_rank = len(lst) + 1
+    dct = to_ranked_dict(lst)
+    dicts = [to_ranked_dict(l) for l in lists]
+    return [word for word in lst if all(dct[word] < dct2.get(word, max_rank) for dct2 in dicts)]
 
 def filter_ascii(lst):
     '''
@@ -166,10 +169,12 @@ def main():
                                                                passwords)]
 
     # make dictionaries disjoint so that d1 & d2 == set() for any two dictionaries
-    male_names   = filter_dup(male_names,   [passwords])
-    female_names = filter_dup(female_names, [passwords, male_names])
-    surnames     = filter_dup(surnames,     [passwords, male_names, female_names])
-    english      = filter_dup(english,      [passwords, male_names, female_names, surnames[:len(english)]])
+    all_dicts = set(tuple(l) for l in [english, surnames, male_names, female_names, passwords])
+    passwords    = filter_dup(passwords,    all_dicts - set([tuple(passwords)]))
+    male_names   = filter_dup(male_names,   all_dicts - set([tuple(male_names)]))
+    female_names = filter_dup(female_names, all_dicts - set([tuple(female_names)]))
+    surnames     = filter_dup(surnames,     all_dicts - set([tuple(surnames)]))
+    english      = filter_dup(english,      all_dicts - set([tuple(english)]))
 
     with open('../frequency_lists.js', 'w') as f: # words are all ascii at this point
         lsts = locals()
