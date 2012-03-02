@@ -1,5 +1,5 @@
 (function() {
-  var build_dict_matcher, build_ranked_dict, date_match, date_rx, dictionary_match, digit_match, digit_rx, english_match, enumerate_h4x0r_subs, female_name_match, findall, h4x0r_match, h4x0r_sub, h4x0r_table, male_name_match, max_coverage_subset, password, password_match, ranked_english, ranked_female_names, ranked_male_names, ranked_passwords, ranked_surnames, relevent_h4x0r_subtable, repeat, repeat_match, sequence_match, sequences, spatial_match, spatial_match_helper, surname_match, year_match, year_rx,
+  var bruteforce_match, build_dict_matcher, build_ranked_dict, date_match, date_rx, dictionary_match, digits_match, digits_rx, english_match, enumerate_h4x0r_subs, female_name_match, findall, h4x0r_match, h4x0r_sub, h4x0r_table, male_name_match, max_coverage_subset, password, password_match, ranked_english, ranked_female_names, ranked_male_names, ranked_passwords, ranked_surnames, relevent_h4x0r_subtable, repeat, repeat_match, sequence_match, sequences, spatial_match, spatial_match_helper, surname_match, year_match, year_rx,
     __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   build_ranked_dict = function(unranked_list) {
@@ -403,17 +403,17 @@
     return best;
   };
 
-  digit_rx = /\d+/;
+  digits_rx = /\d+/;
 
-  digit_match = function(password) {
+  digits_match = function(password) {
     var i, j, match, _i, _len, _ref, _ref2, _results;
-    _ref = findall(password, digit_rx);
+    _ref = findall(password, digits_rx);
     _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       match = _ref[_i];
       _ref2 = match.ij, i = _ref2[0], j = _ref2[1];
       _results.push({
-        pattern: 'digit',
+        pattern: 'digits',
         ij: [i, j],
         token: password.slice(i, j + 1 || 9e9)
       });
@@ -575,6 +575,37 @@
     };
     decoder([], matches);
     return best_chain;
+  };
+
+  bruteforce_match = function(password) {
+    var cardinality, chr, digits, lower, ord, symbols, upper, _i, _len, _ref;
+    _ref = [false, false, false, false], lower = _ref[0], upper = _ref[1], digits = _ref[2], symbols = _ref[3];
+    for (_i = 0, _len = password.length; _i < _len; _i++) {
+      chr = password[_i];
+      ord = chr.charCodeAt(0);
+      if ((0x30 <= ord && ord <= 0x39)) {
+        digits = true;
+      } else if ((0x41 <= ord && ord <= 0x5a)) {
+        upper = true;
+      } else if ((0x61 <= ord && ord <= 0x7a)) {
+        lower = true;
+      } else {
+        symbols = true;
+      }
+    }
+    cardinality = 0;
+    if (digits) cardinality += 10;
+    if (upper) cardinality += 26;
+    if (lower) cardinality += 26;
+    if (symbols) cardinality += 33;
+    return [
+      {
+        pattern: 'bruteforce',
+        ij: [0, password.length - 1],
+        token: password,
+        cardinality: cardinality
+      }
+    ];
   };
 
 }).call(this);

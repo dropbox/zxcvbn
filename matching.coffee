@@ -242,11 +242,11 @@ h4x0r_match = (password) ->
     match.sub = sub
   best
 
-digit_rx = /\d+/
-digit_match = (password) ->
-  for match in findall password, digit_rx
+digits_rx = /\d+/
+digits_match = (password) ->
+  for match in findall password, digits_rx
     [i, j] = match.ij
-    pattern: 'digit'
+    pattern: 'digits'
     ij: [i, j]
     token: password[i..j]
 
@@ -333,6 +333,34 @@ max_coverage_subset = (matches) ->
       decoder(next_chain, next_rest)
   decoder([], matches)
   best_chain
+
+bruteforce_match = (password) ->
+  [lower, upper, digits, symbols] = [false, false, false, false]
+  for chr in password
+    ord = chr.charCodeAt(0)
+    if 0x30 <= ord <= 0x39
+      digits = true
+    else if 0x41 <= ord <= 0x5a
+      upper = true
+    else if 0x61 <= ord <= 0x7a
+      lower = true
+    else
+      symbols = true
+  cardinality = 0
+  if digits
+    cardinality += 10
+  if upper
+    cardinality += 26
+  if lower
+    cardinality += 26
+  if symbols
+    cardinality += 33
+  [
+    pattern: 'bruteforce',
+    ij: [0, password.length-1]
+    token: password
+    cardinality: cardinality
+  ]
 
 # start = new Date().getTime()
 # console.log english_match('correcthorsebatterystaplecorrecthorsebattery')
