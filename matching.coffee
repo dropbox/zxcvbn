@@ -25,20 +25,16 @@ spatial_match = (password) ->
       best = candidate
       best_coverage = candidate_coverage
       best_graph_name = graph_name
-  if best.length
-    #unidirectional_best = spatial_match_helper(password, best_graph_name, unidirectional=true)
-    #best.concat unidirectional_best
-    best
-  else
-    []
+  if best.length then best else []
 
-spatial_match_helper = (password, graph_name, unidirectional) ->
+spatial_match_helper = (password, graph_name) ->
   result = []
   graph = window[graph_name]
   i = 0
+  turns = 0
   while i < password.length
     j = i + 1
-    match_direction = -1
+    last_direction = null
     loop
       [prev_char, cur_char] = password[j-1..j]
       found = false
@@ -50,9 +46,11 @@ spatial_match_helper = (password, graph_name, unidirectional) ->
         if adj and cur_char in adj
           found = true
           found_direction = cur_direction
-          if match_direction == -1
-            match_direction = found_direction
-      if found and (not unidirectional or found_direction == match_direction)
+          if last_direction isnt null and last_direction != found_direction
+            turns += 1
+          last_direction = found_direction
+          break
+      if found
         j += 1
       else
         if j - i > 1
@@ -61,7 +59,6 @@ spatial_match_helper = (password, graph_name, unidirectional) ->
             ij: [i, j-1]
             token: password[i...j]
             graph: graph_name
-            unidirectional: unidirectional
             turns: turns
         break
     i = j

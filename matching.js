@@ -50,14 +50,15 @@ spatial_match = function(password) {
   }
 };
 
-spatial_match_helper = function(password, graph_name, unidirectional) {
-  var adj, adjacents, cur_char, cur_direction, found, found_direction, graph, i, j, match_direction, prev_char, result, _i, _len, _ref;
+spatial_match_helper = function(password, graph_name) {
+  var adj, adjacents, cur_char, cur_direction, found, found_direction, graph, i, j, last_direction, prev_char, result, turns, _i, _len, _ref;
   result = [];
   graph = window[graph_name];
   i = 0;
+  turns = 0;
   while (i < password.length) {
     j = i + 1;
-    match_direction = -1;
+    last_direction = null;
     while (true) {
       _ref = password.slice(j - 1, j + 1 || 9e9), prev_char = _ref[0], cur_char = _ref[1];
       found = false;
@@ -70,10 +71,14 @@ spatial_match_helper = function(password, graph_name, unidirectional) {
         if (adj && __indexOf.call(adj, cur_char) >= 0) {
           found = true;
           found_direction = cur_direction;
-          if (match_direction === -1) match_direction = found_direction;
+          if (last_direction !== null && last_direction !== found_direction) {
+            turns += 1;
+          }
+          last_direction = found_direction;
+          break;
         }
       }
-      if (found && (!unidirectional || found_direction === match_direction)) {
+      if (found) {
         j += 1;
       } else {
         if (j - i > 1) {
@@ -82,7 +87,6 @@ spatial_match_helper = function(password, graph_name, unidirectional) {
             ij: [i, j - 1],
             token: password.slice(i, j),
             graph: graph_name,
-            unidirectional: unidirectional,
             turns: turns
           });
         }
