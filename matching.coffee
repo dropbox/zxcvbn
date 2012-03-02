@@ -26,8 +26,9 @@ spatial_match = (password) ->
       best_coverage = candidate_coverage
       best_graph_name = graph_name
   if best.length
-    unidirectional_best = spatial_match_helper(password, best_graph_name, unidirectional=true)
-    best.concat unidirectional_best
+    #unidirectional_best = spatial_match_helper(password, best_graph_name, unidirectional=true)
+    #best.concat unidirectional_best
+    best
   else
     []
 
@@ -61,6 +62,7 @@ spatial_match_helper = (password, graph_name, unidirectional) ->
             token: password[i...j]
             graph: graph_name
             unidirectional: unidirectional
+            turns: turns
         break
     i = j
   result
@@ -122,6 +124,7 @@ sequence_match = (password) ->
               token: password[i...j]
               sequence_name: seq_name
               sequence_space: seq.length
+              ascending: seq_direction  == 1
           break
     i = j
   result
@@ -218,16 +221,18 @@ enumerate_h4x0r_subs = (table) ->
     sub_dicts.push sub_dict
   sub_dicts
 
-h4x0r_sub = (password, sub) -> (sub[chr] or chr for chr in password).join('')
+empty = (obj) -> (k for k of obj).length == 0
 
-password = 'danwheeler1990'
+h4x0r_sub = (password, sub) -> (sub[chr] or chr for chr in password).join('')
 
 h4x0r_match = (password) ->
   best = []
   best_sub = null
   best_coverage = 0
   for sub in enumerate_h4x0r_subs relevent_h4x0r_subtable(password)
-    candidates = (matcher h4x0r_sub(password, sub) for matcher in [english_match, surname_match, female_name_match, male_name_match])
+    if empty(sub)
+      break # corner case: password has no relevent subs. abort h4xmatching
+    candidates = (matcher h4x0r_sub(password, sub) for matcher in [password_match, english_match, surname_match, female_name_match, male_name_match])
     for candidate in candidates
       coverage = 0
       coverage += match.token.length for match in candidate
@@ -237,10 +242,14 @@ h4x0r_match = (password) ->
         best_coverage = coverage
   for match in best
     [i,j] = match.ij
-    match.token = password[i..j]
+    token = password[i..j]
+    if token.toLowerCase() == match.matched_word
+      # now that the optimal chain is found, only return the matches that contain an actual substitution
+      continue
     match.h4x0rd = true
-    match.sub = sub
-  best
+    match.token = token
+    match.sub = best_sub
+    match
 
 digits_rx = /\d+/
 digits_match = (password) ->
