@@ -64,7 +64,7 @@ def wiki_download(url):
 
     tmp_path = DOWNLOAD_TMPL % freq_range
     if os.path.exists(tmp_path):
-        print 'cached........', url
+        print 'cached.......', url
         with codecs.open(tmp_path, 'r', 'utf8') as f:
             return f.read(), True
     with codecs.open(tmp_path, 'w', 'utf8') as f:
@@ -169,7 +169,7 @@ def main():
     male_names   = filter_dup(male_names,   [passwords])
     female_names = filter_dup(female_names, [passwords, male_names])
     surnames     = filter_dup(surnames,     [passwords, male_names, female_names])
-    english      = filter_dup(english,      [passwords, male_names, female_names, surnames])
+    english      = filter_dup(english,      [passwords, male_names, female_names, surnames[:len(english)]])
 
     with open('../frequency_lists.js', 'w') as f: # words are all ascii at this point
         lsts = locals()
@@ -178,11 +178,11 @@ def main():
             f.write(to_js(lst, lst_name))
 
     print '\nall done! totals:\n'
-    print 'passwords...', len(passwords)
-    print 'male........', len(male_names)
-    print 'female......', len(female_names)
-    print 'surnames....', len(surnames)
-    print 'english.....', len(english)
+    print 'passwords....', len(passwords)
+    print 'male.........', len(male_names)
+    print 'female.......', len(female_names)
+    print 'surnames.....', len(surnames)
+    print 'english......', len(english)
     print
 
 if __name__ == '__main__':
