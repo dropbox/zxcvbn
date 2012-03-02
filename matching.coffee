@@ -250,7 +250,7 @@ digit_match = (password) ->
     ij: [i, j]
     token: password[i..j]
 
-year_rx = /\d{2}|19\d{2}|200\d|201\d/
+year_rx = /19\d{2}|200\d|201\d/ # 4-digit years only. 2-digit years have the same entropy as 2-digit brute force.
 year_match = (password) ->
   for match in findall password, year_rx
     [i, j] = match.ij
@@ -262,9 +262,8 @@ date_rx = /(\d{1,2})( |-|\/|\.|_)?(\d{1,2}?)\2?(\d{2}|19\d{2}|200\d|201\d)/
 date_match = (password) ->
   matches = []
   for match in findall password, date_rx
-    console.log match
     if match[0].length <= 4
-      continue # brute-forcing 4-digit numbers is faster than brute-forcing dates
+      continue # because brute-forcing 4-digit numbers is faster than brute-forcing dates
     [day, month, year] = (parseInt(match[k]) for k in [1,3,4])
     separator = match[2] or ''
     if 12 <= month <= 31 and day <= 12
@@ -294,8 +293,6 @@ findall = (password, rx) ->
   matches
 
 repeat = (chr, n) -> (chr for i in [1..n]).join('')
-
-console.log date_match 'happytime1311912'
 
 ###
 # returns a list of objects for every substring of password that is a member of dictionary.

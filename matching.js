@@ -421,7 +421,7 @@
     return _results;
   };
 
-  year_rx = /\d{2}|19\d{2}|200\d|201\d/;
+  year_rx = /19\d{2}|200\d|201\d/;
 
   year_match = function(password) {
     var i, j, match, _i, _len, _ref, _ref2, _results;
@@ -447,7 +447,6 @@
     _ref = findall(password, date_rx);
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       match = _ref[_i];
-      console.log(match);
       if (match[0].length <= 4) continue;
       _ref2 = (function() {
         var _j, _len2, _ref2, _results;
@@ -502,8 +501,6 @@
       return _results;
     })()).join('');
   };
-
-  console.log(date_match('happytime1311912'));
 
   /*
   # returns a list of objects for every substring of password that is a member of dictionary.
