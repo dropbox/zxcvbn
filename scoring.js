@@ -1,4 +1,4 @@
-var ALPHANUM_CHARS, KEYBOARD_BRANCHING, KEYBOARD_SIZE, KEYPAD_BRANCHING, KEYPAD_SIZE, NUM_DAYS, NUM_MONTHS, NUM_YEARS, PRINTABLE_CHARS, bruteforce_entropy, calc_entropy, date_entropy, dictionary_entropy, digits_entropy, log2, match, nCk, nPk, repeat_entropy, sequence_entropy, spatial_entropy, year_entropy, _i, _len, _ref,
+var ALPHANUM_CHARS, GUESS_RATE_PER_SECOND, KEYBOARD_BRANCHING, KEYBOARD_SIZE, KEYPAD_BRANCHING, KEYPAD_SIZE, NUM_DAYS, NUM_MONTHS, NUM_YEARS, PRINTABLE_CHARS, bruteforce_entropy, calc_bruteforce_cardinality, calc_entropy, date_entropy, dictionary_entropy, digits_entropy, display_info, log2, minimum_entropy_match_sequence, nCk, nPk, repeat_entropy, sequence_entropy, spatial_entropy, year_entropy,
   __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 log2 = function(n) {
@@ -41,25 +41,158 @@ KEYPAD_BRANCHING = 9;
 
 KEYPAD_SIZE = 15;
 
-calc_entropy = function(match) {
-  switch (match.pattern) {
-    case 'repeat':
-      return repeat_entropy(match);
-    case 'sequence':
-      return sequence_entropy(match);
-    case 'digits':
-      return digits_entropy(match);
-    case 'year':
-      return year_entropy(match);
-    case 'date':
-      return date_entropy(match);
-    case 'spatial':
-      return spatial_entropy(match);
-    case 'dictionary':
-      return dictionary_entropy(match);
-    case 'bruteforce':
-      return bruteforce_entropy(match);
+GUESS_RATE_PER_SECOND = 1000;
+
+minimum_entropy_match_sequence = function(password, matches) {
+  var augmented, backpointers, bruteforce_cardinality, candidate_entropy, i, j, k, match, min_entropy, min_match, prev_entropy, start_i, up_to_k, _i, _j, _k, _l, _len, _len2, _ref, _ref2, _ref3, _results, _results2;
+  bruteforce_cardinality = calc_bruteforce_cardinality(password);
+  up_to_k = [];
+  backpointers = [];
+  k = 0;
+  while (k < password.length) {
+    prev_entropy = up_to_k[k - 1] || 0;
+    up_to_k[k] = prev_entropy + log2(bruteforce_cardinality);
+    backpointers[k] = null;
+    for (_i = 0, _len = matches.length; _i < _len; _i++) {
+      match = matches[_i];
+      _ref = match.ij, i = _ref[0], j = _ref[1];
+      if (i > k) break;
+      if (j > k) continue;
+      candidate_entropy = (up_to_k[i - 1] || 0) + calc_entropy(match);
+      if (candidate_entropy < up_to_k[j]) {
+        up_to_k[j] = candidate_entropy;
+        backpointers[j] = match;
+      }
+    }
+    k += 1;
   }
+  k = password.length - 1;
+  min_match = [];
+  min_entropy = up_to_k[k];
+  while (k > 0) {
+    match = backpointers[k];
+    if (match) {
+      min_match.push(match);
+      k = match.ij[0] - 1;
+    } else {
+      k -= 1;
+    }
+  }
+  min_match.reverse();
+  start_i = 0;
+  augmented = [];
+  for (_j = 0, _len2 = min_match.length; _j < _len2; _j++) {
+    match = min_match[_j];
+    _ref2 = match.ij, i = _ref2[0], j = _ref2[1];
+    if (i - start_i > 0) {
+      augmented.push({
+        pattern: 'bruteforce',
+        ij: (function() {
+          _results = [];
+          for (var _k = start_i; start_i <= i ? _k < i : _k > i; start_i <= i ? _k++ : _k--){ _results.push(_k); }
+          return _results;
+        }).apply(this),
+        token: password.slice(start_i, i),
+        cardinality: bruteforce_cardinality
+      });
+    }
+    start_i = j + 1;
+    augmented.push(match);
+  }
+  if (start_i < password.length) {
+    augmented.push({
+      pattern: 'bruteforce',
+      ij: (function() {
+        _results2 = [];
+        for (var _l = start_i, _ref3 = password.length; start_i <= _ref3 ? _l <= _ref3 : _l >= _ref3; start_i <= _ref3 ? _l++ : _l--){ _results2.push(_l); }
+        return _results2;
+      }).apply(this),
+      token: password.slice(start_i, password.length + 1 || 9e9),
+      cardinality: bruteforce_cardinality
+    });
+  }
+  min_match = augmented;
+  return {
+    password: password,
+    crack_time: display_info(Math.pow(2, min_entropy) * (1 / GUESS_RATE_PER_SECOND)),
+    min_entropy: Math.round(min_entropy),
+    min_match: min_match
+  };
+};
+
+display_info = function(seconds) {
+  var century, day, hour, minute, month, year;
+  minute = 60;
+  hour = minute * 60;
+  day = hour * 24;
+  month = day * 31;
+  year = month * 12;
+  century = year * 100;
+  if (seconds < minute) {
+    return {
+      quality: 0,
+      display: 'instant',
+      timescale: 'instant'
+    };
+  } else if (seconds < hour) {
+    return {
+      quality: 1,
+      display: "" + (1 + Math.ceil(seconds / minute)) + " minutes",
+      timescale: 'minutes'
+    };
+  } else if (seconds < day) {
+    return {
+      quality: 1,
+      display: "" + (1 + Math.ceil(seconds / hour)) + " hours",
+      timescale: 'hours'
+    };
+  } else if (seconds < month) {
+    return {
+      quality: 2,
+      display: "" + (1 + Math.ceil(seconds / day)) + " days",
+      timescale: 'days'
+    };
+  } else if (seconds < year) {
+    return {
+      quality: 3,
+      display: "" + (1 + Math.ceil(seconds / month)) + " months",
+      timescale: 'months'
+    };
+  } else if (seconds < century) {
+    return {
+      quality: 4,
+      display: "" + (1 + Math.ceil(seconds / year)) + " years",
+      timescale: 'years'
+    };
+  } else {
+    return {
+      quality: 5,
+      display: 'centuries',
+      timescale: 'centuries'
+    };
+  }
+};
+
+calc_entropy = function(match) {
+  if (match._entropy != null) return match._entropy;
+  return match._entropy = (function() {
+    switch (match.pattern) {
+      case 'repeat':
+        return repeat_entropy(match);
+      case 'sequence':
+        return sequence_entropy(match);
+      case 'digits':
+        return digits_entropy(match);
+      case 'year':
+        return year_entropy(match);
+      case 'date':
+        return date_entropy(match);
+      case 'spatial':
+        return spatial_entropy(match);
+      case 'dictionary':
+        return dictionary_entropy(match);
+    }
+  })();
 };
 
 repeat_entropy = function(match) {
@@ -207,8 +340,26 @@ bruteforce_entropy = function(match) {
   return log2(Math.pow(match.cardinality, match.token.length));
 };
 
-_ref = bruteforce_match('lKajsf2-2-198877');
-for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-  match = _ref[_i];
-  console.log(match, calc_entropy(match));
-}
+calc_bruteforce_cardinality = function(password) {
+  var cardinality, chr, digits, lower, ord, symbols, upper, _i, _len, _ref;
+  _ref = [false, false, false, false], lower = _ref[0], upper = _ref[1], digits = _ref[2], symbols = _ref[3];
+  for (_i = 0, _len = password.length; _i < _len; _i++) {
+    chr = password[_i];
+    ord = chr.charCodeAt(0);
+    if ((0x30 <= ord && ord <= 0x39)) {
+      digits = true;
+    } else if ((0x41 <= ord && ord <= 0x5a)) {
+      upper = true;
+    } else if ((0x61 <= ord && ord <= 0x7a)) {
+      lower = true;
+    } else {
+      symbols = true;
+    }
+  }
+  cardinality = 0;
+  if (digits) cardinality += 10;
+  if (upper) cardinality += 26;
+  if (lower) cardinality += 26;
+  if (symbols) cardinality += 33;
+  return cardinality;
+};

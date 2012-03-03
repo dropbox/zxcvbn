@@ -22,8 +22,106 @@ KEYBOARD_SIZE = 47
 KEYPAD_BRANCHING = 9
 KEYPAD_SIZE = 15
 
+GUESS_RATE_PER_SECOND = 1000
+
+minimum_entropy_match_sequence = (password, matches) ->
+  bruteforce_cardinality = calc_bruteforce_cardinality password
+  up_to_k = []
+  backpointers = []
+  k = 0
+  while k < password.length
+    prev_entropy = up_to_k[k-1] or 0
+    up_to_k[k] = prev_entropy + log2 bruteforce_cardinality # worst-case scenario to beat
+    backpointers[k] = null
+    for match in matches
+      [i, j] = match.ij
+      if i > k
+        break
+      if j > k
+        continue
+      candidate_entropy = (up_to_k[i-1] or 0) + calc_entropy(match)
+      if candidate_entropy < up_to_k[j]
+        up_to_k[j] = candidate_entropy
+        backpointers[j] = match
+    k += 1
+  # decode
+  k = password.length - 1
+  min_match = []
+  min_entropy = up_to_k[k]
+  while k > 0
+    match = backpointers[k]
+    if match
+      min_match.push match
+      k = match.ij[0] - 1
+    else
+      k -= 1
+  min_match.reverse()
+  # fill in blanks with bruteforce matches
+  start_i = 0
+  augmented = []
+  for match in min_match
+    [i, j] = match.ij
+    if i - start_i > 0
+      augmented.push
+        pattern: 'bruteforce'
+        ij: [start_i...i]
+        token: password[start_i...i]
+        cardinality: bruteforce_cardinality
+    start_i = j + 1
+    augmented.push match
+
+  if start_i < password.length
+    augmented.push
+      pattern: 'bruteforce'
+      ij: [start_i..password.length]
+      token: password[start_i..password.length]
+      cardinality: bruteforce_cardinality
+
+  min_match = augmented
+  password: password
+  crack_time: display_info(Math.pow(2, min_entropy) * (1 / GUESS_RATE_PER_SECOND))
+  min_entropy: Math.round(min_entropy)
+  min_match: min_match
+
+display_info = (seconds) ->
+  minute = 60
+  hour = minute * 60
+  day = hour * 24
+  month = day * 31
+  year = month * 12
+  century = year * 100
+  if seconds < minute
+    quality: 0
+    display: 'instant'
+    timescale: 'instant'
+  else if seconds < hour
+    quality: 1
+    display: "#{1 + Math.ceil(seconds / minute)} minutes"
+    timescale: 'minutes'
+  else if seconds < day
+    quality: 1 # no quality change
+    display: "#{1 + Math.ceil(seconds / hour)} hours"
+    timescale: 'hours'
+  else if seconds < month
+    quality: 2
+    display: "#{1 + Math.ceil(seconds / day)} days"
+    timescale: 'days'
+  else if seconds < year
+    quality: 3
+    display: "#{1 + Math.ceil(seconds / month)} months"
+    timescale: 'months'
+  else if seconds < century
+    quality: 4
+    display: "#{1 + Math.ceil(seconds / year)} years"
+    timescale: 'years'
+  else
+    quality: 5
+    display: 'centuries'
+    timescale: 'centuries'
+
 calc_entropy = (match) ->
-  switch match.pattern
+  return match._entropy if match._entropy?
+  match._entropy = switch match.pattern
     when 'repeat'     then repeat_entropy     match
     when 'sequence'   then sequence_entropy   match
     when 'digits'     then digits_entropy     match
@@ -31,7 +129,6 @@ calc_entropy = (match) ->
     when 'date'       then date_entropy       match
     when 'spatial'    then spatial_entropy    match
     when 'dictionary' then dictionary_entropy match
-    when 'bruteforce' then bruteforce_entropy match
 
 repeat_entropy = (match) -> log2 (PRINTABLE_CHARS * match.token.length)
 
@@ -102,5 +199,25 @@ dictionary_entropy = (match) ->
 bruteforce_entropy = (match) ->
   log2 Math.pow(match.cardinality, match.token.length)
 
-for match in bruteforce_match 'lKajsf2-2-198877'
-  console.log match, calc_entropy(match)
+calc_bruteforce_cardinality = (password) ->
+  [lower, upper, digits, symbols] = [false, false, false, false]
+  for chr in password
+    ord = chr.charCodeAt(0)
+    if 0x30 <= ord <= 0x39
+      digits = true
+    else if 0x41 <= ord <= 0x5a
+      upper = true
+    else if 0x61 <= ord <= 0x7a
+      lower = true
+    else
+      symbols = true
+  cardinality = 0
+  if digits
+    cardinality += 10
+  if upper
+    cardinality += 26
+  if lower
+    cardinality += 26
+  if symbols
+    cardinality += 33
+  cardinality

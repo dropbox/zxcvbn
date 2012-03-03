@@ -1,19 +1,10 @@
-###
-# zxcvbn: a password strength meter with solid math and clear assumptions.
-#
-# zxcvbn takes one argument, a password, and returns a js object describing the password's strengh.
-# see the readme doc for details and examples.
-#
-# zxcvbn takes an optional second argument, other_user_inputs, a string of whitespace-delimited
-# words from other inputs on the registration form (such as name, surname, dob, etc). zxcvbn will
-# penalize any password that contains words from this list.
-###
-zxcvbn = (password, other_user_inputs) ->
-  matching_attacks: ['bruteforce,36', 'letters,12-digits,2', 'word,436-word,1022-digit,2']
-  matches: [['correcthorse77'], ['correcthorse', '77'], ['correct', 'horse', '77']]
-  min_attack: 'word,436-word,1022-digit,2'
-  attack_time: 4430
-  quality: 3
-  tip: "words make great passwords, but only when you use at least 4."
+time = -> (new Date()).getTime()
+
+zxcvbn = (password) ->
+  start = time()
+  matches = omnimatch password
+  best_match_data = minimum_entropy_match_sequence password, matches
+  best_match_data.calc_time = time() - start
+  best_match_data
 
 window?.zxcvbn = zxcvbn

@@ -1,19 +1,27 @@
-var bruteforce_match, build_dict_matcher, build_ranked_dict, date_match, date_rx, dictionary_match, digits_match, digits_rx, empty, english_match, enumerate_h4x0r_subs, female_name_match, findall, h4x0r_match, h4x0r_sub, h4x0r_table, male_name_match, max_coverage_subset, omnimatch, password_match, ranked_english, ranked_female_names, ranked_male_names, ranked_passwords, ranked_surnames, relevent_h4x0r_subtable, repeat, repeat_match, sequence_match, sequences, spatial_match, spatial_match_helper, start, surname_match, year_match, year_rx,
+var build_dict_matcher, build_ranked_dict, date_match, date_rx, dictionary_match, digits_match, digits_rx, empty, english_match, enumerate_h4x0r_subs, female_name_match, findall, h4x0r_match, h4x0r_sub, h4x0r_table, male_name_match, max_coverage_subset, omnimatch, password_match, ranked_english, ranked_female_names, ranked_male_names, ranked_passwords, ranked_surnames, relevent_h4x0r_subtable, repeat, repeat_match, sequence_match, sequences, spatial_match, spatial_match_helper, surname_match, year_match, year_rx,
   __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 omnimatch = function(password) {
   var matcher, matches, _i, _len, _ref;
   matches = [];
-  _ref = [bruteforce_match, digits_match, year_match, date_match, repeat_match, sequence_match, spatial_match, password_match, male_name_match, female_name_match, surname_match, english_match, h4x0r_match];
+  _ref = [digits_match, year_match, date_match, repeat_match, sequence_match, spatial_match, password_match, male_name_match, female_name_match, surname_match, english_match, h4x0r_match];
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
     matcher = _ref[_i];
     matches.push.apply(matches, matcher(password));
   }
-  return matches;
+  return matches.sort(function(match1, match2) {
+    var i1, i2, j1, j2, _ref2, _ref3, _ref4;
+    _ref2 = [match1.ij, match2.ij], (_ref3 = _ref2[0], i1 = _ref3[0], j1 = _ref3[1]), (_ref4 = _ref2[1], i2 = _ref4[0], j2 = _ref4[1]);
+    if (i1 === i2) {
+      return j1 - j2;
+    } else {
+      return i1 - i2;
+    }
+  });
 };
 
 spatial_match = function(password) {
-  var best, best_coverage, best_graph_name, candidate, candidate_coverage, graph_name, match, unidirectional, _i, _j, _len, _len2, _ref;
+  var best, best_coverage, best_graph_name, candidate, coverage, graph_name, match, unidirectional, _i, _j, _len, _len2, _ref;
   best = [];
   best_coverage = 0;
   best_graph_name = null;
@@ -21,14 +29,14 @@ spatial_match = function(password) {
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
     graph_name = _ref[_i];
     candidate = spatial_match_helper(password, graph_name, unidirectional = false);
-    candidate_coverage = 0;
+    coverage = 0;
     for (_j = 0, _len2 = candidate.length; _j < _len2; _j++) {
       match = candidate[_j];
-      candidate_coverage += match.token.length;
+      coverage += match.token.length;
     }
-    if (candidate_coverage > best_coverage || (candidate_coverage === best_coverage && candidate.length < best.length)) {
+    if (coverage > best_coverage || (coverage === best_coverage && candidate.length < best.length)) {
       best = candidate;
-      best_coverage = candidate_coverage;
+      best_coverage = coverage;
       best_graph_name = graph_name;
     }
   }
@@ -44,10 +52,10 @@ spatial_match_helper = function(password, graph_name) {
   result = [];
   graph = window[graph_name];
   i = 0;
-  turns = 0;
   while (i < password.length) {
     j = i + 1;
     last_direction = null;
+    turns = 0;
     while (true) {
       _ref = password.slice(j - 1, j + 1 || 9e9), prev_char = _ref[0], cur_char = _ref[1];
       found = false;
@@ -60,10 +68,10 @@ spatial_match_helper = function(password, graph_name) {
         if (adj && __indexOf.call(adj, cur_char) >= 0) {
           found = true;
           found_direction = cur_direction;
-          if (last_direction !== null && last_direction !== found_direction) {
+          if (last_direction !== found_direction) {
             turns += 1;
+            last_direction = found_direction;
           }
-          last_direction = found_direction;
           break;
         }
       }
@@ -76,7 +84,8 @@ spatial_match_helper = function(password, graph_name) {
             ij: [i, j - 1],
             token: password.slice(i, j),
             graph: graph_name,
-            turns: turns
+            turns: turns,
+            display: "spatial-" + graph_name + "-" + (j - i + 1) + "length-" + turns + "turns"
           });
         }
         break;
@@ -103,7 +112,8 @@ repeat_match = function(password) {
             pattern: 'repeat',
             ij: [i, j - 1],
             token: password.slice(i, j),
-            repeated_char: password[i]
+            repeated_char: password[i],
+            display: "repeat-" + password[i] + "-" + (j - i)
           });
         }
         break;
@@ -176,7 +186,8 @@ sequence_match = function(password) {
               token: password.slice(i, j),
               sequence_name: seq_name,
               sequence_space: seq.length,
-              ascending: seq_direction === 1
+              ascending: seq_direction === 1,
+              display: "sequence-" + seq_name + "-length-" + (j - i + 1)
             });
           }
           break;
@@ -271,11 +282,15 @@ build_ranked_dict = function(unranked_list) {
 
 build_dict_matcher = function(dict_name, ranked_dict) {
   return function(password) {
-    var match, matches, _i, _len;
+    var match, matches, _i, _j, _len, _len2;
     matches = max_coverage_subset(dictionary_match(password, ranked_dict));
     for (_i = 0, _len = matches.length; _i < _len; _i++) {
       match = matches[_i];
       match.dictionary_name = dict_name;
+    }
+    for (_j = 0, _len2 = matches.length; _j < _len2; _j++) {
+      match = matches[_j];
+      match.display = "dictionary-" + dict_name + "-rank-" + match.rank;
     }
     return matches;
   };
@@ -306,7 +321,7 @@ h4x0r_table = {
   b: ['8'],
   c: ['(', '{', '[', '<'],
   e: ['3'],
-  g: ['6', '9', '&'],
+  g: ['6', '9'],
   i: ['1', '!', '|'],
   l: ['1', '|', '7'],
   o: ['0'],
@@ -502,7 +517,7 @@ h4x0r_match = function(password) {
   return _results;
 };
 
-digits_rx = /\d+/;
+digits_rx = /\d{3,}/;
 
 digits_match = function(password) {
   var i, j, match, _i, _len, _ref, _ref2, _results;
@@ -514,13 +529,14 @@ digits_match = function(password) {
     _results.push({
       pattern: 'digits',
       ij: [i, j],
-      token: password.slice(i, j + 1 || 9e9)
+      token: password.slice(i, j + 1 || 9e9),
+      display: '#{j-i+1}-digits'
     });
   }
   return _results;
 };
 
-year_rx = /19\d{2}|200\d|201\d/;
+year_rx = /19\d\d|200\d|201\d/;
 
 year_match = function(password) {
   var i, j, match, _i, _len, _ref, _ref2, _results;
@@ -532,7 +548,8 @@ year_match = function(password) {
     _results.push({
       pattern: 'year',
       ij: [i, j],
-      token: password.slice(i, j + 1 || 9e9)
+      token: password.slice(i, j + 1 || 9e9),
+      display: 'year'
     });
   }
   return _results;
@@ -570,7 +587,8 @@ date_match = function(password) {
       separator: separator,
       day: day,
       month: month,
-      year: year
+      year: year,
+      display: 'date'
     });
   }
   return matches;
@@ -600,40 +618,3 @@ repeat = function(chr, n) {
     return _results;
   })()).join('');
 };
-
-bruteforce_match = function(password) {
-  var cardinality, chr, digits, lower, ord, symbols, upper, _i, _len, _ref;
-  _ref = [false, false, false, false], lower = _ref[0], upper = _ref[1], digits = _ref[2], symbols = _ref[3];
-  for (_i = 0, _len = password.length; _i < _len; _i++) {
-    chr = password[_i];
-    ord = chr.charCodeAt(0);
-    if ((0x30 <= ord && ord <= 0x39)) {
-      digits = true;
-    } else if ((0x41 <= ord && ord <= 0x5a)) {
-      upper = true;
-    } else if ((0x61 <= ord && ord <= 0x7a)) {
-      lower = true;
-    } else {
-      symbols = true;
-    }
-  }
-  cardinality = 0;
-  if (digits) cardinality += 10;
-  if (upper) cardinality += 26;
-  if (lower) cardinality += 26;
-  if (symbols) cardinality += 33;
-  return [
-    {
-      pattern: 'bruteforce',
-      ij: [0, password.length - 1],
-      token: password,
-      cardinality: cardinality
-    }
-  ];
-};
-
-start = new Date().getTime();
-
-console.log(omnimatch('correcthorse2211980batterystaple'));
-
-console.log(new Date().getTime() - start);

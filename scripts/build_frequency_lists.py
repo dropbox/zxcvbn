@@ -169,13 +169,14 @@ def main():
                                                                passwords)]
 
     # make dictionaries disjoint so that d1 & d2 == set() for any two dictionaries
-    all_dicts = set(tuple(l) for l in [english, surnames, male_names, female_names, passwords])
-    passwords    = filter_dup(passwords,    all_dicts - set([tuple(passwords)]))
-    male_names   = filter_dup(male_names,   all_dicts - set([tuple(male_names)]))
-    female_names = filter_dup(female_names, all_dicts - set([tuple(female_names)]))
-    surnames     = filter_dup(surnames,     all_dicts - set([tuple(surnames)]))
-    english      = filter_dup(english,      all_dicts - set([tuple(english)]))
+    # all_dicts = set(tuple(l) for l in [english, surnames, male_names, female_names, passwords])
+    # passwords    = filter_dup(passwords,    all_dicts - set([tuple(passwords)]))
+    # male_names   = filter_dup(male_names,   all_dicts - set([tuple(male_names)]))
+    # female_names = filter_dup(female_names, all_dicts - set([tuple(female_names)]))
+    # surnames     = filter_dup(surnames,     all_dicts - set([tuple(surnames)]))
+    # english      = filter_dup(english,      all_dicts - set([tuple(english)]))
 
+    english.extend('leet haxor prod admin'.split())
     with open('../frequency_lists.js', 'w') as f: # words are all ascii at this point
         lsts = locals()
         for lst_name in 'passwords male_names female_names surnames english'.split():

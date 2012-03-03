@@ -1,10 +1,95 @@
 <html>
   <head>
     <title>zxcvbn tests</title>
+    <script type="text/javascript" src="../jquery.js">
+    </script>
+    <script type="text/javascript" src="../mustache.js">
+    </script>
+    <script type="text/javascript" src="../frequency_lists.js">
+    </script>
+    <script type="text/javascript" src="../adjacencies.js">
+    </script>
+    <script type="text/javascript" src="../matching.js">
+    </script>
+    <script type="text/javascript" src="../scoring.js">
+    </script>
     <script type="text/javascript" src="../zxcvbn.js">
+    </script>
+    <script type="text/javascript" src="../test.js">
     </script>
   </head>
   <body>
-    ready
+    <style type="text/css">
+      body {
+        font-family: monospace;
+      }
+      h1 {
+        font-weight: normal;
+        font-size: 120pt;
+        margin-bottom: 40px;
+        padding: 0;
+      }
+
+      h2 {
+        font-weight: normal;
+        font-size: 60pt;
+      }
+
+      h3 {
+        font-weight: normal;
+        font-size: 30pt;
+      }
+
+      #future-is-now {
+        font-size: 40pt;
+        margin-top: 1000px;
+      }
+
+      #results {
+        margin-bottom: 200px;
+      }
+
+      table {
+        width: 790;
+        border-collapse: collapse;
+        font-size: 16 px;
+      }
+      table tr:nth-child(even) {
+        background-color: #ddd;
+      }
+      td, th {
+        padding: 20px 20px;
+      }
+      #results td:nth-child(1), #results th:nth-child(1) {
+        text-align: right;
+      }
+      #search-results td, #search-results th {
+        text-align: right;
+      }
+      .match:hover {
+        color: red;
+      }
+      #search {
+        font-size: 50px;
+        /* height: 100px; */
+        margin-bottom: 300px;
+        padding: 25px;
+        width: 60%
+      }
+    </style>
+    <center>
+    <h1>ZXCVBN</h1>
+    <h3>is inspired by this xkcd comic:</h3>
+    <img src="http://imgs.xkcd.com/comics/password_strength.png" />
+    <h3 id="future-is-now">THE FUTURE IS NOW</h3>
+    <div id="results">
+    </div>
+    <h2 id="give-a-spin">GIVE ZXCVB A SPIN</h2>
+    <input id="search" type="text" size="50">
+    <div id="search-results">
+    </div>
+    <br/><br/><br/><br/><br/><br/><br/><br/><br/>
+    <br/><br/><br/><br/><br/><br/><br/><br/><br/>
+    </center>
   </body>
 </html>

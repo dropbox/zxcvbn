@@ -1,11 +1,10 @@
 # ------------------------------------------------------------------------------
-# omnimatch -- why not try it all ----------------------------------------------
+# omnimatch -- combine everything ----------------------------------------------
 # ------------------------------------------------------------------------------
 
 omnimatch = (password) ->
   matches = []
   for matcher in [
-    bruteforce_match
     digits_match, year_match, date_match
     repeat_match, sequence_match,
     spatial_match,
@@ -13,7 +12,9 @@ omnimatch = (password) ->
     h4x0r_match
   ]
     matches.push.apply matches, matcher(password)
-  matches
+  matches.sort (match1, match2) ->
+    [[i1, j1], [i2, j2]] = [match1.ij, match2.ij]
+    if (i1 == i2) then (j1 - j2) else (i1 - i2)
 
 # ------------------------------------------------------------------------------
 # spatial match (qwerty/dvorak/keypad) -----------------------------------------
@@ -25,11 +26,11 @@ spatial_match = (password) ->
   best_graph_name = null
   for graph_name in ['qwerty', 'dvorak', 'keypad', 'mac_keypad']
     candidate = spatial_match_helper(password, graph_name, unidirectional=false)
-    candidate_coverage = 0
-    candidate_coverage += match.token.length for match in candidate
-    if candidate_coverage > best_coverage or (candidate_coverage == best_coverage and candidate.length < best.length)
+    coverage = 0
+    coverage += match.token.length for match in candidate
+    if coverage > best_coverage or (coverage == best_coverage and candidate.length < best.length)
       best = candidate
-      best_coverage = candidate_coverage
+      best_coverage = coverage
       best_graph_name = graph_name
   if best.length then best else []
 
@@ -37,10 +38,10 @@ spatial_match_helper = (password, graph_name) ->
   result = []
   graph = window[graph_name]
   i = 0
-  turns = 0
   while i < password.length
     j = i + 1
     last_direction = null
+    turns = 0
     loop
       [prev_char, cur_char] = password[j-1..j]
       found = false
@@ -52,9 +53,11 @@ spatial_match_helper = (password, graph_name) ->
         if adj and cur_char in adj
           found = true
           found_direction = cur_direction
-          if last_direction isnt null and last_direction != found_direction
+          if last_direction != found_direction
+            # correct even in the initial case when last_dir is null:
+            # every spatial pattern starts with a turn.
             turns += 1
-          last_direction = found_direction
+            last_direction = found_direction
           break
       if found
         j += 1
@@ -66,6 +69,7 @@ spatial_match_helper = (password, graph_name) ->
             token: password[i...j]
             graph: graph_name
             turns: turns
+            display: "spatial-#{graph_name}-#{j-i+1}length-#{turns}turns"
         break
     i = j
   result
@@ -90,6 +94,7 @@ repeat_match = (password) ->
             ij: [i, j-1]
             token: password[i...j]
             repeated_char: password[i]
+            display: "repeat-#{password[i]}-#{j-i}"
         break
     i = j
   result
@@ -132,12 +137,13 @@ sequence_match = (password) ->
               sequence_name: seq_name
               sequence_space: seq.length
               ascending: seq_direction  == 1
+              display: "sequence-#{seq_name}-length-#{j-i+1}"
           break
     i = j
   result
 
 #-------------------------------------------------------------------------------
-# dictionary matches (common passwords, english, last names, etc) --------------
+# dictionary match (common passwords, english, last names, etc) ----------------
 #-------------------------------------------------------------------------------
 
 dictionary_match = (password, ranked_dict) ->
@@ -187,6 +193,7 @@ build_dict_matcher = (dict_name, ranked_dict) ->
   (password) ->
     matches = max_coverage_subset dictionary_match(password, ranked_dict)
     match.dictionary_name = dict_name for match in matches
+    match.display = "dictionary-#{dict_name}-rank-#{match.rank}" for match in matches
     matches
 
 ranked_english      = build_ranked_dict(english)
@@ -202,7 +209,7 @@ female_name_match = build_dict_matcher('female_names', ranked_female_names)
 password_match    = build_dict_matcher('passwords', ranked_passwords)
 
 #-------------------------------------------------------------------------------
-# dictionary matching with common substitutions (pr0d@dmin instead of prodadmin)
+# dictionary match with common substitutions (pr0d@dmin instead of prodadmin) --
 #-------------------------------------------------------------------------------
 
 h4x0r_table =
@@ -210,7 +217,7 @@ h4x0r_table =
   b: ['8']
   c: ['(', '{', '[', '<']
   e: ['3']
-  g: ['6', '9', '&']
+  g: ['6', '9']
   i: ['1', '!', '|']
   l: ['1', '|', '7']
   o: ['0']
@@ -312,24 +319,26 @@ h4x0r_match = (password) ->
     match
 
 #-------------------------------------------------------------------------------
-# digit regions, years, and dates ----------------------------------------------
+# digit blocks, years, and dates -----------------------------------------------
 #-------------------------------------------------------------------------------
 
-digits_rx = /\d+/
+digits_rx = /\d{3,}/
 digits_match = (password) ->
   for match in findall password, digits_rx
     [i, j] = match.ij
     pattern: 'digits'
     ij: [i, j]
     token: password[i..j]
+    display: '#{j-i+1}-digits'
 
-year_rx = /19\d{2}|200\d|201\d/ # 4-digit years only. 2-digit years have the same entropy as 2-digit brute force.
+year_rx = /19\d\d|200\d|201\d/ # 4-digit years only. 2-digit years have the same entropy as 2-digit brute force.
 year_match = (password) ->
   for match in findall password, year_rx
     [i, j] = match.ij
     pattern: 'year'
     ij: [i, j]
     token: password[i..j]
+    display: 'year'
 
 date_rx = /(\d{1,2})( |-|\/|\.|_)?(\d{1,2}?)\2?(19\d{2}|200\d|201\d|\d{2})/
 date_match = (password) ->
@@ -352,6 +361,7 @@ date_match = (password) ->
       day: day
       month: month
       year: year
+      display: 'date'
   matches
 
 findall = (password, rx) ->
@@ -366,39 +376,3 @@ findall = (password, rx) ->
   matches
 
 repeat = (chr, n) -> (chr for i in [1..n]).join('')
-
-#-------------------------------------------------------------------------------
-# bruteforce: match the whole password and calculate useful numbers ------------
-#-------------------------------------------------------------------------------
-
-bruteforce_match = (password) ->
-  [lower, upper, digits, symbols] = [false, false, false, false]
-  for chr in password
-    ord = chr.charCodeAt(0)
-    if 0x30 <= ord <= 0x39
-      digits = true
-    else if 0x41 <= ord <= 0x5a
-      upper = true
-    else if 0x61 <= ord <= 0x7a
-      lower = true
-    else
-      symbols = true
-  cardinality = 0
-  if digits
-    cardinality += 10
-  if upper
-    cardinality += 26
-  if lower
-    cardinality += 26
-  if symbols
-    cardinality += 33
-  [
-    pattern: 'bruteforce',
-    ij: [0, password.length-1]
-    token: password
-    cardinality: cardinality
-  ]
-
-start = new Date().getTime()
-console.log omnimatch 'correcthorse2211980batterystaple'
-console.log(new Date().getTime() - start)
