@@ -166,23 +166,6 @@ dictionary_match = (password, ranked_dict) ->
         )
   result
 
-max_coverage_subset = (matches) ->
-  best_chain = []
-  best_coverage = 0
-  decoder = (chain, rest) ->
-    min_j = Math.min.apply(null, (match.j for match in rest))
-    for next in rest when next.i <= min_j
-      next_chain = chain.concat [next]
-      next_rest = (match for match in rest when match.i > next.j)
-      coverage = 0
-      coverage += match.token.length for match in next_chain
-      if coverage > best_coverage or (coverage == best_coverage and next_chain.length < best_chain.length)
-        best_coverage = coverage
-        best_chain = next_chain
-      decoder(next_chain, next_rest)
-  decoder([], matches)
-  best_chain
-
 build_ranked_dict = (unranked_list) ->
   result = {}
   i = 1 # rank starts at 1, not 0
@@ -193,7 +176,7 @@ build_ranked_dict = (unranked_list) ->
 
 build_dict_matcher = (dict_name, ranked_dict) ->
   (password) ->
-    matches = max_coverage_subset dictionary_match(password, ranked_dict)
+    matches = dictionary_match(password, ranked_dict)
     match.dictionary_name = dict_name for match in matches
     match.display = "dictionary-#{dict_name}-rank-#{match.rank}" for match in matches
     matches

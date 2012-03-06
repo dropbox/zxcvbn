@@ -1,4 +1,4 @@
-var DICTIONARY_MATCHERS, MATCHERS, build_dict_matcher, build_ranked_dict, date_match, date_rx, dictionary_match, digits_match, digits_rx, empty, english_match, enumerate_l33t_subs, extend, female_name_match, findall, l33t_match, l33t_table, male_name_match, max_coverage_subset, omnimatch, password_match, ranked_english, ranked_female_names, ranked_male_names, ranked_passwords, ranked_surnames, relevent_l33t_subtable, repeat, repeat_match, sequence_match, sequences, spatial_match, spatial_match_helper, surname_match, translate, year_match, year_rx,
+var DICTIONARY_MATCHERS, MATCHERS, build_dict_matcher, build_ranked_dict, date_match, date_rx, dictionary_match, digits_match, digits_rx, empty, english_match, enumerate_l33t_subs, extend, female_name_match, findall, l33t_match, l33t_table, male_name_match, omnimatch, password_match, ranked_english, ranked_female_names, ranked_male_names, ranked_passwords, ranked_surnames, relevent_l33t_subtable, repeat, repeat_match, sequence_match, sequences, spatial_match, spatial_match_helper, surname_match, translate, year_match, year_rx,
   __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 empty = function(obj) {
@@ -244,52 +244,6 @@ dictionary_match = function(password, ranked_dict) {
   return result;
 };
 
-max_coverage_subset = function(matches) {
-  var best_chain, best_coverage, decoder;
-  best_chain = [];
-  best_coverage = 0;
-  decoder = function(chain, rest) {
-    var coverage, match, min_j, next, next_chain, next_rest, _i, _j, _len, _len2, _results;
-    min_j = Math.min.apply(null, (function() {
-      var _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = rest.length; _i < _len; _i++) {
-        match = rest[_i];
-        _results.push(match.j);
-      }
-      return _results;
-    })());
-    _results = [];
-    for (_i = 0, _len = rest.length; _i < _len; _i++) {
-      next = rest[_i];
-      if (!(next.i <= min_j)) continue;
-      next_chain = chain.concat([next]);
-      next_rest = (function() {
-        var _j, _len2, _results2;
-        _results2 = [];
-        for (_j = 0, _len2 = rest.length; _j < _len2; _j++) {
-          match = rest[_j];
-          if (match.i > next.j) _results2.push(match);
-        }
-        return _results2;
-      })();
-      coverage = 0;
-      for (_j = 0, _len2 = next_chain.length; _j < _len2; _j++) {
-        match = next_chain[_j];
-        coverage += match.token.length;
-      }
-      if (coverage > best_coverage || (coverage === best_coverage && next_chain.length < best_chain.length)) {
-        best_coverage = coverage;
-        best_chain = next_chain;
-      }
-      _results.push(decoder(next_chain, next_rest));
-    }
-    return _results;
-  };
-  decoder([], matches);
-  return best_chain;
-};
-
 build_ranked_dict = function(unranked_list) {
   var i, result, word, _i, _len;
   result = {};
@@ -305,7 +259,7 @@ build_ranked_dict = function(unranked_list) {
 build_dict_matcher = function(dict_name, ranked_dict) {
   return function(password) {
     var match, matches, _i, _j, _len, _len2;
-    matches = max_coverage_subset(dictionary_match(password, ranked_dict));
+    matches = dictionary_match(password, ranked_dict);
     for (_i = 0, _len = matches.length; _i < _len; _i++) {
       match = matches[_i];
       match.dictionary_name = dict_name;
