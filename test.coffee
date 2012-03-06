@@ -16,7 +16,6 @@ password1
 viking
 thx1138
 ScoRpi0ns
-pr0d@dm1n
 
 rianhunter2000
 ryanhunter2000
