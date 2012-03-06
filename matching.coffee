@@ -14,135 +14,6 @@ omnimatch = (password) ->
   matches.sort (match1, match2) ->
     (match1.i - match2.i) or (match1.j - match2.j)
 
-# ------------------------------------------------------------------------------
-# spatial match (qwerty/dvorak/keypad) -----------------------------------------
-# ------------------------------------------------------------------------------
-
-spatial_match = (password) ->
-  best = []
-  best_coverage = 0
-  best_graph_name = null
-  for graph_name in ['qwerty', 'dvorak', 'keypad', 'mac_keypad']
-    candidate = spatial_match_helper(password, graph_name, unidirectional=false)
-    coverage = 0
-    coverage += match.token.length for match in candidate
-    if coverage > best_coverage or (coverage == best_coverage and candidate.length < best.length)
-      best = candidate
-      best_coverage = coverage
-      best_graph_name = graph_name
-  best
-
-spatial_match_helper = (password, graph_name) ->
-  result = []
-  graph = window[graph_name]
-  i = 0
-  while i < password.length
-    j = i + 1
-    last_direction = null
-    turns = 0
-    loop
-      [prev_char, cur_char] = password[j-1..j]
-      found = false
-      found_direction = -1
-      cur_direction = -1
-      adjacents = graph[prev_char] or []
-      for adj in adjacents
-        cur_direction += 1
-        if adj and cur_char in adj
-          found = true
-          found_direction = cur_direction
-          if last_direction != found_direction
-            # correct even in the initial case when last_dir is null:
-            # every spatial pattern starts with a turn.
-            turns += 1
-            last_direction = found_direction
-          break
-      if found
-        j += 1
-      else
-        if j - i > 2 # only consider length-3 chains and up
-          result.push
-            pattern: 'spatial'
-            i: i
-            j: j-1
-            token: password[i...j]
-            graph: graph_name
-            turns: turns
-            display: "spatial-#{graph_name}-#{turns}turns"
-        break
-    i = j
-  result
-
-#-------------------------------------------------------------------------------
-# repeats (aaa) and sequences (abcdef) -----------------------------------------
-#-------------------------------------------------------------------------------
-
-repeat_match = (password) ->
-  result = []
-  i = 0
-  while i < password.length
-    j = i + 1
-    loop
-      [prev_char, cur_char] = password[j-1..j]
-      if password[j-1] == password[j]
-        j += 1
-      else
-        if j - i > 2 # length-3 chains and up
-          result.push
-            pattern: 'repeat'
-            i: i
-            j: j-1
-            token: password[i...j]
-            repeated_char: password[i]
-            display: "repeat-#{password[i]}"
-        break
-    i = j
-  result
-
-sequences =
-  lower: 'abcdefghijklmnopqrstuvwxyz'
-  upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-  digits: '01234567890'
-
-sequence_match = (password) ->
-  result = []
-  i = 0
-  while i < password.length
-    j = i + 1
-    seq = null # either lower, upper, or digits
-    seq_name = null
-    seq_direction = null # 1 for ascending seq abcd, -1 for dcba
-    for seq_candidate_name in ['lower', 'upper', 'digits']
-      seq_candidate = sequences[seq_candidate_name]
-      [i_n, j_n] = (seq_candidate.indexOf(chr) for chr in [password[i], password[j]])
-      if i_n > -1 and j_n > -1
-        direction = j_n - i_n
-        if direction in [1, -1]
-          seq = seq_candidate
-          seq_name = seq_candidate_name
-          seq_direction = direction
-          break
-    if seq
-      loop
-        [prev_char, cur_char] = password[j-1..j]
-        [prev_n, cur_n] = (seq_candidate.indexOf(chr) for chr in [prev_char, cur_char])
-        if cur_n - prev_n == seq_direction
-          j += 1
-        else
-          if j - i > 2 # length-3 chains and up
-            result.push
-              pattern: 'sequence'
-              i: i
-              j: j-1
-              token: password[i...j]
-              sequence_name: seq_name
-              sequence_space: seq.length
-              ascending: seq_direction  == 1
-              display: "sequence-#{seq_name}"
-          break
-    i = j
-  result
-
 #-------------------------------------------------------------------------------
 # dictionary match (common passwords, english, last names, etc) ----------------
 #-------------------------------------------------------------------------------
@@ -211,7 +82,7 @@ l33t_table =
   x: ['%']
   z: ['2']
 
-# returns a pruned copy of l33t_table that only includes password's possible substitutions
+# makes a pruned copy of l33t_table that only includes password's possible substitutions
 relevent_l33t_subtable = (password) ->
   password_chars = {}
   for chr in password
@@ -223,7 +94,7 @@ relevent_l33t_subtable = (password) ->
       filtered[letter] = relevent_subs
   filtered
 
-# for a given password, returns a list of possible 1337 replacement dictionaries
+# returns the list of possible 1337 replacement dictionaries for a given password
 enumerate_l33t_subs = (table) ->
   keys = (k for k of table)
   subs = [[]]
@@ -275,29 +146,147 @@ enumerate_l33t_subs = (table) ->
   sub_dicts
 
 l33t_match = (password) ->
-  best = []
-  best_sub = null
-  best_coverage = 0
-  for sub in enumerate_l33t_subs relevent_l33t_subtable(password)
-    if empty(sub)
-      break # corner case: password has no relevent subs. abort l33tmatching
-    candidates = (matcher translate(password, sub) for matcher in DICTIONARY_MATCHERS)
-    for candidate in candidates
-      coverage = 0
-      coverage += match.token.length for match in candidate
-      if coverage > best_coverage or (coverage == best_coverage and candidate.length < best.length)
-        best = candidate
-        best_sub = sub
-        best_coverage = coverage
-  for match in best
-    token = password[match.i..match.j]
-    if token.toLowerCase() == match.matched_word
-      # now that the optimal chain is found, only return the matches that contain an actual substitution
-      continue
-    match.l33t = true
-    match.token = token
-    match.sub = best_sub
-    match
+  matches = []
+  for sub in enumerate_l33t_subs relevent_l33t_subtable password
+    if empty sub
+      break # corner case: password has no relevent subs.
+    for matcher in DICTIONARY_MATCHERS
+      subbed_password = translate password, sub
+      for match in matcher(subbed_password)
+        token = password[match.i..match.j]
+        if token.toLowerCase() == match.matched_word
+          # only return the matches that contain an actual substitution
+          continue
+        match.l33t = true
+        match.token = token
+        match.sub = sub
+        matches.push match
+  matches
+
+# ------------------------------------------------------------------------------
+# spatial match (qwerty/dvorak/keypad) -----------------------------------------
+# ------------------------------------------------------------------------------
+
+GRAPHS =
+  'qwerty': qwerty
+  'dvorak': dvorak
+  'keypad': keypad
+  'mac_keypad': mac_keypad
+
+spatial_match = (password) ->
+  matches = []
+  for graph_name, graph of GRAPHS
+    extend matches, spatial_match_helper(password, graph, graph_name)
+  matches
+
+spatial_match_helper = (password, graph, graph_name) ->
+  result = []
+  i = 0
+  while i < password.length
+    j = i + 1
+    last_direction = null
+    turns = 0
+    loop
+      [prev_char, cur_char] = password[j-1..j]
+      found = false
+      found_direction = -1
+      cur_direction = -1
+      adjacents = graph[prev_char] or []
+      for adj in adjacents
+        cur_direction += 1
+        if adj and cur_char in adj
+          found = true
+          found_direction = cur_direction
+          if last_direction != found_direction
+            # correct even in the initial case when last_dir is null:
+            # every spatial pattern starts with a turn.
+            turns += 1
+            last_direction = found_direction
+          break
+      if found
+        j += 1
+      else
+        if j - i > 2 # only consider length-3 chains and up
+          result.push
+            pattern: 'spatial'
+            i: i
+            j: j-1
+            token: password[i...j]
+            graph: graph_name
+            turns: turns
+            display: "spatial-#{graph_name}-#{turns}turns"
+        break
+    i = j
+  result
+
+#-------------------------------------------------------------------------------
+# repeats (aaa) and sequences (abcdef) -----------------------------------------
+#-------------------------------------------------------------------------------
+
+repeat_match = (password) ->
+  result = []
+  i = 0
+  while i < password.length
+    j = i + 1
+    loop
+      [prev_char, cur_char] = password[j-1..j]
+      if password[j-1] == password[j]
+        j += 1
+      else
+        if j - i > 2 # length-3 chains and up
+          result.push
+            pattern: 'repeat'
+            i: i
+            j: j-1
+            token: password[i...j]
+            repeated_char: password[i]
+            display: "repeat-#{password[i]}"
+        break
+    i = j
+  result
+
+SEQUENCES =
+  lower: 'abcdefghijklmnopqrstuvwxyz'
+  upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  digits: '01234567890'
+
+sequence_match = (password) ->
+  result = []
+  i = 0
+  while i < password.length
+    j = i + 1
+    seq = null # either lower, upper, or digits
+    seq_name = null
+    seq_direction = null # 1 for ascending seq abcd, -1 for dcba
+    for seq_candidate_name, seq_candidate of SEQUENCES
+      [i_n, j_n] = (seq_candidate.indexOf(chr) for chr in [password[i], password[j]])
+      if i_n > -1 and j_n > -1
+        direction = j_n - i_n
+        if direction in [1, -1]
+          seq = seq_candidate
+          seq_name = seq_candidate_name
+          seq_direction = direction
+          break
+    if seq
+      loop
+        [prev_char, cur_char] = password[j-1..j]
+        [prev_n, cur_n] = (seq_candidate.indexOf(chr) for chr in [prev_char, cur_char])
+        if cur_n - prev_n == seq_direction
+          j += 1
+        else
+          if j - i > 2 # length-3 chains and up
+            result.push
+              pattern: 'sequence'
+              i: i
+              j: j-1
+              token: password[i...j]
+              sequence_name: seq_name
+              sequence_space: seq.length
+              ascending: seq_direction  == 1
+              display: "sequence-#{seq_name}"
+          break
+    i = j
+  result
 
 #-------------------------------------------------------------------------------
 # digits, years, dates ---------------------------------------------------------

@@ -1,4 +1,4 @@
-var DICTIONARY_MATCHERS, MATCHERS, build_dict_matcher, build_ranked_dict, date_match, date_rx, dictionary_match, digits_match, digits_rx, empty, english_match, enumerate_l33t_subs, extend, female_name_match, findall, l33t_match, l33t_table, male_name_match, omnimatch, password_match, ranked_english, ranked_female_names, ranked_male_names, ranked_passwords, ranked_surnames, relevent_l33t_subtable, repeat, repeat_match, sequence_match, sequences, spatial_match, spatial_match_helper, surname_match, translate, year_match, year_rx,
+var DICTIONARY_MATCHERS, GRAPHS, MATCHERS, SEQUENCES, build_dict_matcher, build_ranked_dict, date_match, date_rx, dictionary_match, digits_match, digits_rx, empty, english_match, enumerate_l33t_subs, extend, female_name_match, findall, l33t_match, l33t_table, male_name_match, omnimatch, password_match, ranked_english, ranked_female_names, ranked_male_names, ranked_passwords, ranked_surnames, relevent_l33t_subtable, repeat, repeat_match, sequence_match, spatial_match, spatial_match_helper, surname_match, translate, year_match, year_rx,
   __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 empty = function(obj) {
@@ -40,184 +40,6 @@ omnimatch = function(password) {
   return matches.sort(function(match1, match2) {
     return (match1.i - match2.i) || (match1.j - match2.j);
   });
-};
-
-spatial_match = function(password) {
-  var best, best_coverage, best_graph_name, candidate, coverage, graph_name, match, unidirectional, _i, _j, _len, _len2, _ref;
-  best = [];
-  best_coverage = 0;
-  best_graph_name = null;
-  _ref = ['qwerty', 'dvorak', 'keypad', 'mac_keypad'];
-  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-    graph_name = _ref[_i];
-    candidate = spatial_match_helper(password, graph_name, unidirectional = false);
-    coverage = 0;
-    for (_j = 0, _len2 = candidate.length; _j < _len2; _j++) {
-      match = candidate[_j];
-      coverage += match.token.length;
-    }
-    if (coverage > best_coverage || (coverage === best_coverage && candidate.length < best.length)) {
-      best = candidate;
-      best_coverage = coverage;
-      best_graph_name = graph_name;
-    }
-  }
-  return best;
-};
-
-spatial_match_helper = function(password, graph_name) {
-  var adj, adjacents, cur_char, cur_direction, found, found_direction, graph, i, j, last_direction, prev_char, result, turns, _i, _len, _ref;
-  result = [];
-  graph = window[graph_name];
-  i = 0;
-  while (i < password.length) {
-    j = i + 1;
-    last_direction = null;
-    turns = 0;
-    while (true) {
-      _ref = password.slice(j - 1, j + 1 || 9e9), prev_char = _ref[0], cur_char = _ref[1];
-      found = false;
-      found_direction = -1;
-      cur_direction = -1;
-      adjacents = graph[prev_char] || [];
-      for (_i = 0, _len = adjacents.length; _i < _len; _i++) {
-        adj = adjacents[_i];
-        cur_direction += 1;
-        if (adj && __indexOf.call(adj, cur_char) >= 0) {
-          found = true;
-          found_direction = cur_direction;
-          if (last_direction !== found_direction) {
-            turns += 1;
-            last_direction = found_direction;
-          }
-          break;
-        }
-      }
-      if (found) {
-        j += 1;
-      } else {
-        if (j - i > 2) {
-          result.push({
-            pattern: 'spatial',
-            i: i,
-            j: j - 1,
-            token: password.slice(i, j),
-            graph: graph_name,
-            turns: turns,
-            display: "spatial-" + graph_name + "-" + turns + "turns"
-          });
-        }
-        break;
-      }
-    }
-    i = j;
-  }
-  return result;
-};
-
-repeat_match = function(password) {
-  var cur_char, i, j, prev_char, result, _ref;
-  result = [];
-  i = 0;
-  while (i < password.length) {
-    j = i + 1;
-    while (true) {
-      _ref = password.slice(j - 1, j + 1 || 9e9), prev_char = _ref[0], cur_char = _ref[1];
-      if (password[j - 1] === password[j]) {
-        j += 1;
-      } else {
-        if (j - i > 2) {
-          result.push({
-            pattern: 'repeat',
-            i: i,
-            j: j - 1,
-            token: password.slice(i, j),
-            repeated_char: password[i],
-            display: "repeat-" + password[i]
-          });
-        }
-        break;
-      }
-    }
-    i = j;
-  }
-  return result;
-};
-
-sequences = {
-  lower: 'abcdefghijklmnopqrstuvwxyz',
-  upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-  digits: '01234567890'
-};
-
-sequence_match = function(password) {
-  var chr, cur_char, cur_n, direction, i, i_n, j, j_n, prev_char, prev_n, result, seq, seq_candidate, seq_candidate_name, seq_direction, seq_name, _i, _len, _ref, _ref2, _ref3, _ref4;
-  result = [];
-  i = 0;
-  while (i < password.length) {
-    j = i + 1;
-    seq = null;
-    seq_name = null;
-    seq_direction = null;
-    _ref = ['lower', 'upper', 'digits'];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      seq_candidate_name = _ref[_i];
-      seq_candidate = sequences[seq_candidate_name];
-      _ref2 = (function() {
-        var _j, _len2, _ref2, _results;
-        _ref2 = [password[i], password[j]];
-        _results = [];
-        for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
-          chr = _ref2[_j];
-          _results.push(seq_candidate.indexOf(chr));
-        }
-        return _results;
-      })(), i_n = _ref2[0], j_n = _ref2[1];
-      if (i_n > -1 && j_n > -1) {
-        direction = j_n - i_n;
-        if (direction === 1 || direction === -1) {
-          seq = seq_candidate;
-          seq_name = seq_candidate_name;
-          seq_direction = direction;
-          break;
-        }
-      }
-    }
-    if (seq) {
-      while (true) {
-        _ref3 = password.slice(j - 1, j + 1 || 9e9), prev_char = _ref3[0], cur_char = _ref3[1];
-        _ref4 = (function() {
-          var _j, _len2, _ref4, _results;
-          _ref4 = [prev_char, cur_char];
-          _results = [];
-          for (_j = 0, _len2 = _ref4.length; _j < _len2; _j++) {
-            chr = _ref4[_j];
-            _results.push(seq_candidate.indexOf(chr));
-          }
-          return _results;
-        })(), prev_n = _ref4[0], cur_n = _ref4[1];
-        if (cur_n - prev_n === seq_direction) {
-          j += 1;
-        } else {
-          if (j - i > 2) {
-            result.push({
-              pattern: 'sequence',
-              i: i,
-              j: j - 1,
-              token: password.slice(i, j),
-              sequence_name: seq_name,
-              sequence_space: seq.length,
-              ascending: seq_direction === 1,
-              display: "sequence-" + seq_name
-            });
-          }
-          break;
-        }
-      }
-    }
-    i = j;
-  }
-  return result;
 };
 
 dictionary_match = function(password, ranked_dict) {
@@ -422,48 +244,197 @@ enumerate_l33t_subs = function(table) {
 };
 
 l33t_match = function(password) {
-  var best, best_coverage, best_sub, candidate, candidates, coverage, match, matcher, sub, token, _i, _j, _k, _l, _len, _len2, _len3, _len4, _ref, _results;
-  best = [];
-  best_sub = null;
-  best_coverage = 0;
+  var match, matcher, matches, sub, subbed_password, token, _i, _j, _k, _len, _len2, _len3, _ref, _ref2;
+  matches = [];
   _ref = enumerate_l33t_subs(relevent_l33t_subtable(password));
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
     sub = _ref[_i];
     if (empty(sub)) break;
-    candidates = (function() {
-      var _j, _len2, _results;
-      _results = [];
-      for (_j = 0, _len2 = DICTIONARY_MATCHERS.length; _j < _len2; _j++) {
-        matcher = DICTIONARY_MATCHERS[_j];
-        _results.push(matcher(translate(password, sub)));
-      }
-      return _results;
-    })();
-    for (_j = 0, _len2 = candidates.length; _j < _len2; _j++) {
-      candidate = candidates[_j];
-      coverage = 0;
-      for (_k = 0, _len3 = candidate.length; _k < _len3; _k++) {
-        match = candidate[_k];
-        coverage += match.token.length;
-      }
-      if (coverage > best_coverage || (coverage === best_coverage && candidate.length < best.length)) {
-        best = candidate;
-        best_sub = sub;
-        best_coverage = coverage;
+    for (_j = 0, _len2 = DICTIONARY_MATCHERS.length; _j < _len2; _j++) {
+      matcher = DICTIONARY_MATCHERS[_j];
+      subbed_password = translate(password, sub);
+      _ref2 = matcher(subbed_password);
+      for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
+        match = _ref2[_k];
+        token = password.slice(match.i, match.j + 1 || 9e9);
+        if (token.toLowerCase() === match.matched_word) continue;
+        match.l33t = true;
+        match.token = token;
+        match.sub = sub;
+        matches.push(match);
       }
     }
   }
-  _results = [];
-  for (_l = 0, _len4 = best.length; _l < _len4; _l++) {
-    match = best[_l];
-    token = password.slice(match.i, match.j + 1 || 9e9);
-    if (token.toLowerCase() === match.matched_word) continue;
-    match.l33t = true;
-    match.token = token;
-    match.sub = best_sub;
-    _results.push(match);
+  return matches;
+};
+
+GRAPHS = {
+  'qwerty': qwerty,
+  'dvorak': dvorak,
+  'keypad': keypad,
+  'mac_keypad': mac_keypad
+};
+
+spatial_match = function(password) {
+  var graph, graph_name, matches;
+  matches = [];
+  for (graph_name in GRAPHS) {
+    graph = GRAPHS[graph_name];
+    extend(matches, spatial_match_helper(password, graph, graph_name));
   }
-  return _results;
+  return matches;
+};
+
+spatial_match_helper = function(password, graph, graph_name) {
+  var adj, adjacents, cur_char, cur_direction, found, found_direction, i, j, last_direction, prev_char, result, turns, _i, _len, _ref;
+  result = [];
+  i = 0;
+  while (i < password.length) {
+    j = i + 1;
+    last_direction = null;
+    turns = 0;
+    while (true) {
+      _ref = password.slice(j - 1, j + 1 || 9e9), prev_char = _ref[0], cur_char = _ref[1];
+      found = false;
+      found_direction = -1;
+      cur_direction = -1;
+      adjacents = graph[prev_char] || [];
+      for (_i = 0, _len = adjacents.length; _i < _len; _i++) {
+        adj = adjacents[_i];
+        cur_direction += 1;
+        if (adj && __indexOf.call(adj, cur_char) >= 0) {
+          found = true;
+          found_direction = cur_direction;
+          if (last_direction !== found_direction) {
+            turns += 1;
+            last_direction = found_direction;
+          }
+          break;
+        }
+      }
+      if (found) {
+        j += 1;
+      } else {
+        if (j - i > 2) {
+          result.push({
+            pattern: 'spatial',
+            i: i,
+            j: j - 1,
+            token: password.slice(i, j),
+            graph: graph_name,
+            turns: turns,
+            display: "spatial-" + graph_name + "-" + turns + "turns"
+          });
+        }
+        break;
+      }
+    }
+    i = j;
+  }
+  return result;
+};
+
+repeat_match = function(password) {
+  var cur_char, i, j, prev_char, result, _ref;
+  result = [];
+  i = 0;
+  while (i < password.length) {
+    j = i + 1;
+    while (true) {
+      _ref = password.slice(j - 1, j + 1 || 9e9), prev_char = _ref[0], cur_char = _ref[1];
+      if (password[j - 1] === password[j]) {
+        j += 1;
+      } else {
+        if (j - i > 2) {
+          result.push({
+            pattern: 'repeat',
+            i: i,
+            j: j - 1,
+            token: password.slice(i, j),
+            repeated_char: password[i],
+            display: "repeat-" + password[i]
+          });
+        }
+        break;
+      }
+    }
+    i = j;
+  }
+  return result;
+};
+
+SEQUENCES = {
+  lower: 'abcdefghijklmnopqrstuvwxyz',
+  upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  digits: '01234567890'
+};
+
+sequence_match = function(password) {
+  var chr, cur_char, cur_n, direction, i, i_n, j, j_n, prev_char, prev_n, result, seq, seq_candidate, seq_candidate_name, seq_direction, seq_name, _ref, _ref2, _ref3;
+  result = [];
+  i = 0;
+  while (i < password.length) {
+    j = i + 1;
+    seq = null;
+    seq_name = null;
+    seq_direction = null;
+    for (seq_candidate_name in SEQUENCES) {
+      seq_candidate = SEQUENCES[seq_candidate_name];
+      _ref = (function() {
+        var _i, _len, _ref, _results;
+        _ref = [password[i], password[j]];
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          chr = _ref[_i];
+          _results.push(seq_candidate.indexOf(chr));
+        }
+        return _results;
+      })(), i_n = _ref[0], j_n = _ref[1];
+      if (i_n > -1 && j_n > -1) {
+        direction = j_n - i_n;
+        if (direction === 1 || direction === -1) {
+          seq = seq_candidate;
+          seq_name = seq_candidate_name;
+          seq_direction = direction;
+          break;
+        }
+      }
+    }
+    if (seq) {
+      while (true) {
+        _ref2 = password.slice(j - 1, j + 1 || 9e9), prev_char = _ref2[0], cur_char = _ref2[1];
+        _ref3 = (function() {
+          var _i, _len, _ref3, _results;
+          _ref3 = [prev_char, cur_char];
+          _results = [];
+          for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+            chr = _ref3[_i];
+            _results.push(seq_candidate.indexOf(chr));
+          }
+          return _results;
+        })(), prev_n = _ref3[0], cur_n = _ref3[1];
+        if (cur_n - prev_n === seq_direction) {
+          j += 1;
+        } else {
+          if (j - i > 2) {
+            result.push({
+              pattern: 'sequence',
+              i: i,
+              j: j - 1,
+              token: password.slice(i, j),
+              sequence_name: seq_name,
+              sequence_space: seq.length,
+              ascending: seq_direction === 1,
+              display: "sequence-" + seq_name
+            });
+          }
+          break;
+        }
+      }
+    }
+    i = j;
+  }
+  return result;
 };
 
 repeat = function(chr, n) {
