@@ -211,7 +211,7 @@ password_match    = build_dict_matcher('passwords', ranked_passwords)
 # dictionary match with common substitutions (pr0d@dmin instead of prodadmin) --
 #-------------------------------------------------------------------------------
 
-h4x0r_table =
+l33t_table =
   a: ['4', '@']
   b: ['8']
   c: ['(', '{', '[', '<']
@@ -225,20 +225,20 @@ h4x0r_table =
   x: ['%']
   z: ['2']
 
-# returns a pruned copy of h4x0r_table that only includes password's possible substitutions
-relevent_h4x0r_subtable = (password) ->
+# returns a pruned copy of l33t_table that only includes password's possible substitutions
+relevent_l33t_subtable = (password) ->
   password_chars = {}
   for chr in password
     password_chars[chr] = true
   filtered = {}
-  for letter, subs of h4x0r_table
+  for letter, subs of l33t_table
     relevent_subs = (sub for sub in subs when sub of password_chars)
     if relevent_subs.length > 0
       filtered[letter] = relevent_subs
   filtered
 
 # for a given password, returns a list of possible 1337 replacement dictionaries
-enumerate_h4x0r_subs = (table) ->
+enumerate_l33t_subs = (table) ->
   keys = (k for k of table)
   subs = [[]]
 
@@ -260,20 +260,20 @@ enumerate_h4x0r_subs = (table) ->
     first_key = keys[0]
     rest_keys = keys[1..]
     next_subs = []
-    for h4x_chr in table[first_key]
+    for l33t_chr in table[first_key]
       for sub in subs
-        dup_h4x_index = -1
+        dup_l33t_index = -1
         for i in [0...sub.length]
-          if sub[i][0] == h4x_chr
-            dup_h4x_index = i
+          if sub[i][0] == l33t_chr
+            dup_l33t_index = i
             break
-        if dup_h4x_index == -1
-          sub_extension = sub.concat [[h4x_chr, first_key]]
+        if dup_l33t_index == -1
+          sub_extension = sub.concat [[l33t_chr, first_key]]
           next_subs.push sub_extension
         else
           sub_alternative = sub.slice(0)
-          sub_alternative.splice(dup_h4x_index, 1)
-          sub_alternative.push [h4x_chr, first_key]
+          sub_alternative.splice(dup_l33t_index, 1)
+          sub_alternative.push [l33t_chr, first_key]
           next_subs.push sub
           next_subs.push sub_alternative
     subs = dedup next_subs
@@ -283,18 +283,18 @@ enumerate_h4x0r_subs = (table) ->
   sub_dicts = [] # convert from assoc lists to dicts
   for sub in subs
     sub_dict = {}
-    for [h4x_chr, chr] in sub
-      sub_dict[h4x_chr] = chr
+    for [l33t_chr, chr] in sub
+      sub_dict[l33t_chr] = chr
     sub_dicts.push sub_dict
   sub_dicts
 
-h4x0r_match = (password) ->
+l33t_match = (password) ->
   best = []
   best_sub = null
   best_coverage = 0
-  for sub in enumerate_h4x0r_subs relevent_h4x0r_subtable(password)
+  for sub in enumerate_l33t_subs relevent_l33t_subtable(password)
     if empty(sub)
-      break # corner case: password has no relevent subs. abort h4xmatching
+      break # corner case: password has no relevent subs. abort l33tmatching
     candidates = (matcher translate(password, sub) for matcher in DICTIONARY_MATCHERS)
     for candidate in candidates
       coverage = 0
@@ -309,7 +309,7 @@ h4x0r_match = (password) ->
     if token.toLowerCase() == match.matched_word
       # now that the optimal chain is found, only return the matches that contain an actual substitution
       continue
-    match.h4x0rd = true
+    match.l33t = true
     match.token = token
     match.sub = best_sub
     match
@@ -382,7 +382,7 @@ DICTIONARY_MATCHERS = [
 ]
 
 MATCHERS = DICTIONARY_MATCHERS.concat [
-    h4x0r_match,
+    l33t_match,
     digits_match, year_match, date_match,
     repeat_match, sequence_match,
     spatial_match

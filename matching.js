@@ -1,4 +1,4 @@
-var DICTIONARY_MATCHERS, MATCHERS, build_dict_matcher, build_ranked_dict, date_match, date_rx, dictionary_match, digits_match, digits_rx, empty, english_match, enumerate_h4x0r_subs, extend, female_name_match, findall, h4x0r_match, h4x0r_table, male_name_match, max_coverage_subset, omnimatch, password_match, ranked_english, ranked_female_names, ranked_male_names, ranked_passwords, ranked_surnames, relevent_h4x0r_subtable, repeat, repeat_match, sequence_match, sequences, spatial_match, spatial_match_helper, surname_match, translate, year_match, year_rx,
+var DICTIONARY_MATCHERS, MATCHERS, build_dict_matcher, build_ranked_dict, date_match, date_rx, dictionary_match, digits_match, digits_rx, empty, english_match, enumerate_l33t_subs, extend, female_name_match, findall, l33t_match, l33t_table, male_name_match, max_coverage_subset, omnimatch, password_match, ranked_english, ranked_female_names, ranked_male_names, ranked_passwords, ranked_surnames, relevent_l33t_subtable, repeat, repeat_match, sequence_match, sequences, spatial_match, spatial_match_helper, surname_match, translate, year_match, year_rx,
   __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 empty = function(obj) {
@@ -336,7 +336,7 @@ female_name_match = build_dict_matcher('female_names', ranked_female_names);
 
 password_match = build_dict_matcher('passwords', ranked_passwords);
 
-h4x0r_table = {
+l33t_table = {
   a: ['4', '@'],
   b: ['8'],
   c: ['(', '{', '[', '<'],
@@ -351,7 +351,7 @@ h4x0r_table = {
   z: ['2']
 };
 
-relevent_h4x0r_subtable = function(password) {
+relevent_l33t_subtable = function(password) {
   var chr, filtered, letter, password_chars, relevent_subs, sub, subs, _i, _len;
   password_chars = {};
   for (_i = 0, _len = password.length; _i < _len; _i++) {
@@ -359,8 +359,8 @@ relevent_h4x0r_subtable = function(password) {
     password_chars[chr] = true;
   }
   filtered = {};
-  for (letter in h4x0r_table) {
-    subs = h4x0r_table[letter];
+  for (letter in l33t_table) {
+    subs = l33t_table[letter];
     relevent_subs = (function() {
       var _j, _len2, _results;
       _results = [];
@@ -375,8 +375,8 @@ relevent_h4x0r_subtable = function(password) {
   return filtered;
 };
 
-enumerate_h4x0r_subs = function(table) {
-  var chr, dedup, h4x_chr, helper, k, keys, sub, sub_dict, sub_dicts, subs, _i, _j, _len, _len2, _ref;
+enumerate_l33t_subs = function(table) {
+  var chr, dedup, helper, k, keys, l33t_chr, sub, sub_dict, sub_dicts, subs, _i, _j, _len, _len2, _ref;
   keys = (function() {
     var _results;
     _results = [];
@@ -419,30 +419,30 @@ enumerate_h4x0r_subs = function(table) {
     return deduped;
   };
   helper = function(keys) {
-    var dup_h4x_index, first_key, h4x_chr, i, next_subs, rest_keys, sub, sub_alternative, sub_extension, _i, _j, _len, _len2, _ref, _ref2;
+    var dup_l33t_index, first_key, i, l33t_chr, next_subs, rest_keys, sub, sub_alternative, sub_extension, _i, _j, _len, _len2, _ref, _ref2;
     if (!keys.length) return;
     first_key = keys[0];
     rest_keys = keys.slice(1);
     next_subs = [];
     _ref = table[first_key];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      h4x_chr = _ref[_i];
+      l33t_chr = _ref[_i];
       for (_j = 0, _len2 = subs.length; _j < _len2; _j++) {
         sub = subs[_j];
-        dup_h4x_index = -1;
+        dup_l33t_index = -1;
         for (i = 0, _ref2 = sub.length; 0 <= _ref2 ? i < _ref2 : i > _ref2; 0 <= _ref2 ? i++ : i--) {
-          if (sub[i][0] === h4x_chr) {
-            dup_h4x_index = i;
+          if (sub[i][0] === l33t_chr) {
+            dup_l33t_index = i;
             break;
           }
         }
-        if (dup_h4x_index === -1) {
-          sub_extension = sub.concat([[h4x_chr, first_key]]);
+        if (dup_l33t_index === -1) {
+          sub_extension = sub.concat([[l33t_chr, first_key]]);
           next_subs.push(sub_extension);
         } else {
           sub_alternative = sub.slice(0);
-          sub_alternative.splice(dup_h4x_index, 1);
-          sub_alternative.push([h4x_chr, first_key]);
+          sub_alternative.splice(dup_l33t_index, 1);
+          sub_alternative.push([l33t_chr, first_key]);
           next_subs.push(sub);
           next_subs.push(sub_alternative);
         }
@@ -457,20 +457,20 @@ enumerate_h4x0r_subs = function(table) {
     sub = subs[_i];
     sub_dict = {};
     for (_j = 0, _len2 = sub.length; _j < _len2; _j++) {
-      _ref = sub[_j], h4x_chr = _ref[0], chr = _ref[1];
-      sub_dict[h4x_chr] = chr;
+      _ref = sub[_j], l33t_chr = _ref[0], chr = _ref[1];
+      sub_dict[l33t_chr] = chr;
     }
     sub_dicts.push(sub_dict);
   }
   return sub_dicts;
 };
 
-h4x0r_match = function(password) {
+l33t_match = function(password) {
   var best, best_coverage, best_sub, candidate, candidates, coverage, i, j, match, matcher, sub, token, _i, _j, _k, _l, _len, _len2, _len3, _len4, _ref, _ref2, _results;
   best = [];
   best_sub = null;
   best_coverage = 0;
-  _ref = enumerate_h4x0r_subs(relevent_h4x0r_subtable(password));
+  _ref = enumerate_l33t_subs(relevent_l33t_subtable(password));
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
     sub = _ref[_i];
     if (empty(sub)) break;
@@ -503,7 +503,7 @@ h4x0r_match = function(password) {
     _ref2 = match.ij, i = _ref2[0], j = _ref2[1];
     token = password.slice(i, j + 1 || 9e9);
     if (token.toLowerCase() === match.matched_word) continue;
-    match.h4x0rd = true;
+    match.l33t = true;
     match.token = token;
     match.sub = best_sub;
     _results.push(match);
@@ -615,4 +615,4 @@ date_match = function(password) {
 
 DICTIONARY_MATCHERS = [password_match, male_name_match, female_name_match, surname_match, english_match];
 
-MATCHERS = DICTIONARY_MATCHERS.concat([h4x0r_match, digits_match, year_match, date_match, repeat_match, sequence_match, spatial_match]);
+MATCHERS = DICTIONARY_MATCHERS.concat([l33t_match, digits_match, year_match, date_match, repeat_match, sequence_match, spatial_match]);

@@ -200,7 +200,7 @@ spatial_entropy = function(match) {
 };
 
 dictionary_entropy = function(match) {
-  var chr, entropy, h4x_chrs, k, num_alpha, num_h4x, num_possibles, num_upper, sub_chrs, v;
+  var chr, entropy, k, l33t_chrs, num_alpha, num_l33t, num_possibles, num_upper, sub_chrs, v;
   entropy = log2(match.rank);
   if (match.token.match(/^[A-Z][^A-Z]+$/)) {
     entropy += 1;
@@ -233,7 +233,7 @@ dictionary_entropy = function(match) {
     })()).length;
     entropy += log2(nCk(num_alpha, num_upper));
   }
-  if (match.h4x0rd) {
+  if (match.l33t) {
     sub_chrs = (function() {
       var _ref, _results;
       _ref = match.sub;
@@ -244,7 +244,7 @@ dictionary_entropy = function(match) {
       }
       return _results;
     })();
-    h4x_chrs = (function() {
+    l33t_chrs = (function() {
       var _ref, _results;
       _ref = match.sub;
       _results = [];
@@ -260,23 +260,23 @@ dictionary_entropy = function(match) {
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         chr = _ref[_i];
-        if (__indexOf.call(sub_chrs.concat(h4x_chrs), chr) >= 0) {
+        if (__indexOf.call(sub_chrs.concat(l33t_chrs), chr) >= 0) {
           _results.push(chr);
         }
       }
       return _results;
     })()).length;
-    num_h4x = ((function() {
+    num_l33t = ((function() {
       var _i, _len, _ref, _results;
       _ref = match.token;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         chr = _ref[_i];
-        if (__indexOf.call(h4x_chrs, chr) >= 0) _results.push(chr);
+        if (__indexOf.call(l33t_chrs, chr) >= 0) _results.push(chr);
       }
       return _results;
     })()).length;
-    entropy += log2(nCk(num_possibles, num_h4x));
+    entropy += log2(nCk(num_possibles, num_l33t));
   }
   return entropy;
 };

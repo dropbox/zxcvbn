@@ -163,12 +163,12 @@ dictionary_entropy = (match) ->
     num_alpha = (chr for chr in match.token when chr.match /[A-Za-z]/).length
     num_upper = (chr for chr in match.token when chr.match /[A-Z]/).length
     entropy += log2 nCk(num_alpha, num_upper)
-  if match.h4x0rd
+  if match.l33t
     sub_chrs = (v for k,v of match.sub)
-    h4x_chrs = (k for k,v of match.sub)
-    num_possibles = (chr for chr in match.token when chr in sub_chrs.concat h4x_chrs).length
-    num_h4x = (chr for chr in match.token when chr in h4x_chrs).length
-    entropy += log2 nCk(num_possibles, num_h4x)
+    l33t_chrs = (k for k,v of match.sub)
+    num_possibles = (chr for chr in match.token when chr in sub_chrs.concat l33t_chrs).length
+    num_l33t = (chr for chr in match.token when chr in l33t_chrs).length
+    entropy += log2 nCk(num_possibles, num_l33t)
   entropy
 
 bruteforce_entropy = (match) ->
