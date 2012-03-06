@@ -1,4 +1,4 @@
-var GUESS_RATE_PER_SECOND, KEYBOARD_BRANCHING, KEYBOARD_SIZE, KEYPAD_BRANCHING, KEYPAD_SIZE, NUM_DAYS, NUM_MONTHS, NUM_YEARS, bruteforce_entropy, calc_bruteforce_cardinality, calc_entropy, date_entropy, dictionary_entropy, digits_entropy, display_info, log2, minimum_entropy_match_sequence, nCk, nPk, repeat_entropy, sequence_entropy, spatial_entropy, year_entropy,
+var KEYBOARD_BRANCHING, KEYBOARD_SIZE, KEYPAD_BRANCHING, KEYPAD_SIZE, NUM_ATTACKERS, NUM_DAYS, NUM_MONTHS, NUM_YEARS, SECONDS_PER_GUESS, SINGLE_GUESS, bruteforce_entropy, calc_bruteforce_cardinality, calc_entropy, date_entropy, dictionary_entropy, digits_entropy, display_time, entropy_to_crack_time, log2, minimum_entropy_match_sequence, nCk, nPk, repeat_entropy, sequence_entropy, spatial_entropy, year_entropy,
   __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 nPk = function(n, k) {
@@ -22,8 +22,6 @@ nCk = function(n, k) {
 log2 = function(n) {
   return Math.log(n) / Math.log(2);
 };
-
-GUESS_RATE_PER_SECOND = 1000;
 
 minimum_entropy_match_sequence = function(password, matches) {
   var augmented, backpointers, bruteforce_cardinality, candidate_entropy, i, j, k, match, min_entropy, min_match, prev_entropy, start_i, up_to_k, _i, _j, _len, _len2, _ref, _ref2;
@@ -90,10 +88,20 @@ minimum_entropy_match_sequence = function(password, matches) {
   min_match = augmented;
   return {
     password: password,
-    crack_time: display_info(Math.pow(2, min_entropy) * (1 / GUESS_RATE_PER_SECOND)),
+    crack_time: display_time(entropy_to_crack_time(min_entropy)),
     min_entropy: Math.round(min_entropy),
     min_match: min_match
   };
+};
+
+SINGLE_GUESS = .010;
+
+NUM_ATTACKERS = 100;
+
+SECONDS_PER_GUESS = SINGLE_GUESS / NUM_ATTACKERS;
+
+entropy_to_crack_time = function(entropy) {
+  return .5 * Math.pow(2, entropy) * SECONDS_PER_GUESS;
 };
 
 calc_entropy = function(match) {
@@ -303,7 +311,7 @@ calc_bruteforce_cardinality = function(password) {
   return cardinality;
 };
 
-display_info = function(seconds) {
+display_time = function(seconds) {
   var century, day, hour, minute, month, year;
   minute = 60;
   hour = minute * 60;

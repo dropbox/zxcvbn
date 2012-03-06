@@ -12,20 +12,22 @@ nCk = (n, k) ->
 log2 = (n) -> Math.log(n) / Math.log(2)
 
 # ------------------------------------------------------------------------------
-# minimum entropy search: takes a big list of overlapping matches, returns the
-# non-overlapping sublist with minimum entropy. O(N^2) dp alg.
+# minimum entropy search -------------------------------------------------------
 # ------------------------------------------------------------------------------
-
-GUESS_RATE_PER_SECOND = 1000
+#
+# takes a list of overlapping matches, returns the non-overlapping sublist with
+# minimum entropy. O(nm) dp alg for length-n password with m candidate matches.
+# ------------------------------------------------------------------------------
 
 minimum_entropy_match_sequence = (password, matches) ->
   bruteforce_cardinality = calc_bruteforce_cardinality password
-  up_to_k = []
+  up_to_k = [] # min entropy up to k
   backpointers = []
   k = 0
   while k < password.length
     prev_entropy = up_to_k[k-1] or 0
-    up_to_k[k] = prev_entropy + log2 bruteforce_cardinality # worst-case scenario to beat
+    # worst-case scenario to beat: min entropy sequence at k-1, plus a brute-force char
+    up_to_k[k] = prev_entropy + log2 bruteforce_cardinality
     backpointers[k] = null
     for match in matches
       [i, j] = [match.i, match.j]
@@ -78,9 +80,31 @@ minimum_entropy_match_sequence = (password, matches) ->
   min_match = augmented
 
   password: password
-  crack_time: display_info(Math.pow(2, min_entropy) * (1 / GUESS_RATE_PER_SECOND))
-  min_entropy: Math.round(min_entropy)
+  crack_time: display_time entropy_to_crack_time min_entropy
+  min_entropy: Math.round min_entropy
   min_match: min_match
+
+# ------------------------------------------------------------------------------
+# threat model -- conservative apocalypse scenario -----------------------------
+# ------------------------------------------------------------------------------
+#
+# assumes:
+# * passwords are stored as salted hashes, different random salt per user.
+#   (making rainbow attacks infeasable.)
+# * hashes and salts were stolen. attacker is guessing passwords at max rate.
+# * attacker has several CPUs at their disposal.
+# ------------------------------------------------------------------------------
+
+# about 10 ms per guess for bcrypt with an appropriate work factor.
+# adjust accordingly if you use another hash function, possibly by
+# several orders of magnitude!
+SINGLE_GUESS = .010
+NUM_ATTACKERS = 100 # number of cores guessing in parallel.
+
+SECONDS_PER_GUESS = SINGLE_GUESS / NUM_ATTACKERS
+
+# average number of guesses before cracking, not total: add a .5 term
+entropy_to_crack_time = (entropy) -> .5 * Math.pow(2, entropy) * SECONDS_PER_GUESS
 
 # ------------------------------------------------------------------------------
 # entropy calcs -- one function per match pattern ------------------------------
@@ -202,7 +226,7 @@ calc_bruteforce_cardinality = (password) ->
     cardinality += 33
   cardinality
 
-display_info = (seconds) ->
+display_time = (seconds) ->
   minute = 60
   hour = minute * 60
   day = hour * 24
