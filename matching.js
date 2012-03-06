@@ -1,22 +1,46 @@
-var build_dict_matcher, build_ranked_dict, date_match, date_rx, dictionary_match, digits_match, digits_rx, empty, english_match, enumerate_h4x0r_subs, female_name_match, findall, h4x0r_match, h4x0r_sub, h4x0r_table, male_name_match, max_coverage_subset, omnimatch, password_match, ranked_english, ranked_female_names, ranked_male_names, ranked_passwords, ranked_surnames, relevent_h4x0r_subtable, repeat, repeat_match, sequence_match, sequences, spatial_match, spatial_match_helper, surname_match, year_match, year_rx,
+var DICTIONARY_MATCHERS, MATCHERS, build_dict_matcher, build_ranked_dict, date_match, date_rx, dictionary_match, digits_match, digits_rx, empty, english_match, enumerate_h4x0r_subs, extend, female_name_match, findall, h4x0r_match, h4x0r_table, male_name_match, max_coverage_subset, omnimatch, password_match, ranked_english, ranked_female_names, ranked_male_names, ranked_passwords, ranked_surnames, relevent_h4x0r_subtable, repeat, repeat_match, sequence_match, sequences, spatial_match, spatial_match_helper, surname_match, translate, year_match, year_rx,
   __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
+empty = function(obj) {
+  var k;
+  return ((function() {
+    var _results;
+    _results = [];
+    for (k in obj) {
+      _results.push(k);
+    }
+    return _results;
+  })()).length === 0;
+};
+
+extend = function(lst, lst2) {
+  return lst.push.apply(lst, lst2);
+};
+
+translate = function(string, chr_map) {
+  var chr;
+  return ((function() {
+    var _i, _len, _results;
+    _results = [];
+    for (_i = 0, _len = string.length; _i < _len; _i++) {
+      chr = string[_i];
+      _results.push(chr_map[chr] || chr);
+    }
+    return _results;
+  })()).join('');
+};
+
 omnimatch = function(password) {
-  var matcher, matches, _i, _len, _ref;
+  var matcher, matches, _i, _len;
   matches = [];
-  _ref = [digits_match, year_match, date_match, repeat_match, sequence_match, spatial_match, password_match, male_name_match, female_name_match, surname_match, english_match, h4x0r_match];
-  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-    matcher = _ref[_i];
-    matches.push.apply(matches, matcher(password));
+  for (_i = 0, _len = MATCHERS.length; _i < _len; _i++) {
+    matcher = MATCHERS[_i];
+    extend(matches, matcher(password));
   }
   return matches.sort(function(match1, match2) {
-    var i1, i2, j1, j2, _ref2, _ref3, _ref4;
-    _ref2 = [match1.ij, match2.ij], (_ref3 = _ref2[0], i1 = _ref3[0], j1 = _ref3[1]), (_ref4 = _ref2[1], i2 = _ref4[0], j2 = _ref4[1]);
-    if (i1 === i2) {
-      return j1 - j2;
-    } else {
-      return i1 - i2;
-    }
+    var i1, i2, j1, j2, _ref, _ref2, _ref3;
+    _ref = [match1.ij, match2.ij], (_ref2 = _ref[0], i1 = _ref2[0], j1 = _ref2[1]), (_ref3 = _ref[1], i2 = _ref3[0], j2 = _ref3[1]);
+    return (i1 - i2) || (j1 - j2);
   });
 };
 
@@ -40,11 +64,7 @@ spatial_match = function(password) {
       best_graph_name = graph_name;
     }
   }
-  if (best.length) {
-    return best;
-  } else {
-    return [];
-  }
+  return best;
 };
 
 spatial_match_helper = function(password, graph_name) {
@@ -445,31 +465,6 @@ enumerate_h4x0r_subs = function(table) {
   return sub_dicts;
 };
 
-empty = function(obj) {
-  var k;
-  return ((function() {
-    var _results;
-    _results = [];
-    for (k in obj) {
-      _results.push(k);
-    }
-    return _results;
-  })()).length === 0;
-};
-
-h4x0r_sub = function(password, sub) {
-  var chr;
-  return ((function() {
-    var _i, _len, _results;
-    _results = [];
-    for (_i = 0, _len = password.length; _i < _len; _i++) {
-      chr = password[_i];
-      _results.push(sub[chr] || chr);
-    }
-    return _results;
-  })()).join('');
-};
-
 h4x0r_match = function(password) {
   var best, best_coverage, best_sub, candidate, candidates, coverage, i, j, match, matcher, sub, token, _i, _j, _k, _l, _len, _len2, _len3, _len4, _ref, _ref2, _results;
   best = [];
@@ -480,12 +475,11 @@ h4x0r_match = function(password) {
     sub = _ref[_i];
     if (empty(sub)) break;
     candidates = (function() {
-      var _j, _len2, _ref2, _results;
-      _ref2 = [password_match, english_match, surname_match, female_name_match, male_name_match];
+      var _j, _len2, _results;
       _results = [];
-      for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
-        matcher = _ref2[_j];
-        _results.push(matcher(h4x0r_sub(password, sub)));
+      for (_j = 0, _len2 = DICTIONARY_MATCHERS.length; _j < _len2; _j++) {
+        matcher = DICTIONARY_MATCHERS[_j];
+        _results.push(matcher(translate(password, sub)));
       }
       return _results;
     })();
@@ -515,6 +509,31 @@ h4x0r_match = function(password) {
     _results.push(match);
   }
   return _results;
+};
+
+repeat = function(chr, n) {
+  var i;
+  return ((function() {
+    var _results;
+    _results = [];
+    for (i = 1; 1 <= n ? i <= n : i >= n; 1 <= n ? i++ : i--) {
+      _results.push(chr);
+    }
+    return _results;
+  })()).join('');
+};
+
+findall = function(password, rx) {
+  var match, matches;
+  matches = [];
+  while (true) {
+    match = password.match(rx);
+    if (!match) break;
+    match.ij = [match.index, match.index + match[0].length - 1];
+    matches.push(match);
+    password = password.replace(match[0], repeat(' ', match[0].length));
+  }
+  return matches;
 };
 
 digits_rx = /\d{3,}/;
@@ -594,27 +613,6 @@ date_match = function(password) {
   return matches;
 };
 
-findall = function(password, rx) {
-  var match, matches;
-  matches = [];
-  while (true) {
-    match = password.match(rx);
-    if (!match) break;
-    match.ij = [match.index, match.index + match[0].length - 1];
-    matches.push(match);
-    password = password.replace(match[0], repeat(' ', match[0].length));
-  }
-  return matches;
-};
+DICTIONARY_MATCHERS = [password_match, male_name_match, female_name_match, surname_match, english_match];
 
-repeat = function(chr, n) {
-  var i;
-  return ((function() {
-    var _results;
-    _results = [];
-    for (i = 1; 1 <= n ? i <= n : i >= n; 1 <= n ? i++ : i--) {
-      _results.push(chr);
-    }
-    return _results;
-  })()).join('');
-};
+MATCHERS = DICTIONARY_MATCHERS.concat([h4x0r_match, digits_match, year_match, date_match, repeat_match, sequence_match, spatial_match]);

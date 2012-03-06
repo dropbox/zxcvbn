@@ -8,7 +8,7 @@ import urllib2
 
 from pprint import pprint
 
-SLEEP_TIME = 10 # seconds
+SLEEP_TIME = 20 # seconds
 
 def get_ranked_english():
     '''
@@ -19,20 +19,7 @@ def get_ranked_english():
     the list is separated into pages of 1000 or 2000 terms each.
     * the first 10k words are separated into pages of 1000 terms each.
     * the remainder is separated into pages of 2000 terms each:
-    urls look like this:
-
-    http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/TV/2006/1-1000
-    http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/TV/2006/1001-2000
-    http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/TV/2006/2001-3000
-    ...
-    http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/TV/2006/9001-10000
-    http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/TV/2006/10001-12000
-    http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/TV/2006/12001-14000
-    ...
-    http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/TV/2006/38001-40000
-    http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/TV/2006/40001-41284
     '''
-
     URL_TMPL = 'http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/TV/2006/%s'
     urls = []
     for i in xrange(10):
@@ -57,7 +44,7 @@ def get_ranked_english():
 
 def wiki_download(url):
     '''
-    scrape friendly: sleep 10 seconds between each request, cache each result.
+    scrape friendly: sleep 20 seconds between each request, cache each result.
     '''
     DOWNLOAD_TMPL = '../data/tv_and_movie_freqlist%s.html'
     freq_range = url[url.rindex('/')+1:]
@@ -78,7 +65,7 @@ def wiki_download(url):
         return result, False
 
 def parse_wiki_terms(doc):
-    '''super fragile hax but checks the result at the end'''
+    '''who needs an html parser. fragile hax, but checks the result at the end'''
     results = []
     last3 = ['', '', '']
     header = True

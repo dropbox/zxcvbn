@@ -1,6 +1,4 @@
 
-log2 = (n) -> Math.log(n) / Math.log(2)
-
 nPk = (n, k) ->
   result = 1
   result *= m for m in [n-k+1..n]
@@ -11,16 +9,12 @@ nCk = (n, k) ->
   k_fact *= m for m in [1..k]
   nPk(n, k) / k_fact
 
-PRINTABLE_CHARS = 95
-ALPHANUM_CHARS = 62
-NUM_YEARS = 119 # years match against 1900 - 2019
-NUM_MONTHS = 12
-NUM_DAYS = 31
+log2 = (n) -> Math.log(n) / Math.log(2)
 
-KEYBOARD_BRANCHING = 6
-KEYBOARD_SIZE = 47
-KEYPAD_BRANCHING = 9
-KEYPAD_SIZE = 15
+# ------------------------------------------------------------------------------
+# minimum entropy search: takes a big list of overlapping matches, returns the
+# non-overlapping sublist with minimum entropy. O(N^2) dp alg.
+# ------------------------------------------------------------------------------
 
 GUESS_RATE_PER_SECOND = 1000
 
@@ -44,7 +38,8 @@ minimum_entropy_match_sequence = (password, matches) ->
         up_to_k[j] = candidate_entropy
         backpointers[j] = match
     k += 1
-  # decode
+
+  # walk backwards and decode
   k = password.length - 1
   min_match = []
   min_entropy = up_to_k[k]
@@ -56,7 +51,8 @@ minimum_entropy_match_sequence = (password, matches) ->
     else
       k -= 1
   min_match.reverse()
-  # fill in blanks with bruteforce matches
+
+  # fill in the blanks between matches with bruteforce matches
   start_i = 0
   augmented = []
   for match in min_match
@@ -83,45 +79,13 @@ minimum_entropy_match_sequence = (password, matches) ->
   min_entropy: Math.round(min_entropy)
   min_match: min_match
 
-display_info = (seconds) ->
-  minute = 60
-  hour = minute * 60
-  day = hour * 24
-  month = day * 31
-  year = month * 12
-  century = year * 100
-  if seconds < minute
-    quality: 0
-    display: 'instant'
-    timescale: 'instant'
-  else if seconds < hour
-    quality: 1
-    display: "#{1 + Math.ceil(seconds / minute)} minutes"
-    timescale: 'minutes'
-  else if seconds < day
-    quality: 1 # no quality change
-    display: "#{1 + Math.ceil(seconds / hour)} hours"
-    timescale: 'hours'
-  else if seconds < month
-    quality: 2
-    display: "#{1 + Math.ceil(seconds / day)} days"
-    timescale: 'days'
-  else if seconds < year
-    quality: 3
-    display: "#{1 + Math.ceil(seconds / month)} months"
-    timescale: 'months'
-  else if seconds < century
-    quality: 4
-    display: "#{1 + Math.ceil(seconds / year)} years"
-    timescale: 'years'
-  else
-    quality: 5
-    display: 'centuries'
-    timescale: 'centuries'
+# ------------------------------------------------------------------------------
+# entropy calcs -- one function per match pattern ------------------------------
+# ------------------------------------------------------------------------------
 
 calc_entropy = (match) ->
-  return match._entropy if match._entropy?
-  match._entropy = switch match.pattern
+  return match.entropy if match.entropy?
+  match.entropy = switch match.pattern
     when 'repeat'     then repeat_entropy     match
     when 'sequence'   then sequence_entropy   match
     when 'digits'     then digits_entropy     match
@@ -130,7 +94,9 @@ calc_entropy = (match) ->
     when 'spatial'    then spatial_entropy    match
     when 'dictionary' then dictionary_entropy match
 
-repeat_entropy = (match) -> log2 (PRINTABLE_CHARS * match.token.length)
+repeat_entropy = (match) ->
+  cardinality = calc_bruteforce_cardinality match.token
+  log2 (cardinality * match.token.length)
 
 sequence_entropy = (match) ->
   first_chr = match.token[0]
@@ -149,6 +115,10 @@ sequence_entropy = (match) ->
 
 digits_entropy = (match) -> log2 Math.pow(10, match.token.length)
 
+NUM_YEARS = 119 # years match against 1900 - 2019
+NUM_MONTHS = 12
+NUM_DAYS = 31
+
 year_entropy = (match) -> log2 NUM_YEARS
 
 date_entropy = (match) ->
@@ -159,6 +129,11 @@ date_entropy = (match) ->
   if match.separator
     entropy += 2 # add two bits for separator selection [/,-,.,etc]
   entropy
+
+KEYBOARD_BRANCHING = 6
+KEYBOARD_SIZE = 47
+KEYPAD_BRANCHING = 9
+KEYPAD_SIZE = 15
 
 spatial_entropy = (match) ->
   if match.graph in ['qwerty', 'dvorak']
@@ -199,6 +174,8 @@ dictionary_entropy = (match) ->
 bruteforce_entropy = (match) ->
   log2 Math.pow(match.cardinality, match.token.length)
 
+# utilities --------------------------------------------------------------------
+
 calc_bruteforce_cardinality = (password) ->
   [lower, upper, digits, symbols] = [false, false, false, false]
   for chr in password
@@ -221,3 +198,32 @@ calc_bruteforce_cardinality = (password) ->
   if symbols
     cardinality += 33
   cardinality
+
+display_info = (seconds) ->
+  minute = 60
+  hour = minute * 60
+  day = hour * 24
+  month = day * 31
+  year = month * 12
+  century = year * 100
+  if seconds < minute
+    quality: 0
+    display: 'instant'
+  else if seconds < hour
+    quality: 1
+    display: "#{1 + Math.ceil(seconds / minute)} minutes"
+  else if seconds < day
+    quality: 1 # no quality change
+    display: "#{1 + Math.ceil(seconds / hour)} hours"
+  else if seconds < month
+    quality: 2
+    display: "#{1 + Math.ceil(seconds / day)} days"
+  else if seconds < year
+    quality: 3
+    display: "#{1 + Math.ceil(seconds / month)} months"
+  else if seconds < century
+    quality: 4
+    display: "#{1 + Math.ceil(seconds / year)} years"
+  else
+    quality: 5
+    display: 'centuries'

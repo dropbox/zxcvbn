@@ -1,20 +1,19 @@
+
+empty = (obj) -> (k for k of obj).length == 0
+extend = (lst, lst2) -> lst.push.apply lst, lst2
+translate = (string, chr_map) -> (chr_map[chr] or chr for chr in string).join('')
+
 # ------------------------------------------------------------------------------
 # omnimatch -- combine everything ----------------------------------------------
 # ------------------------------------------------------------------------------
 
 omnimatch = (password) ->
   matches = []
-  for matcher in [
-    digits_match, year_match, date_match
-    repeat_match, sequence_match,
-    spatial_match,
-    password_match, male_name_match, female_name_match, surname_match, english_match,
-    h4x0r_match
-  ]
-    matches.push.apply matches, matcher(password)
+  for matcher in MATCHERS
+    extend matches, matcher(password)
   matches.sort (match1, match2) ->
     [[i1, j1], [i2, j2]] = [match1.ij, match2.ij]
-    if (i1 == i2) then (j1 - j2) else (i1 - i2)
+    (i1 - i2) or (j1 - j2)
 
 # ------------------------------------------------------------------------------
 # spatial match (qwerty/dvorak/keypad) -----------------------------------------
@@ -32,7 +31,7 @@ spatial_match = (password) ->
       best = candidate
       best_coverage = coverage
       best_graph_name = graph_name
-  if best.length then best else []
+  best
 
 spatial_match_helper = (password, graph_name) ->
   result = []
@@ -226,7 +225,7 @@ h4x0r_table =
   x: ['%']
   z: ['2']
 
-# makes a pruned copy of h4x0r_table that only includes the substitutions that occur in password
+# returns a pruned copy of h4x0r_table that only includes password's possible substitutions
 relevent_h4x0r_subtable = (password) ->
   password_chars = {}
   for chr in password
@@ -279,6 +278,7 @@ enumerate_h4x0r_subs = (table) ->
           next_subs.push sub_alternative
     subs = dedup next_subs
     helper(rest_keys)
+
   helper(keys)
   sub_dicts = [] # convert from assoc lists to dicts
   for sub in subs
@@ -288,10 +288,6 @@ enumerate_h4x0r_subs = (table) ->
     sub_dicts.push sub_dict
   sub_dicts
 
-empty = (obj) -> (k for k of obj).length == 0
-
-h4x0r_sub = (password, sub) -> (sub[chr] or chr for chr in password).join('')
-
 h4x0r_match = (password) ->
   best = []
   best_sub = null
@@ -299,7 +295,7 @@ h4x0r_match = (password) ->
   for sub in enumerate_h4x0r_subs relevent_h4x0r_subtable(password)
     if empty(sub)
       break # corner case: password has no relevent subs. abort h4xmatching
-    candidates = (matcher h4x0r_sub(password, sub) for matcher in [password_match, english_match, surname_match, female_name_match, male_name_match])
+    candidates = (matcher translate(password, sub) for matcher in DICTIONARY_MATCHERS)
     for candidate in candidates
       coverage = 0
       coverage += match.token.length for match in candidate
@@ -319,8 +315,21 @@ h4x0r_match = (password) ->
     match
 
 #-------------------------------------------------------------------------------
-# digit blocks, years, and dates -----------------------------------------------
+# digits, years, dates ---------------------------------------------------------
 #-------------------------------------------------------------------------------
+
+repeat = (chr, n) -> (chr for i in [1..n]).join('')
+
+findall = (password, rx) ->
+  matches = []
+  loop
+    match = password.match rx
+    if not match
+      break
+    match.ij = [match.index, match.index + match[0].length - 1]
+    matches.push match
+    password = password.replace match[0], repeat(' ', match[0].length)
+  matches
 
 digits_rx = /\d{3,}/
 digits_match = (password) ->
@@ -364,15 +373,17 @@ date_match = (password) ->
       display: 'date'
   matches
 
-findall = (password, rx) ->
-  matches = []
-  loop
-    match = password.match rx
-    if not match
-      break
-    match.ij = [match.index, match.index + match[0].length - 1]
-    matches.push match
-    password = password.replace match[0], repeat(' ', match[0].length)
-  matches
+#-------------------------------------------------------------------------------
+# matcher lists ----------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
-repeat = (chr, n) -> (chr for i in [1..n]).join('')
+DICTIONARY_MATCHERS = [
+    password_match, male_name_match, female_name_match, surname_match, english_match
+]
+
+MATCHERS = DICTIONARY_MATCHERS.concat [
+    h4x0r_match,
+    digits_match, year_match, date_match,
+    repeat_match, sequence_match,
+    spatial_match
+]

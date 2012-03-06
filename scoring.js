@@ -1,9 +1,5 @@
-var ALPHANUM_CHARS, GUESS_RATE_PER_SECOND, KEYBOARD_BRANCHING, KEYBOARD_SIZE, KEYPAD_BRANCHING, KEYPAD_SIZE, NUM_DAYS, NUM_MONTHS, NUM_YEARS, PRINTABLE_CHARS, bruteforce_entropy, calc_bruteforce_cardinality, calc_entropy, date_entropy, dictionary_entropy, digits_entropy, display_info, log2, minimum_entropy_match_sequence, nCk, nPk, repeat_entropy, sequence_entropy, spatial_entropy, year_entropy,
+var GUESS_RATE_PER_SECOND, KEYBOARD_BRANCHING, KEYBOARD_SIZE, KEYPAD_BRANCHING, KEYPAD_SIZE, NUM_DAYS, NUM_MONTHS, NUM_YEARS, bruteforce_entropy, calc_bruteforce_cardinality, calc_entropy, date_entropy, dictionary_entropy, digits_entropy, display_info, log2, minimum_entropy_match_sequence, nCk, nPk, repeat_entropy, sequence_entropy, spatial_entropy, year_entropy,
   __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-log2 = function(n) {
-  return Math.log(n) / Math.log(2);
-};
 
 nPk = function(n, k) {
   var m, result, _ref;
@@ -23,23 +19,9 @@ nCk = function(n, k) {
   return nPk(n, k) / k_fact;
 };
 
-PRINTABLE_CHARS = 95;
-
-ALPHANUM_CHARS = 62;
-
-NUM_YEARS = 119;
-
-NUM_MONTHS = 12;
-
-NUM_DAYS = 31;
-
-KEYBOARD_BRANCHING = 6;
-
-KEYBOARD_SIZE = 47;
-
-KEYPAD_BRANCHING = 9;
-
-KEYPAD_SIZE = 15;
+log2 = function(n) {
+  return Math.log(n) / Math.log(2);
+};
 
 GUESS_RATE_PER_SECOND = 1000;
 
@@ -120,62 +102,9 @@ minimum_entropy_match_sequence = function(password, matches) {
   };
 };
 
-display_info = function(seconds) {
-  var century, day, hour, minute, month, year;
-  minute = 60;
-  hour = minute * 60;
-  day = hour * 24;
-  month = day * 31;
-  year = month * 12;
-  century = year * 100;
-  if (seconds < minute) {
-    return {
-      quality: 0,
-      display: 'instant',
-      timescale: 'instant'
-    };
-  } else if (seconds < hour) {
-    return {
-      quality: 1,
-      display: "" + (1 + Math.ceil(seconds / minute)) + " minutes",
-      timescale: 'minutes'
-    };
-  } else if (seconds < day) {
-    return {
-      quality: 1,
-      display: "" + (1 + Math.ceil(seconds / hour)) + " hours",
-      timescale: 'hours'
-    };
-  } else if (seconds < month) {
-    return {
-      quality: 2,
-      display: "" + (1 + Math.ceil(seconds / day)) + " days",
-      timescale: 'days'
-    };
-  } else if (seconds < year) {
-    return {
-      quality: 3,
-      display: "" + (1 + Math.ceil(seconds / month)) + " months",
-      timescale: 'months'
-    };
-  } else if (seconds < century) {
-    return {
-      quality: 4,
-      display: "" + (1 + Math.ceil(seconds / year)) + " years",
-      timescale: 'years'
-    };
-  } else {
-    return {
-      quality: 5,
-      display: 'centuries',
-      timescale: 'centuries'
-    };
-  }
-};
-
 calc_entropy = function(match) {
-  if (match._entropy != null) return match._entropy;
-  return match._entropy = (function() {
+  if (match.entropy != null) return match.entropy;
+  return match.entropy = (function() {
     switch (match.pattern) {
       case 'repeat':
         return repeat_entropy(match);
@@ -196,7 +125,9 @@ calc_entropy = function(match) {
 };
 
 repeat_entropy = function(match) {
-  return log2(PRINTABLE_CHARS * match.token.length);
+  var cardinality;
+  cardinality = calc_bruteforce_cardinality(match.token);
+  return log2(cardinality * match.token.length);
 };
 
 sequence_entropy = function(match) {
@@ -221,6 +152,12 @@ digits_entropy = function(match) {
   return log2(Math.pow(10, match.token.length));
 };
 
+NUM_YEARS = 119;
+
+NUM_MONTHS = 12;
+
+NUM_DAYS = 31;
+
 year_entropy = function(match) {
   return log2(NUM_YEARS);
 };
@@ -235,6 +172,14 @@ date_entropy = function(match) {
   if (match.separator) entropy += 2;
   return entropy;
 };
+
+KEYBOARD_BRANCHING = 6;
+
+KEYBOARD_SIZE = 47;
+
+KEYPAD_BRANCHING = 9;
+
+KEYPAD_SIZE = 15;
 
 spatial_entropy = function(match) {
   var branching, entropy, possible_turn_points, possible_turn_seqs, start_choices, _ref;
@@ -362,4 +307,50 @@ calc_bruteforce_cardinality = function(password) {
   if (lower) cardinality += 26;
   if (symbols) cardinality += 33;
   return cardinality;
+};
+
+display_info = function(seconds) {
+  var century, day, hour, minute, month, year;
+  minute = 60;
+  hour = minute * 60;
+  day = hour * 24;
+  month = day * 31;
+  year = month * 12;
+  century = year * 100;
+  if (seconds < minute) {
+    return {
+      quality: 0,
+      display: 'instant'
+    };
+  } else if (seconds < hour) {
+    return {
+      quality: 1,
+      display: "" + (1 + Math.ceil(seconds / minute)) + " minutes"
+    };
+  } else if (seconds < day) {
+    return {
+      quality: 1,
+      display: "" + (1 + Math.ceil(seconds / hour)) + " hours"
+    };
+  } else if (seconds < month) {
+    return {
+      quality: 2,
+      display: "" + (1 + Math.ceil(seconds / day)) + " days"
+    };
+  } else if (seconds < year) {
+    return {
+      quality: 3,
+      display: "" + (1 + Math.ceil(seconds / month)) + " months"
+    };
+  } else if (seconds < century) {
+    return {
+      quality: 4,
+      display: "" + (1 + Math.ceil(seconds / year)) + " years"
+    };
+  } else {
+    return {
+      quality: 5,
+      display: 'centuries'
+    };
+  }
 };
