@@ -26,7 +26,7 @@ log2 = function(n) {
 GUESS_RATE_PER_SECOND = 1000;
 
 minimum_entropy_match_sequence = function(password, matches) {
-  var augmented, backpointers, bruteforce_cardinality, candidate_entropy, i, j, k, match, min_entropy, min_match, prev_entropy, start_i, up_to_k, _i, _j, _k, _l, _len, _len2, _ref, _ref2, _ref3, _results, _results2;
+  var augmented, backpointers, bruteforce_cardinality, candidate_entropy, i, j, k, match, min_entropy, min_match, prev_entropy, start_i, up_to_k, _i, _j, _len, _len2, _ref, _ref2;
   bruteforce_cardinality = calc_bruteforce_cardinality(password);
   up_to_k = [];
   backpointers = [];
@@ -37,7 +37,7 @@ minimum_entropy_match_sequence = function(password, matches) {
     backpointers[k] = null;
     for (_i = 0, _len = matches.length; _i < _len; _i++) {
       match = matches[_i];
-      _ref = match.ij, i = _ref[0], j = _ref[1];
+      _ref = [match.i, match.j], i = _ref[0], j = _ref[1];
       if (i > k) break;
       if (j > k) continue;
       candidate_entropy = (up_to_k[i - 1] || 0) + calc_entropy(match);
@@ -55,7 +55,7 @@ minimum_entropy_match_sequence = function(password, matches) {
     match = backpointers[k];
     if (match) {
       min_match.push(match);
-      k = match.ij[0] - 1;
+      k = match.i - 1;
     } else {
       k -= 1;
     }
@@ -65,15 +65,12 @@ minimum_entropy_match_sequence = function(password, matches) {
   augmented = [];
   for (_j = 0, _len2 = min_match.length; _j < _len2; _j++) {
     match = min_match[_j];
-    _ref2 = match.ij, i = _ref2[0], j = _ref2[1];
+    _ref2 = [match.i, match.j], i = _ref2[0], j = _ref2[1];
     if (i - start_i > 0) {
       augmented.push({
         pattern: 'bruteforce',
-        ij: (function() {
-          _results = [];
-          for (var _k = start_i; start_i <= i ? _k < i : _k > i; start_i <= i ? _k++ : _k--){ _results.push(_k); }
-          return _results;
-        }).apply(this),
+        i: start_i,
+        j: i - 1,
         token: password.slice(start_i, i),
         cardinality: bruteforce_cardinality
       });
@@ -84,12 +81,9 @@ minimum_entropy_match_sequence = function(password, matches) {
   if (start_i < password.length) {
     augmented.push({
       pattern: 'bruteforce',
-      ij: (function() {
-        _results2 = [];
-        for (var _l = start_i, _ref3 = password.length; start_i <= _ref3 ? _l <= _ref3 : _l >= _ref3; start_i <= _ref3 ? _l++ : _l--){ _results2.push(_l); }
-        return _results2;
-      }).apply(this),
-      token: password.slice(start_i, password.length + 1 || 9e9),
+      i: start_i,
+      j: password.length - 1,
+      token: password.slice(start_i, password.length),
       cardinality: bruteforce_cardinality
     });
   }

@@ -28,7 +28,7 @@ minimum_entropy_match_sequence = (password, matches) ->
     up_to_k[k] = prev_entropy + log2 bruteforce_cardinality # worst-case scenario to beat
     backpointers[k] = null
     for match in matches
-      [i, j] = match.ij
+      [i, j] = [match.i, match.j]
       if i > k
         break
       if j > k
@@ -47,7 +47,7 @@ minimum_entropy_match_sequence = (password, matches) ->
     match = backpointers[k]
     if match
       min_match.push match
-      k = match.ij[0] - 1
+      k = match.i - 1
     else
       k -= 1
   min_match.reverse()
@@ -56,11 +56,12 @@ minimum_entropy_match_sequence = (password, matches) ->
   start_i = 0
   augmented = []
   for match in min_match
-    [i, j] = match.ij
+    [i, j] = [match.i, match.j]
     if i - start_i > 0
       augmented.push
         pattern: 'bruteforce'
-        ij: [start_i...i]
+        i: start_i # the start of the gap.
+        j: i - 1   # ends one before the start of the following match.
         token: password[start_i...i]
         cardinality: bruteforce_cardinality
     start_i = j + 1
@@ -69,11 +70,13 @@ minimum_entropy_match_sequence = (password, matches) ->
   if start_i < password.length
     augmented.push
       pattern: 'bruteforce'
-      ij: [start_i..password.length]
-      token: password[start_i..password.length]
+      i: start_i
+      j: password.length - 1
+      token: password[start_i...password.length]
       cardinality: bruteforce_cardinality
 
   min_match = augmented
+
   password: password
   crack_time: display_info(Math.pow(2, min_entropy) * (1 / GUESS_RATE_PER_SECOND))
   min_entropy: Math.round(min_entropy)

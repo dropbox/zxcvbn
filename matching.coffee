@@ -12,8 +12,7 @@ omnimatch = (password) ->
   for matcher in MATCHERS
     extend matches, matcher(password)
   matches.sort (match1, match2) ->
-    [[i1, j1], [i2, j2]] = [match1.ij, match2.ij]
-    (i1 - i2) or (j1 - j2)
+    (match1.i - match2.i) or (match1.j - match2.j)
 
 # ------------------------------------------------------------------------------
 # spatial match (qwerty/dvorak/keypad) -----------------------------------------
@@ -64,11 +63,12 @@ spatial_match_helper = (password, graph_name) ->
         if j - i > 2 # only consider length-3 chains and up
           result.push
             pattern: 'spatial'
-            ij: [i, j-1]
+            i: i
+            j: j-1
             token: password[i...j]
             graph: graph_name
             turns: turns
-            display: "spatial-#{graph_name}-#{j-i+1}length-#{turns}turns"
+            display: "spatial-#{graph_name}-#{turns}turns"
         break
     i = j
   result
@@ -90,10 +90,11 @@ repeat_match = (password) ->
         if j - i > 2 # length-3 chains and up
           result.push
             pattern: 'repeat'
-            ij: [i, j-1]
+            i: i
+            j: j-1
             token: password[i...j]
             repeated_char: password[i]
-            display: "repeat-#{password[i]}-#{j-i}"
+            display: "repeat-#{password[i]}"
         break
     i = j
   result
@@ -131,12 +132,13 @@ sequence_match = (password) ->
           if j - i > 2 # length-3 chains and up
             result.push
               pattern: 'sequence'
-              ij: [i, j-1]
+              i: i
+              j: j-1
               token: password[i...j]
               sequence_name: seq_name
               sequence_space: seq.length
               ascending: seq_direction  == 1
-              display: "sequence-#{seq_name}-length-#{j-i+1}"
+              display: "sequence-#{seq_name}"
           break
     i = j
   result
@@ -156,7 +158,8 @@ dictionary_match = (password, ranked_dict) ->
         rank = ranked_dict[word]
         result.push(
           pattern: 'dictionary'
-          ij: [i, j]
+          i: i
+          j: j
           token: password[i..j]
           matched_word: word
           rank: rank
@@ -167,10 +170,10 @@ max_coverage_subset = (matches) ->
   best_chain = []
   best_coverage = 0
   decoder = (chain, rest) ->
-    min_j = Math.min.apply(null, (match.ij[1] for match in rest))
-    for next in rest when next.ij[0] <= min_j
+    min_j = Math.min.apply(null, (match.j for match in rest))
+    for next in rest when next.i <= min_j
       next_chain = chain.concat [next]
-      next_rest = (match for match in rest when match.ij[0] > next.ij[1])
+      next_rest = (match for match in rest when match.i > next.j)
       coverage = 0
       coverage += match.token.length for match in next_chain
       if coverage > best_coverage or (coverage == best_coverage and next_chain.length < best_chain.length)
@@ -304,8 +307,7 @@ l33t_match = (password) ->
         best_sub = sub
         best_coverage = coverage
   for match in best
-    [i,j] = match.ij
-    token = password[i..j]
+    token = password[match.i..match.j]
     if token.toLowerCase() == match.matched_word
       # now that the optimal chain is found, only return the matches that contain an actual substitution
       continue
@@ -326,7 +328,8 @@ findall = (password, rx) ->
     match = password.match rx
     if not match
       break
-    match.ij = [match.index, match.index + match[0].length - 1]
+    match.i = match.index
+    match.j = match.index + match[0].length - 1
     matches.push match
     password = password.replace match[0], repeat(' ', match[0].length)
   matches
@@ -334,18 +337,20 @@ findall = (password, rx) ->
 digits_rx = /\d{3,}/
 digits_match = (password) ->
   for match in findall password, digits_rx
-    [i, j] = match.ij
+    [i, j] = [match.i, match.j]
     pattern: 'digits'
-    ij: [i, j]
+    i: i
+    j: j
     token: password[i..j]
-    display: '#{j-i+1}-digits'
+    display: "#{j-i+1}-digits"
 
 year_rx = /19\d\d|200\d|201\d/ # 4-digit years only. 2-digit years have the same entropy as 2-digit brute force.
 year_match = (password) ->
   for match in findall password, year_rx
-    [i, j] = match.ij
+    [i, j] = [match.i, match.j]
     pattern: 'year'
-    ij: [i, j]
+    i: i
+    j: j
     token: password[i..j]
     display: 'year'
 
@@ -361,11 +366,11 @@ date_match = (password) ->
       [day, month] = [month, day]
     if day > 31 or month > 12
       continue
-    [i, j] = match.ij
     matches.push
       pattern: 'date'
-      ij: [i, j]
-      token: password[i..j]
+      i: match.i
+      j: match.j
+      token: password[match.i..match.j]
       separator: separator
       day: day
       month: month

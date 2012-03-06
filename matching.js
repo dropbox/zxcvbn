@@ -38,9 +38,7 @@ omnimatch = function(password) {
     extend(matches, matcher(password));
   }
   return matches.sort(function(match1, match2) {
-    var i1, i2, j1, j2, _ref, _ref2, _ref3;
-    _ref = [match1.ij, match2.ij], (_ref2 = _ref[0], i1 = _ref2[0], j1 = _ref2[1]), (_ref3 = _ref[1], i2 = _ref3[0], j2 = _ref3[1]);
-    return (i1 - i2) || (j1 - j2);
+    return (match1.i - match2.i) || (match1.j - match2.j);
   });
 };
 
@@ -101,11 +99,12 @@ spatial_match_helper = function(password, graph_name) {
         if (j - i > 2) {
           result.push({
             pattern: 'spatial',
-            ij: [i, j - 1],
+            i: i,
+            j: j - 1,
             token: password.slice(i, j),
             graph: graph_name,
             turns: turns,
-            display: "spatial-" + graph_name + "-" + (j - i + 1) + "length-" + turns + "turns"
+            display: "spatial-" + graph_name + "-" + turns + "turns"
           });
         }
         break;
@@ -130,10 +129,11 @@ repeat_match = function(password) {
         if (j - i > 2) {
           result.push({
             pattern: 'repeat',
-            ij: [i, j - 1],
+            i: i,
+            j: j - 1,
             token: password.slice(i, j),
             repeated_char: password[i],
-            display: "repeat-" + password[i] + "-" + (j - i)
+            display: "repeat-" + password[i]
           });
         }
         break;
@@ -202,12 +202,13 @@ sequence_match = function(password) {
           if (j - i > 2) {
             result.push({
               pattern: 'sequence',
-              ij: [i, j - 1],
+              i: i,
+              j: j - 1,
               token: password.slice(i, j),
               sequence_name: seq_name,
               sequence_space: seq.length,
               ascending: seq_direction === 1,
-              display: "sequence-" + seq_name + "-length-" + (j - i + 1)
+              display: "sequence-" + seq_name
             });
           }
           break;
@@ -231,7 +232,8 @@ dictionary_match = function(password, ranked_dict) {
         rank = ranked_dict[word];
         result.push({
           pattern: 'dictionary',
-          ij: [i, j],
+          i: i,
+          j: j,
           token: password.slice(i, j + 1 || 9e9),
           matched_word: word,
           rank: rank
@@ -253,21 +255,21 @@ max_coverage_subset = function(matches) {
       _results = [];
       for (_i = 0, _len = rest.length; _i < _len; _i++) {
         match = rest[_i];
-        _results.push(match.ij[1]);
+        _results.push(match.j);
       }
       return _results;
     })());
     _results = [];
     for (_i = 0, _len = rest.length; _i < _len; _i++) {
       next = rest[_i];
-      if (!(next.ij[0] <= min_j)) continue;
+      if (!(next.i <= min_j)) continue;
       next_chain = chain.concat([next]);
       next_rest = (function() {
         var _j, _len2, _results2;
         _results2 = [];
         for (_j = 0, _len2 = rest.length; _j < _len2; _j++) {
           match = rest[_j];
-          if (match.ij[0] > next.ij[1]) _results2.push(match);
+          if (match.i > next.j) _results2.push(match);
         }
         return _results2;
       })();
@@ -466,7 +468,7 @@ enumerate_l33t_subs = function(table) {
 };
 
 l33t_match = function(password) {
-  var best, best_coverage, best_sub, candidate, candidates, coverage, i, j, match, matcher, sub, token, _i, _j, _k, _l, _len, _len2, _len3, _len4, _ref, _ref2, _results;
+  var best, best_coverage, best_sub, candidate, candidates, coverage, match, matcher, sub, token, _i, _j, _k, _l, _len, _len2, _len3, _len4, _ref, _results;
   best = [];
   best_sub = null;
   best_coverage = 0;
@@ -500,8 +502,7 @@ l33t_match = function(password) {
   _results = [];
   for (_l = 0, _len4 = best.length; _l < _len4; _l++) {
     match = best[_l];
-    _ref2 = match.ij, i = _ref2[0], j = _ref2[1];
-    token = password.slice(i, j + 1 || 9e9);
+    token = password.slice(match.i, match.j + 1 || 9e9);
     if (token.toLowerCase() === match.matched_word) continue;
     match.l33t = true;
     match.token = token;
@@ -529,7 +530,8 @@ findall = function(password, rx) {
   while (true) {
     match = password.match(rx);
     if (!match) break;
-    match.ij = [match.index, match.index + match[0].length - 1];
+    match.i = match.index;
+    match.j = match.index + match[0].length - 1;
     matches.push(match);
     password = password.replace(match[0], repeat(' ', match[0].length));
   }
@@ -544,12 +546,13 @@ digits_match = function(password) {
   _results = [];
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
     match = _ref[_i];
-    _ref2 = match.ij, i = _ref2[0], j = _ref2[1];
+    _ref2 = [match.i, match.j], i = _ref2[0], j = _ref2[1];
     _results.push({
       pattern: 'digits',
-      ij: [i, j],
+      i: i,
+      j: j,
       token: password.slice(i, j + 1 || 9e9),
-      display: '#{j-i+1}-digits'
+      display: "" + (j - i + 1) + "-digits"
     });
   }
   return _results;
@@ -563,10 +566,11 @@ year_match = function(password) {
   _results = [];
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
     match = _ref[_i];
-    _ref2 = match.ij, i = _ref2[0], j = _ref2[1];
+    _ref2 = [match.i, match.j], i = _ref2[0], j = _ref2[1];
     _results.push({
       pattern: 'year',
-      ij: [i, j],
+      i: i,
+      j: j,
       token: password.slice(i, j + 1 || 9e9),
       display: 'year'
     });
@@ -577,7 +581,7 @@ year_match = function(password) {
 date_rx = /(\d{1,2})( |-|\/|\.|_)?(\d{1,2}?)\2?(19\d{2}|200\d|201\d|\d{2})/;
 
 date_match = function(password) {
-  var day, i, j, k, match, matches, month, separator, year, _i, _len, _ref, _ref2, _ref3, _ref4;
+  var day, k, match, matches, month, separator, year, _i, _len, _ref, _ref2, _ref3;
   matches = [];
   _ref = findall(password, date_rx);
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -598,11 +602,11 @@ date_match = function(password) {
       _ref3 = [month, day], day = _ref3[0], month = _ref3[1];
     }
     if (day > 31 || month > 12) continue;
-    _ref4 = match.ij, i = _ref4[0], j = _ref4[1];
     matches.push({
       pattern: 'date',
-      ij: [i, j],
-      token: password.slice(i, j + 1 || 9e9),
+      i: match.i,
+      j: match.j,
+      token: password.slice(match.i, match.j + 1 || 9e9),
       separator: separator,
       day: day,
       month: month,
