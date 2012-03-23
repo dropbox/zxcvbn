@@ -1,10 +1,16 @@
-time = -> (new Date()).getTime()
 
-zxcvbn = (password) ->
-  start = time()
-  matches = omnimatch password
-  result = minimum_entropy_match_sequence password, matches
-  result.calc_time = time() - start
-  result
+ZXCVBN_SRC = '../zxcvbn.js'
 
-window?.zxcvbn = zxcvbn
+# adapted from http://friendlybit.com/js/lazy-loading-asyncronous-javascript/
+async_load = ->
+  s = document.createElement 'script'
+  s.src = ZXCVBN_SRC
+  s.type = 'text/javascript'
+  s.async = true
+  first = document.getElementsByTagName('script')[0]
+  first.parentNode.insertBefore s, first
+
+if window.attachEvent?
+  window.attachEvent 'onload', async_load
+else
+  window.addEventListener 'load', async_load, false

@@ -52,20 +52,8 @@ build_dict_matcher = (dict_name, ranked_dict) ->
     match.display = "dictionary-#{dict_name}-rank-#{match.rank}" for match in matches
     matches
 
-ranked_english      = build_ranked_dict(english)
-ranked_surnames     = build_ranked_dict(surnames)
-ranked_male_names   = build_ranked_dict(male_names)
-ranked_female_names = build_ranked_dict(female_names)
-ranked_passwords    = build_ranked_dict(passwords)
-
-english_match     = build_dict_matcher('words', ranked_english)
-surname_match     = build_dict_matcher('surnames', ranked_surnames)
-male_name_match   = build_dict_matcher('male_names', ranked_male_names)
-female_name_match = build_dict_matcher('female_names', ranked_female_names)
-password_match    = build_dict_matcher('passwords', ranked_passwords)
-
 #-------------------------------------------------------------------------------
-# dictionary match with common substitutions (pr0d@dmin instead of prodadmin) --
+# dictionary match with common l33t substitutions ------------------------------
 #-------------------------------------------------------------------------------
 
 l33t_table =
@@ -166,12 +154,6 @@ l33t_match = (password) ->
 # ------------------------------------------------------------------------------
 # spatial match (qwerty/dvorak/keypad) -----------------------------------------
 # ------------------------------------------------------------------------------
-
-GRAPHS =
-  'qwerty': qwerty
-  'dvorak': dvorak
-  'keypad': keypad
-  'mac_keypad': mac_keypad
 
 spatial_match = (password) ->
   matches = []
@@ -349,18 +331,3 @@ date_match = (password) ->
       year: year
       display: 'date'
   matches
-
-#-------------------------------------------------------------------------------
-# matcher lists ----------------------------------------------------------------
-#-------------------------------------------------------------------------------
-
-DICTIONARY_MATCHERS = [
-    password_match, male_name_match, female_name_match, surname_match, english_match
-]
-
-MATCHERS = DICTIONARY_MATCHERS.concat [
-    l33t_match,
-    digits_match, year_match, date_match,
-    repeat_match, sequence_match,
-    spatial_match
-]
