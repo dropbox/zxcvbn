@@ -76,7 +76,7 @@ def build_graph(layout_str, slanted):
     return adjacency_graph
 
 if __name__ == '__main__':
-    with open('adjacencies.js', 'w') as f:
+    with open('adjacency_graphs.js', 'w') as f:
         for graph_name, args in [('qwerty', (qwerty, True)),
                                  ('dvorak', (dvorak, True)),
                                  ('keypad', (keypad, False)),
