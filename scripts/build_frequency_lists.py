@@ -98,12 +98,15 @@ def get_ranked_census_names():
     http://www.census.gov/genealogy/names/dist.female.first
     '''
     FILE_TMPL = '../data/us_census_2000_%s.txt'
+    SURNAME_CUTOFF_PERCENTILE = 85 # ie7 can't handle huge lists. cut surname list off at a certain percentile.
     lists = []
     for list_name in ['surnames', 'male_first', 'female_first']:
         path = FILE_TMPL % list_name
         lst = []
         for line in codecs.open(path, 'r', 'utf8'):
             if line.strip():
+                if list_name == 'surnames' and float(line.split()[2]) > SURNAME_CUTOFF_PERCENTILE:
+                    break
                 name = line.split()[0].lower()
                 lst.append(name)
         lists.append(lst)
