@@ -148,23 +148,18 @@ date_entropy = (match) ->
     entropy += 2 # add two bits for separator selection [/,-,.,etc]
   entropy
 
-KEYBOARD_BRANCHING = 6
-KEYBOARD_SIZE = 47
-KEYPAD_BRANCHING = 9
-KEYPAD_SIZE = 15
-
 spatial_entropy = (match) ->
   if match.graph in ['qwerty', 'dvorak']
-    start_choices = KEYBOARD_SIZE
-    branching = KEYBOARD_BRANCHING
+    start_positions = KEYBOARD_STARTING_POSITIONS
+    degree = KEYBOARD_AVERAGE_DEGREE
   else
-    start_choices = KEYPAD_SIZE
-    branching = KEYPAD_BRANCHING
-  entropy = log2(start_choices * match.token.length)
+    start_positions = KEYBOARD_STARTING_POSITIONS
+    degree = KEYPAD_AVERAGE_DEGREE
+  entropy = log2(start_positions * match.token.length)
   if match.turns > 0
     possible_turn_points = match.token.length - 1
     possible_turn_seqs = nCk(possible_turn_points, match.turns)
-    entropy += log2(branching * possible_turn_seqs)
+    entropy += log2(degree * possible_turn_seqs)
   entropy
 
 dictionary_entropy = (match) ->

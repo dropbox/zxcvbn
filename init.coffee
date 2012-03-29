@@ -24,6 +24,21 @@ GRAPHS =
   'keypad': keypad
   'mac_keypad': mac_keypad
 
+# on qwerty, 'g' has degree 6 being adjacent to 'ftyhbv', '\' has degree 1.
+# this calculates the average over all keys.
+calc_average_degree = (graph) ->
+  average = 0
+  for key, neighbors of graph
+    average += (n for n in neighbors when n).length
+  average /= (k for k,v of graph).length
+  average
+
+KEYBOARD_AVERAGE_DEGREE     = calc_average_degree(qwerty)
+KEYPAD_AVERAGE_DEGREE       = calc_average_degree(keypad) # slightly different for keypad/mac keypad, but close enough
+
+KEYBOARD_STARTING_POSITIONS = (k for k,v of qwerty).length
+KEYPAD_STARTING_POSITIONS   = (k for k,v of keypad).length
+
 time = -> (new Date()).getTime()
 
 # now that frequency lists are loaded, replace zxcvbn stub function.
