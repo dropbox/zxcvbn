@@ -24,7 +24,7 @@ GRAPHS =
   'keypad': keypad
   'mac_keypad': mac_keypad
 
-# on qwerty, 'g' has degree 6 being adjacent to 'ftyhbv', '\' has degree 1.
+# on qwerty, 'g' has degree 6, being adjacent to 'ftyhbv'. '\' has degree 1.
 # this calculates the average over all keys.
 calc_average_degree = (graph) ->
   average = 0

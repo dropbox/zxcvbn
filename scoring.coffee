@@ -1,10 +1,12 @@
 
 nPk = (n, k) ->
+  return 0 if k > n
   result = 1
   result *= m for m in [n-k+1..n]
   result
 
 nCk = (n, k) ->
+  return 1 if k == 0
   k_fact = 1
   k_fact *= m for m in [1..k]
   nPk(n, k) / k_fact
@@ -150,32 +152,24 @@ date_entropy = (match) ->
 
 spatial_entropy = (match) ->
   if match.graph in ['qwerty', 'dvorak']
-    start_positions = KEYBOARD_STARTING_POSITIONS
-    degree = KEYBOARD_AVERAGE_DEGREE
+    s = KEYBOARD_STARTING_POSITIONS
+    d = KEYBOARD_AVERAGE_DEGREE
   else
-    start_positions = KEYBOARD_STARTING_POSITIONS
-    degree = KEYPAD_AVERAGE_DEGREE
-  entropy = log2(start_positions * match.token.length)
-  if match.turns > 0
-    possible_turn_points = match.token.length - 1
-    possible_turn_seqs = nCk(possible_turn_points, match.turns)
-    entropy += log2(degree * possible_turn_seqs)
-  entropy
+    s = KEYBOARD_STARTING_POSITIONS
+    d = KEYPAD_AVERAGE_DEGREE
+  possibilities = 1
+  L = match.token.length
+  t = match.turns
+  # calculates the number of possible patterns w/ length L or less with t turns or less.
+  for i in [2..L]
+    possible_turns = Math.min(t, i - 1)
+    for j in [1..possible_turns]
+      possibilities += nCk(i - 1, j - 1) * d * s * i
+  log2 possibilities
 
 dictionary_entropy = (match) ->
   entropy = log2 match.rank
-  if match.token.match /^[A-Z][^A-Z]+$/
-    entropy += 1 # capitalized word is most common capitalization scheme
-  else if match.token.match /^[^A-Z]+[A-Z]$/
-    entropy += 2 # then end-capitalized
-  else if match.token.match /^[^a-z]+$/
-    entropy += 2 # or all-caps
-  else if match.token.match /^[^a-z]+[^A-Z]+[^a-z]$/
-    entropy += 2 # or capitalized + end-capitalized
-  else if not match.token.match /^[^A-Z]+$/
-    num_alpha = (chr for chr in match.token when chr.match /[A-Za-z]/).length
-    num_upper = (chr for chr in match.token when chr.match /[A-Z]/).length
-    entropy += log2 nCk(num_alpha, num_upper)
+  entropy += extra_uppercase_entropy(match.token)
   if match.l33t
     sub_chrs = (v for k,v of match.sub)
     l33t_chrs = (k for k,v of match.sub)
@@ -183,6 +177,29 @@ dictionary_entropy = (match) ->
     num_l33t = (chr for chr in match.token when chr in l33t_chrs).length
     entropy += log2 nCk(num_possibles, num_l33t)
   entropy
+
+START_UPPER = /^[A-Z][^A-Z]+$/
+END_UPPER = /^[^A-Z]+[A-Z]$/
+ALL_UPPER = /^[^a-z]+$/
+ALL_LOWER = /^[^A-Z]+$/
+
+extra_uppercase_entropy = (word) ->
+  if word.match ALL_LOWER
+    return 0
+  # a capitalized word is the most common capitalization scheme,
+  # so it only doubles the search space (uncapitalized + capitalized): 1 extra bit of entropy.
+  # allcaps and end-capitalized are common enough too, underestimate as 1 extra bit to be safe.
+  for regex in [START_UPPER, ALL_UPPER, END_UPPER]
+    if word.match regex
+      return 1
+  # otherwise calculate the number of ways to capitalize U+L uppercase+lowercase letters with U uppercase letters or less.
+  # or, if there's more uppercase than lower (for e.g. PASSwORD), the number of ways to lowercase U+L letters with L lowercase letters or less.
+  U = (chr for chr in word when chr.match /[A-Z]/).length
+  L = (chr for chr in word when chr.match /[a-z]/).length
+  possibilities = 1
+  for i in [1..Math.min(U, L)]
+    possibilities += nCk(U + L, i)
+  log2 possibilities
 
 bruteforce_entropy = (match) ->
   log2 Math.pow(match.cardinality, match.token.length)
