@@ -100,8 +100,7 @@ enumerate_l33t_subs = (table) ->
     deduped
 
   helper = (keys) ->
-    if not keys.length
-      return
+    return if not keys.length
     first_key = keys[0]
     rest_keys = keys[1..]
     next_subs = []
@@ -136,15 +135,13 @@ enumerate_l33t_subs = (table) ->
 l33t_match = (password) ->
   matches = []
   for sub in enumerate_l33t_subs relevent_l33t_subtable password
-    if empty sub
-      break # corner case: password has no relevent subs.
+    break if empty sub # corner case: password has no relevent subs.
     for matcher in DICTIONARY_MATCHERS
       subbed_password = translate password, sub
       for match in matcher(subbed_password)
         token = password[match.i..match.j]
         if token.toLowerCase() == match.matched_word
-          # only return the matches that contain an actual substitution
-          continue
+          continue # only return the matches that contain an actual substitution
         match.l33t = true
         match.token = token
         match.sub = sub
@@ -280,8 +277,7 @@ findall = (password, rx) ->
   matches = []
   loop
     match = password.match rx
-    if not match
-      break
+    break if not match
     match.i = match.index
     match.j = match.index + match[0].length - 1
     matches.push match
@@ -312,8 +308,6 @@ date_rx = /(\d{1,2})( |-|\/|\.|_)?(\d{1,2}?)\2?(19\d{2}|200\d|201\d|\d{2})/
 date_match = (password) ->
   matches = []
   for match in findall password, date_rx
-    if match[0].length <= 4
-      continue # because brute-forcing 4-digit numbers is faster than brute-forcing dates
     [day, month, year] = (parseInt(match[k]) for k in [1,3,4])
     separator = match[2] or ''
     if 12 <= month <= 31 and day <= 12

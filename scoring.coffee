@@ -169,13 +169,8 @@ spatial_entropy = (match) ->
 
 dictionary_entropy = (match) ->
   entropy = log2 match.rank
-  entropy += extra_uppercase_entropy(match.token)
-  if match.l33t
-    sub_chrs = (v for k,v of match.sub)
-    l33t_chrs = (k for k,v of match.sub)
-    num_possibles = (chr for chr in match.token when chr in sub_chrs.concat l33t_chrs).length
-    num_l33t = (chr for chr in match.token when chr in l33t_chrs).length
-    entropy += log2 nCk(num_possibles, num_l33t)
+  entropy += extra_uppercase_entropy(match)
+  entropy += extra_l33t_entropy(match)
   entropy
 
 START_UPPER = /^[A-Z][^A-Z]+$/
@@ -183,26 +178,32 @@ END_UPPER = /^[^A-Z]+[A-Z]$/
 ALL_UPPER = /^[^a-z]+$/
 ALL_LOWER = /^[^A-Z]+$/
 
-extra_uppercase_entropy = (word) ->
-  if word.match ALL_LOWER
-    return 0
+extra_uppercase_entropy = (match) ->
+  word = match.token
+  return 0 if word.match ALL_LOWER
   # a capitalized word is the most common capitalization scheme,
   # so it only doubles the search space (uncapitalized + capitalized): 1 extra bit of entropy.
   # allcaps and end-capitalized are common enough too, underestimate as 1 extra bit to be safe.
   for regex in [START_UPPER, ALL_UPPER, END_UPPER]
-    if word.match regex
-      return 1
+    return 1 if word.match regex
   # otherwise calculate the number of ways to capitalize U+L uppercase+lowercase letters with U uppercase letters or less.
   # or, if there's more uppercase than lower (for e.g. PASSwORD), the number of ways to lowercase U+L letters with L lowercase letters or less.
   U = (chr for chr in word when chr.match /[A-Z]/).length
   L = (chr for chr in word when chr.match /[a-z]/).length
   possibilities = 1
-  for i in [1..Math.min(U, L)]
-    possibilities += nCk(U + L, i)
+  possibilities += nCk(U + L, i) for i in [1..Math.min(U, L)]
   log2 possibilities
 
-bruteforce_entropy = (match) ->
-  log2 Math.pow(match.cardinality, match.token.length)
+extra_l33t_entropy = (match) ->
+  return 0 if not match.l33t
+  possibilities = 1
+  for unsubbed, subbed in match.sub
+    U = (chr for chr in match.token when chr == unsubbed).length # number of unsubbed characters.
+    S = (chr for chr in match.token when chr == subbed).length   # number of subbed characters.
+    possibilities += nCk(U + S, i) for i in [1..Math.min(U, S)]  # similar math as uppercase entropy.
+  log2 possibilities
+
+bruteforce_entropy = (match) -> log2 Math.pow(match.cardinality, match.token.length)
 
 # utilities --------------------------------------------------------------------
 
@@ -212,22 +213,18 @@ calc_bruteforce_cardinality = (password) ->
     ord = chr.charCodeAt(0)
     if 0x30 <= ord <= 0x39
       digits = true
-    else if 0x41 <= ord <= 0x5a
+    if 0x41 <= ord <= 0x5a
       upper = true
-    else if 0x61 <= ord <= 0x7a
+    if 0x61 <= ord <= 0x7a
       lower = true
     else
       symbols = true
-  cardinality = 0
-  if digits
-    cardinality += 10
-  if upper
-    cardinality += 26
-  if lower
-    cardinality += 26
-  if symbols
-    cardinality += 33
-  cardinality
+  c = 0
+  c += 10 if digits
+  c += 26 if upper
+  c += 26 if lower
+  c += 33 if symbols
+  c
 
 display_time = (seconds) ->
   minute = 60
