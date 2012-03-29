@@ -20,72 +20,64 @@ log2 = (n) -> Math.log(n) / Math.log(2)
 # ------------------------------------------------------------------------------
 
 minimum_entropy_match_sequence = (password, matches) ->
-  bruteforce_cardinality = calc_bruteforce_cardinality password
-  up_to_k = [] # min entropy up to k
-  backpointers = []
-  k = 0
-  while k < password.length
-    prev_entropy = up_to_k[k-1] or 0
-    # worst-case scenario to beat: min entropy sequence at k-1, plus a brute-force char
-    up_to_k[k] = prev_entropy + log2 bruteforce_cardinality
+  bruteforce_cardinality = calc_bruteforce_cardinality password # e.g. 26 for lowercase
+  up_to_k = []      # minimum entropy up to k.
+  backpointers = [] # for the optimal sequence of matches up to k, holds the final match (match.j == k). null means the sequence ends w/ a brute-force character.
+  for k in [0...password.length]
+    # starting scenario to try and beat: adding a brute-force character to the minimum entropy sequence at k-1.
+    up_to_k[k] = (up_to_k[k-1] or 0) + log2 bruteforce_cardinality
     backpointers[k] = null
-    for match in matches
+    for match in matches when match.j == k
       [i, j] = [match.i, match.j]
-      if i > k
-        break
-      if j > k
-        continue
       candidate_entropy = (up_to_k[i-1] or 0) + calc_entropy(match)
       if candidate_entropy < up_to_k[j]
         up_to_k[j] = candidate_entropy
         backpointers[j] = match
-    k += 1
 
-  # walk backwards and decode
+  # walk backwards and decode the best sequence
+  match_sequence = []
   k = password.length - 1
-  min_match = []
-  min_entropy = up_to_k[k]
   while k > 0
     match = backpointers[k]
     if match
-      min_match.push match
+      match_sequence.push match
       k = match.i - 1
     else
       k -= 1
-  min_match.reverse()
+  match_sequence.reverse()
 
-  # fill in the blanks between matches with bruteforce matches
-  start_i = 0
-  augmented = []
-  for match in min_match
+  # fill in the blanks between pattern matches with bruteforce "matches"
+  # that way the match sequence fully covers the password: match1.j == match2.i - 1 for every adjacent match1,match2.
+  make_bruteforce_match = (i, j) ->
+    pattern: 'bruteforce'
+    i: i
+    j: j
+    token: password[i..j]
+    cardinality: bruteforce_cardinality
+    display: "bruteforce-with-#{bruteforce_cardinality}-cardinality"
+  k = 0
+  match_sequence_copy = []
+  for match in match_sequence
     [i, j] = [match.i, match.j]
-    if i - start_i > 0
-      augmented.push
-        pattern: 'bruteforce'
-        i: start_i # the start of the gap.
-        j: i - 1   # ends one before the start of the following match.
-        token: password[start_i...i]
-        cardinality: bruteforce_cardinality
-    start_i = j + 1
-    augmented.push match
+    if i - k > 0
+      match_sequence_copy.push make_bruteforce_match(k, i - 1)
+    k = j + 1
+    match_sequence_copy.push match
+  if k < password.length
+    match_sequence_copy.push make_bruteforce_match(k, password.length - 1)
+  match_sequence = match_sequence_copy
 
-  if start_i < password.length
-    augmented.push
-      pattern: 'bruteforce'
-      i: start_i
-      j: password.length - 1
-      token: password[start_i...password.length]
-      cardinality: bruteforce_cardinality
+  min_entropy = up_to_k[password.length - 1]
+  crack_time = entropy_to_crack_time min_entropy
 
-  min_match = augmented
-
-  password: password
-  crack_time: display_time entropy_to_crack_time min_entropy
-  min_entropy: Math.round min_entropy
-  min_match: min_match
+  # final result object
+  entropy: Math.round min_entropy
+  match_sequence: match_sequence
+  crack_time: crack_time
+  crack_time_display: display_time crack_time
 
 # ------------------------------------------------------------------------------
-# threat model -- conservative apocalypse scenario -----------------------------
+# threat model -- stolen hash catastrophe scenario -----------------------------
 # ------------------------------------------------------------------------------
 #
 # assumes:
@@ -95,7 +87,7 @@ minimum_entropy_match_sequence = (password, matches) ->
 # * attacker has several CPUs at their disposal.
 # ------------------------------------------------------------------------------
 
-# about 10 ms per guess for bcrypt with an appropriate work factor.
+# about 10 ms per guess for bcrypt/scrypt/PBKDF2 with an appropriate work factor.
 # adjust accordingly if you use another hash function, possibly by
 # several orders of magnitude!
 SINGLE_GUESS = .010
@@ -103,8 +95,7 @@ NUM_ATTACKERS = 100 # number of cores guessing in parallel.
 
 SECONDS_PER_GUESS = SINGLE_GUESS / NUM_ATTACKERS
 
-# average number of guesses before cracking, not total: add a .5 term
-entropy_to_crack_time = (entropy) -> .5 * Math.pow(2, entropy) * SECONDS_PER_GUESS
+entropy_to_crack_time = (entropy) -> .5 * Math.pow(2, entropy) * SECONDS_PER_GUESS # average, not total
 
 # ------------------------------------------------------------------------------
 # entropy calcs -- one function per match pattern ------------------------------
@@ -234,23 +225,16 @@ display_time = (seconds) ->
   year = month * 12
   century = year * 100
   if seconds < minute
-    quality: 0
-    display: 'instant'
+    'instant'
   else if seconds < hour
-    quality: 1
-    display: "#{1 + Math.ceil(seconds / minute)} minutes"
+    "#{1 + Math.ceil(seconds / minute)} minutes"
   else if seconds < day
-    quality: 1 # no quality change
-    display: "#{1 + Math.ceil(seconds / hour)} hours"
+    "#{1 + Math.ceil(seconds / hour)} hours"
   else if seconds < month
-    quality: 2
-    display: "#{1 + Math.ceil(seconds / day)} days"
+    "#{1 + Math.ceil(seconds / day)} days"
   else if seconds < year
-    quality: 3
-    display: "#{1 + Math.ceil(seconds / month)} months"
+    "#{1 + Math.ceil(seconds / month)} months"
   else if seconds < century
-    quality: 4
-    display: "#{1 + Math.ceil(seconds / year)} years"
+    "#{1 + Math.ceil(seconds / year)} years"
   else
-    quality: 5
-    display: 'centuries'
+    'centuries'
