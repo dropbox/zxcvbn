@@ -25,14 +25,12 @@ time = -> (new Date()).getTime()
 
 # now that frequency lists are loaded, replace zxcvbn stub function.
 window.zxcvbn = (password) ->
-  console.log 'bam'
   start = time()
   matches = omnimatch password
   result = minimum_entropy_match_sequence password, matches
   result.calc_time = time() - start
   result
 
-#console.log(start);
 #document.getElementsByTagName('h1')[0].innerHTML = time() - start;
 
 zxcvbn_load_hook?() # run load hook from user, if defined
