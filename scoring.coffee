@@ -208,11 +208,12 @@ extra_uppercase_entropy = (match) ->
 extra_l33t_entropy = (match) ->
   return 0 if not match.l33t
   possibilities = 0
-  for unsubbed, subbed in match.sub
+  for unsubbed, subbed of match.sub
     U = (chr for chr in match.token when chr == unsubbed).length # number of unsubbed characters.
     S = (chr for chr in match.token when chr == subbed).length   # number of subbed characters.
-    possibilities += nCk(U + S, i) for i in [1..Math.min(U, S)]  # similar math as uppercase entropy.
-  log2 possibilities
+    if Math.min(U, S) > 0
+      possibilities += nCk(U + S, i) for i in [1..Math.min(U, S)]
+  log2(possibilities or 1)
 
 bruteforce_entropy = (match) -> log2 Math.pow(match.cardinality, match.token.length)
 
