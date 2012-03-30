@@ -165,6 +165,7 @@ spatial_match_helper = (password, graph, graph_name) ->
     j = i + 1
     last_direction = null
     turns = 0
+    shifted_count = 0
     loop
       [prev_char, cur_char] = password[j-1..j]
       found = false
@@ -176,8 +177,12 @@ spatial_match_helper = (password, graph, graph_name) ->
         if adj and cur_char in adj
           found = true
           found_direction = cur_direction
+          if adj.indexOf(cur_char) == 1
+            # index 1 in the adjacency means the key is shifted, 0 means unshifted: A vs a, % vs 5, etc.
+            # for example, 'q' is adjacent to the entry '2@'. @ is shifted w/ index 1, 2 is unshifted.
+            shifted_count += 1
           if last_direction != found_direction
-            # correct even in the initial case when last_dir is null:
+            # adding a turn is correct even in the initial case when last_direction is null:
             # every spatial pattern starts with a turn.
             turns += 1
             last_direction = found_direction
@@ -193,7 +198,8 @@ spatial_match_helper = (password, graph, graph_name) ->
             token: password[i...j]
             graph: graph_name
             turns: turns
-            display: "spatial-#{graph_name}-#{turns}turns"
+            shifted_count: shifted_count
+            display: "spatial-#{graph_name}-#{turns}turns-#{shifted_count}shifts"
         break
     i = j
   result

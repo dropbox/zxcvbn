@@ -73,10 +73,12 @@ minimum_entropy_match_sequence = (password, matches) ->
   crack_time = entropy_to_crack_time min_entropy
 
   # final result object
-  entropy: Math.round min_entropy
+  entropy: round_to_x_digits(min_entropy, 3)
   match_sequence: match_sequence
   crack_time: crack_time
   crack_time_display: display_time crack_time
+
+round_to_x_digits = (n, x) -> Math.round(n * Math.pow(10, x)) / Math.pow(10, x)
 
 # ------------------------------------------------------------------------------
 # threat model -- stolen hash catastrophe scenario -----------------------------
@@ -157,15 +159,24 @@ spatial_entropy = (match) ->
   else
     s = KEYBOARD_STARTING_POSITIONS
     d = KEYPAD_AVERAGE_DEGREE
-  possibilities = 1
+  possibilities = 0
   L = match.token.length
   t = match.turns
   # calculates the number of possible patterns w/ length L or less with t turns or less.
   for i in [2..L]
     possible_turns = Math.min(t, i - 1)
     for j in [1..possible_turns]
-      possibilities += nCk(i - 1, j - 1) * d * s * i
-  log2 possibilities
+      possibilities += nCk(i - 1, j - 1) * d * s * j
+  entropy = log2 possibilities
+  # add extra entropy for shifted keys. (% instead of 5, A instead of a.)
+  # math is similar to extra entropy from uppercase letters in dictionary matches.
+  if match.shifted_count
+    S = match.shifted_count
+    U = match.token.length - match.shifted_count # unshifted count
+    possibilities = 0
+    possibilities += nCk(S + U, i) for i in [1..Math.min(S, U)]
+    entropy += log2 possibilities
+  entropy
 
 dictionary_entropy = (match) ->
   entropy = log2 match.rank
@@ -190,13 +201,13 @@ extra_uppercase_entropy = (match) ->
   # or, if there's more uppercase than lower (for e.g. PASSwORD), the number of ways to lowercase U+L letters with L lowercase letters or less.
   U = (chr for chr in word when chr.match /[A-Z]/).length
   L = (chr for chr in word when chr.match /[a-z]/).length
-  possibilities = 1
+  possibilities = 0
   possibilities += nCk(U + L, i) for i in [1..Math.min(U, L)]
   log2 possibilities
 
 extra_l33t_entropy = (match) ->
   return 0 if not match.l33t
-  possibilities = 1
+  possibilities = 0
   for unsubbed, subbed in match.sub
     U = (chr for chr in match.token when chr == unsubbed).length # number of unsubbed characters.
     S = (chr for chr in match.token when chr == subbed).length   # number of subbed characters.
