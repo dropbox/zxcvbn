@@ -142,9 +142,12 @@ l33t_match = (password) ->
         token = password[match.i..match.j]
         if token.toLowerCase() == match.matched_word
           continue # only return the matches that contain an actual substitution
+        match_sub = {} # subset of mappings in sub that are in use for this match
+        for subbed_chr, chr of sub when subbed_chr in token
+          match_sub[subbed_chr] = chr
         match.l33t = true
         match.token = token
-        match.sub = sub
+        match.sub = match_sub
         matches.push match
   matches
 

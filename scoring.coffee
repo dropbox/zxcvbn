@@ -166,7 +166,7 @@ spatial_entropy = (match) ->
   for i in [2..L]
     possible_turns = Math.min(t, i - 1)
     for j in [1..possible_turns]
-      possibilities += nCk(i - 1, j - 1) * d * s * j
+      possibilities += nCk(i - 1, j - 1) * s * Math.pow(d, j)
   entropy = log2 possibilities
   # add extra entropy for shifted keys. (% instead of 5, A instead of a.)
   # math is similar to extra entropy from uppercase letters in dictionary matches.
@@ -174,7 +174,7 @@ spatial_entropy = (match) ->
     S = match.shifted_count
     U = match.token.length - match.shifted_count # unshifted count
     possibilities = 0
-    possibilities += nCk(S + U, i) for i in [1..Math.min(S, U)]
+    possibilities += nCk(S + U, i) for i in [0..Math.min(S, U)]
     entropy += log2 possibilities
   entropy
 
@@ -195,14 +195,14 @@ extra_uppercase_entropy = (match) ->
   # a capitalized word is the most common capitalization scheme,
   # so it only doubles the search space (uncapitalized + capitalized): 1 extra bit of entropy.
   # allcaps and end-capitalized are common enough too, underestimate as 1 extra bit to be safe.
-  for regex in [START_UPPER, ALL_UPPER, END_UPPER]
+  for regex in [START_UPPER, END_UPPER, ALL_UPPER]
     return 1 if word.match regex
   # otherwise calculate the number of ways to capitalize U+L uppercase+lowercase letters with U uppercase letters or less.
   # or, if there's more uppercase than lower (for e.g. PASSwORD), the number of ways to lowercase U+L letters with L lowercase letters or less.
   U = (chr for chr in word when chr.match /[A-Z]/).length
   L = (chr for chr in word when chr.match /[a-z]/).length
   possibilities = 0
-  possibilities += nCk(U + L, i) for i in [1..Math.min(U, L)]
+  possibilities += nCk(U + L, i) for i in [0..Math.min(U, L)]
   log2 possibilities
 
 extra_l33t_entropy = (match) ->
@@ -211,9 +211,8 @@ extra_l33t_entropy = (match) ->
   for unsubbed, subbed of match.sub
     U = (chr for chr in match.token when chr == unsubbed).length # number of unsubbed characters.
     S = (chr for chr in match.token when chr == subbed).length   # number of subbed characters.
-    if Math.min(U, S) > 0
-      possibilities += nCk(U + S, i) for i in [1..Math.min(U, S)]
-  log2(possibilities or 1)
+    possibilities += nCk(U + S, i) for i in [0..Math.min(U, S)]
+  log2 possibilities
 
 bruteforce_entropy = (match) -> log2 Math.pow(match.cardinality, match.token.length)
 
