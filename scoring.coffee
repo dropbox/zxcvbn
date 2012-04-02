@@ -106,15 +106,16 @@ entropy_to_crack_time = (entropy) -> .5 * Math.pow(2, entropy) * SECONDS_PER_GUE
 # ------------------------------------------------------------------------------
 
 calc_entropy = (match) ->
-  return match.entropy if match.entropy?
-  match.entropy = switch match.pattern
-    when 'repeat'     then repeat_entropy     match
-    when 'sequence'   then sequence_entropy   match
-    when 'digits'     then digits_entropy     match
-    when 'year'       then year_entropy       match
-    when 'date'       then date_entropy       match
-    when 'spatial'    then spatial_entropy    match
-    when 'dictionary' then dictionary_entropy match
+  return match.entropy if match.entropy? # a match's entropy doesn't change. cache it.
+  entropy_func = switch match.pattern
+    when 'repeat'     then repeat_entropy
+    when 'sequence'   then sequence_entropy
+    when 'digits'     then digits_entropy
+    when 'year'       then year_entropy
+    when 'date'       then date_entropy
+    when 'spatial'    then spatial_entropy
+    when 'dictionary' then dictionary_entropy
+  match.entropy = entropy_func match
 
 repeat_entropy = (match) ->
   cardinality = calc_bruteforce_cardinality match.token
