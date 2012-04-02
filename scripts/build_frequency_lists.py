@@ -114,7 +114,7 @@ def get_ranked_census_names():
 
 def get_ranked_common_passwords():
     lst = []
-    for line in codecs.open('../data/common_500_passwords.txt', 'r', 'utf8'):
+    for line in codecs.open('../data/common_passwords.txt', 'r', 'utf8'):
         if line.strip():
             lst.append(line.strip())
     return lst
