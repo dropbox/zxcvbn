@@ -313,6 +313,8 @@ year_match = (password) ->
     token: password[i..j]
     display: 'year'
 
+# known bug: this doesn't cover all short dates w/o separators like 111911.
+
 date_rx = /(\d{1,2})( |-|\/|\.|_)?(\d{1,2}?)\2?(19\d{2}|200\d|201\d|\d{2})/
 date_match = (password) ->
   matches = []

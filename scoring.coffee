@@ -31,6 +31,7 @@ minimum_entropy_match_sequence = (password, matches) ->
     backpointers[k] = null
     for match in matches when match.j == k
       [i, j] = [match.i, match.j]
+      # see if best entropy up to i-1 + entropy of this match is less than the current minimum at j.
       candidate_entropy = (up_to_k[i-1] or 0) + calc_entropy(match)
       if candidate_entropy < up_to_k[j]
         up_to_k[j] = candidate_entropy
@@ -49,7 +50,7 @@ minimum_entropy_match_sequence = (password, matches) ->
   match_sequence.reverse()
 
   # fill in the blanks between pattern matches with bruteforce "matches"
-  # that way the match sequence fully covers the password: match1.j == match2.i - 1 for every adjacent match1,match2.
+  # that way the match sequence fully covers the password: match1.j == match2.i - 1 for every adjacent match1, match2.
   make_bruteforce_match = (i, j) ->
     pattern: 'bruteforce'
     i: i
@@ -69,7 +70,7 @@ minimum_entropy_match_sequence = (password, matches) ->
     match_sequence_copy.push make_bruteforce_match(k, password.length - 1)
   match_sequence = match_sequence_copy
 
-  min_entropy = up_to_k[password.length - 1]
+  min_entropy = up_to_k[password.length - 1] or 0  # or 0 corner case is for an empty password ''
   crack_time = entropy_to_crack_time min_entropy
 
   # final result object
