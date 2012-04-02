@@ -4,7 +4,7 @@ zxcvbn
 THEFUTUREISNOW
 backtothefuture
 correcthorsebatterystaple
-coRrecth0rseba++ery1.18.1958staple$
+coRrecth0rseba++ery9.23.2007staple$
 tr0ub4d0ur&3
 
 RAINBOWSHELL123698745
@@ -22,6 +22,7 @@ ryanhunter2000
 
 asdfghju7654rewq
 AOEUIDHG&*()LS_
+do you know
 
 12345678
 defghi6789
@@ -76,30 +77,29 @@ results_tmpl = '''
   {{#results}}
   <tr>
     <td>
-      {{#min_match}}<span class="match" onclick="console.log('{{display}}')">{{token}}</span>{{/min_match}}
+      {{#match_sequence}}<span class="match" onclick="console.log('{{display}}')">{{token}}</span>{{/match_sequence}}
     </td>
     <td>{{calc_time}}</td>
-    <td>~{{min_entropy}}</td>
-    <td>{{crack_time.display}}</td>
+    <td>{{entropy}}</td>
+    <td>{{crack_time_display}}</td>
   </tr>
   {{/results}}
 </table>
 '''
 
-results = {results: (zxcvbn(password) for password in test_passwords.split('\n') when password)}
+zxcvbn_load_hook = ->
+  $ ->
+    results = {results: (zxcvbn(password) for password in test_passwords.split('\n') when password)}
+    rendered = Mustache.render(results_tmpl, results)
+    $('#results').html(rendered)
 
-$ ->
-  rendered = Mustache.render(results_tmpl, results)
-  $('#results').html(rendered)
+    last_q = ''
+    _listener = ->
+      current = $('#search').val().trim()
+      if current and (current != last_q)
+        last_q = current
+        results = {results: [zxcvbn(current, ['dan', 'daniel', 'wheeler', 'dan@dropbox.com', 'dan.lowe.wheeler@gmail.com'])]}
+        rendered = Mustache.render(results_tmpl, results)
+        $('#search-results').html(rendered)
 
-  last_q = ''
-  _listener = ->
-    current = $('#search').val().trim()
-    if current and (current != last_q)
-      last_q = current
-      results = {results: [zxcvbn(current)]}
-      rendered = Mustache.render(results_tmpl, results)
-      $('#search-results').html(rendered)
-      console.log(rendered)
-
-  setInterval _listener, 100
+    setInterval _listener, 100

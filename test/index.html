@@ -1,22 +1,30 @@
 <html>
   <head>
     <title>zxcvbn tests</title>
-    <script type="text/javascript" src="../jquery.js">
+
+    <script type="text/javascript" src="jquery.js">
     </script>
-    <script type="text/javascript" src="../mustache.js">
+    <script type="text/javascript" src="mustache.js">
     </script>
+    <script type="text/javascript" src="test.js">
+    </script>
+
+    <!--
+    <script type="text/javascript" src="http://dl.dropbox.com/u/209/zxcvbn-async.js">
+    </script>
+    -->
+
     <script type="text/javascript" src="../frequency_lists.js">
     </script>
-    <script type="text/javascript" src="../adjacencies.js">
+    <script type="text/javascript" src="../adjacency_graphs.js">
     </script>
     <script type="text/javascript" src="../matching.js">
     </script>
     <script type="text/javascript" src="../scoring.js">
     </script>
-    <script type="text/javascript" src="../zxcvbn.js">
+    <script type="text/javascript" src="../init.js">
     </script>
-    <script type="text/javascript" src="../test.js">
-    </script>
+
   </head>
   <body>
     <style type="text/css">
@@ -42,11 +50,10 @@
 
       #future-is-now {
         font-size: 40pt;
-        margin-top: 1000px;
       }
 
       #results {
-        margin-bottom: 200px;
+        margin-bottom: 300px;
       }
 
       table {
@@ -72,24 +79,25 @@
       #search {
         font-size: 50px;
         /* height: 100px; */
-        margin-bottom: 300px;
         padding: 25px;
         width: 60%
       }
     </style>
     <center>
+
     <h1>ZXCVBN</h1>
     <h3>is inspired by this xkcd comic:</h3>
     <img src="http://imgs.xkcd.com/comics/password_strength.png" />
-    <h3 id="future-is-now">THE FUTURE IS NOW</h3>
-    <div id="results">
-    </div>
-    <h2 id="give-a-spin">GIVE ZXCVB A SPIN</h2>
+
+    <h2 id="give-a-spin">GIVE IT A TRY</h2>
     <input id="search" type="text" size="50">
     <div id="search-results">
     </div>
-    <br/><br/><br/><br/><br/><br/><br/><br/><br/>
-    <br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+    <h3 id="future-is-now">EXAMPLES</h3>
+    <div id="results">
+    </div>
+
     </center>
   </body>
 </html>
