@@ -92,8 +92,9 @@ round_to_x_digits = (n, x) -> Math.round(n * Math.pow(10, x)) / Math.pow(10, x)
 # * attacker has several CPUs at their disposal.
 # ------------------------------------------------------------------------------
 
-# about 10 ms per guess for bcrypt/scrypt/PBKDF2 with an appropriate work factor.
-# adjust accordingly if you use another hash function, possibly by
+# for a hash function like bcrypt/scrypt/PBKDF2, 10ms per guess is a safe lower bound.
+# (usually a guess would take longer -- this assumes fast hardware and a small work factor.)
+# adjust for your site accordingly if you use another hash function, possibly by
 # several orders of magnitude!
 SINGLE_GUESS = .010
 NUM_ATTACKERS = 100 # number of cores guessing in parallel.
@@ -159,7 +160,7 @@ spatial_entropy = (match) ->
     s = KEYBOARD_STARTING_POSITIONS
     d = KEYBOARD_AVERAGE_DEGREE
   else
-    s = KEYBOARD_STARTING_POSITIONS
+    s = KEYPAD_STARTING_POSITIONS
     d = KEYPAD_AVERAGE_DEGREE
   possibilities = 0
   L = match.token.length
