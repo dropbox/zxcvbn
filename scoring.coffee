@@ -74,9 +74,10 @@ minimum_entropy_match_sequence = (password, matches) ->
   crack_time = entropy_to_crack_time min_entropy
 
   # final result object
+  password: password
   entropy: round_to_x_digits(min_entropy, 3)
   match_sequence: match_sequence
-  crack_time: crack_time
+  crack_time: round_to_x_digits(crack_time, 3)
   crack_time_display: display_time crack_time
 
 round_to_x_digits = (n, x) -> Math.round(n * Math.pow(10, x)) / Math.pow(10, x)
@@ -124,8 +125,8 @@ repeat_entropy = (match) ->
   log2 (cardinality * match.token.length)
 
 sequence_entropy = (match) ->
-  first_chr = match.token[0]
-  if first_chr in ['a' or '1']
+  first_chr = match.token.charAt(0)
+  if first_chr in ['a', '1']
     base_entropy = 1
   else
     if first_chr.match /\d/
@@ -202,8 +203,8 @@ extra_uppercase_entropy = (match) ->
     return 1 if word.match regex
   # otherwise calculate the number of ways to capitalize U+L uppercase+lowercase letters with U uppercase letters or less.
   # or, if there's more uppercase than lower (for e.g. PASSwORD), the number of ways to lowercase U+L letters with L lowercase letters or less.
-  U = (chr for chr in word when chr.match /[A-Z]/).length
-  L = (chr for chr in word when chr.match /[a-z]/).length
+  U = (chr for chr in word.split('') when chr.match /[A-Z]/).length
+  L = (chr for chr in word.split('') when chr.match /[a-z]/).length
   possibilities = 0
   possibilities += nCk(U + L, i) for i in [0..Math.min(U, L)]
   log2 possibilities
@@ -212,8 +213,8 @@ extra_l33t_entropy = (match) ->
   return 0 if not match.l33t
   possibilities = 0
   for unsubbed, subbed of match.sub
-    U = (chr for chr in match.token when chr == unsubbed).length # number of unsubbed characters.
-    S = (chr for chr in match.token when chr == subbed).length   # number of subbed characters.
+    U = (chr for chr in match.token.split('') when chr == unsubbed).length # number of unsubbed characters.
+    S = (chr for chr in match.token.split('') when chr == subbed).length   # number of subbed characters.
     possibilities += nCk(U + S, i) for i in [0..Math.min(U, S)]
   log2 possibilities
 
@@ -223,7 +224,7 @@ bruteforce_entropy = (match) -> log2 Math.pow(match.cardinality, match.token.len
 
 calc_bruteforce_cardinality = (password) ->
   [lower, upper, digits, symbols] = [false, false, false, false]
-  for chr in password
+  for chr in password.split('')
     ord = chr.charCodeAt(0)
     if 0x30 <= ord <= 0x39
       digits = true

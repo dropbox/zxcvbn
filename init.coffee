@@ -39,8 +39,6 @@ KEYPAD_AVERAGE_DEGREE       = calc_average_degree(keypad) # slightly different f
 KEYBOARD_STARTING_POSITIONS = (k for k,v of qwerty).length
 KEYPAD_STARTING_POSITIONS   = (k for k,v of keypad).length
 
-console.log KEYBOARD_AVERAGE_DEGREE
-
 time = -> (new Date()).getTime()
 
 # now that frequency lists are loaded, replace zxcvbn stub function.

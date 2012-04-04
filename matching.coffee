@@ -1,7 +1,7 @@
 
 empty = (obj) -> (k for k of obj).length == 0
 extend = (lst, lst2) -> lst.push.apply lst, lst2
-translate = (string, chr_map) -> (chr_map[chr] or chr for chr in string).join('')
+translate = (string, chr_map) -> (chr_map[chr] or chr for chr in string.split('')).join('')
 
 # ------------------------------------------------------------------------------
 # omnimatch -- combine everything ----------------------------------------------
@@ -73,7 +73,7 @@ l33t_table =
 # makes a pruned copy of l33t_table that only includes password's possible substitutions
 relevent_l33t_subtable = (password) ->
   password_chars = {}
-  for chr in password
+  for chr in password.split('')
     password_chars[chr] = true
   filtered = {}
   for letter, subs of l33t_table
@@ -177,7 +177,7 @@ spatial_match_helper = (password, graph, graph_name) ->
       adjacents = graph[prev_char] or []
       for adj in adjacents
         cur_direction += 1
-        if adj and cur_char in adj
+        if adj and adj.indexOf(cur_char) != -1
           found = true
           found_direction = cur_direction
           if adj.indexOf(cur_char) == 1
@@ -218,7 +218,7 @@ repeat_match = (password) ->
     j = i + 1
     loop
       [prev_char, cur_char] = password[j-1..j]
-      if password[j-1] == password[j]
+      if password.charAt(j-1) == password.charAt(j)
         j += 1
       else
         if j - i > 2 # length-3 chains and up
@@ -227,7 +227,7 @@ repeat_match = (password) ->
             i: i
             j: j-1
             token: password[i...j]
-            repeated_char: password[i]
+            repeated_char: password.charAt(i)
             display: "repeat-#{password[i]}"
         break
     i = j
@@ -247,7 +247,7 @@ sequence_match = (password) ->
     seq_name = null
     seq_direction = null # 1 for ascending seq abcd, -1 for dcba
     for seq_candidate_name, seq_candidate of SEQUENCES
-      [i_n, j_n] = (seq_candidate.indexOf(chr) for chr in [password[i], password[j]])
+      [i_n, j_n] = (seq_candidate.indexOf(chr) for chr in [password.charAt(i), password.charAt(j)])
       if i_n > -1 and j_n > -1
         direction = j_n - i_n
         if direction in [1, -1]
