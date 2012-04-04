@@ -7,7 +7,7 @@ ________________________________________________________________________
 
 zxcvbn, named after a crappy password, is a JavaScript password strength
 estimation library. Use it to implement a custom strength bar on a
-registration form near you! 
+registration form near you!
 
 zxcvbn attempts to give sound password advice through pattern matching
 and conservative entropy calculations. It finds 10k common passwords,
@@ -46,15 +46,24 @@ zxcvbn adds a single function to the global namespace:
 zxcvbn(password, user_inputs)
 
 It takes one required argument, a password, and returns a result object.
-The result includes a few properties: 
+The result includes a few properties:
 
 result.entropy            # bits
+
 result.crack_time         # estimation of actual crack time, in seconds.
-result.crack_time_display # same crack time, as a friendlier string: "instant", "6 minutes", "centuries", etc.
-result.score              # [0,1,2,3,4] if crack time is less than [10**2, 10**4, 10**6, 10**8, Infinity], respectively. 
+
+result.crack_time_display # same crack time, as a friendlier string:
+                          # "instant", "6 minutes", "centuries", etc.
+
+result.score              # [0,1,2,3,4] if crack time is less than
+                          # [10**2, 10**4, 10**6, 10**8, Infinity], respectively.
                           # (A score is helpful for implementing a strength bar.)
-result.match_sequence     # the list of patterns that zxcvbn based the entropy calculation on. 
-result.calculation_time   # how long it took to calculate an answer, in milliseconds. usually only a few ms.
+
+result.match_sequence     # the list of patterns that zxcvbn based the
+                          # entropy calculation on.
+
+result.calculation_time   # how long it took to calculate an answer (milliseconds)
+                          # usually only a few ms.
 
 The optional user_inputs argument is an array of strings that zxcvbn
 will add to its internal dictionary. This can be whatever list of
@@ -102,11 +111,11 @@ library.
 init.js needs to come last, otherwise script order doesn't matter.
 
 I recommend setting up coffee-mode in emacs, or whatever equivalent, so
-that CoffeeScript compiles to js on save. Otherwise you'll need to 
+that CoffeeScript compiles to js on save. Otherwise you'll need to
 repetitively run compile_and_minify.js
 
 ------------------------------------------------------------------------
-Acknowledgments 
+Acknowledgments
 ------------------------------------------------------------------------
 
 Dropbox, thank you in so many ways, but in particular, for supporting
@@ -121,5 +130,5 @@ Huge thanks to Wiktionary contributor(s) for building a frequency list of
 English as used in television and movies:
 http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists
 
-Last but not least, big thanks to xkcd :) 
+Last but not least, big thanks to xkcd :)
 https://xkcd.com/936/
