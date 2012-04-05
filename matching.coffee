@@ -170,7 +170,8 @@ spatial_match_helper = (password, graph, graph_name) ->
     turns = 0
     shifted_count = 0
     loop
-      [prev_char, cur_char] = password[j-1..j]
+      prev_char = password.charAt(j-1)
+      cur_char = password.charAt(j)
       found = false
       found_direction = -1
       cur_direction = -1
