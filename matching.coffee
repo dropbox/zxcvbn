@@ -164,35 +164,39 @@ spatial_match = (password) ->
 spatial_match_helper = (password, graph, graph_name) ->
   result = []
   i = 0
-  while i < password.length
+  while i < password.length - 1
     j = i + 1
     last_direction = null
     turns = 0
     shifted_count = 0
     loop
       prev_char = password.charAt(j-1)
-      cur_char = password.charAt(j)
       found = false
       found_direction = -1
       cur_direction = -1
       adjacents = graph[prev_char] or []
-      for adj in adjacents
-        cur_direction += 1
-        if adj and adj.indexOf(cur_char) != -1
-          found = true
-          found_direction = cur_direction
-          if adj.indexOf(cur_char) == 1
-            # index 1 in the adjacency means the key is shifted, 0 means unshifted: A vs a, % vs 5, etc.
-            # for example, 'q' is adjacent to the entry '2@'. @ is shifted w/ index 1, 2 is unshifted.
-            shifted_count += 1
-          if last_direction != found_direction
-            # adding a turn is correct even in the initial case when last_direction is null:
-            # every spatial pattern starts with a turn.
-            turns += 1
-            last_direction = found_direction
-          break
+      # consider growing pattern by one character if j hasn't gone over the edge.
+      if j < password.length
+        cur_char = password.charAt(j)
+        for adj in adjacents
+          cur_direction += 1
+          if adj and adj.indexOf(cur_char) != -1
+            found = true
+            found_direction = cur_direction
+            if adj.indexOf(cur_char) == 1
+              # index 1 in the adjacency means the key is shifted, 0 means unshifted: A vs a, % vs 5, etc.
+              # for example, 'q' is adjacent to the entry '2@'. @ is shifted w/ index 1, 2 is unshifted.
+              shifted_count += 1
+            if last_direction != found_direction
+              # adding a turn is correct even in the initial case when last_direction is null:
+              # every spatial pattern starts with a turn.
+              turns += 1
+              last_direction = found_direction
+            break
+      # if a pattern was found, extend j and try to grow again
       if found
         j += 1
+      # otherwise push the pattern discovered so far, if any...
       else
         if j - i > 2 # only consider length-3 chains and up
           result.push
@@ -204,6 +208,7 @@ spatial_match_helper = (password, graph, graph_name) ->
             turns: turns
             shifted_count: shifted_count
         break
+      # ...and start a new search for the rest of the password.
     i = j
   result
 
@@ -300,7 +305,8 @@ digits_match = (password) ->
     j: j
     token: password[i..j]
 
-year_rx = /19\d\d|200\d|201\d/ # 4-digit years only. 2-digit years have the same entropy as 2-digit brute force.
+# 4-digit years only. 2-digit years have the same entropy as 2-digit brute force.
+year_rx = /19\d\d|200\d|201\d/
 year_match = (password) ->
   for match in findall password, year_rx
     [i, j] = [match.i, match.j]
