@@ -26,12 +26,14 @@ Installation
 <script type="text/javascript" src="zxcvbn-async.js">
 </script>
 
-is the best way to add zxcvbn to your site. zxcvbn-async.js is a
-tiny 350 bytes. On window.load, after your page loads and renders, it'll
-fetch zxcvbn.js, which is more like 680k (300k gzipped), most of which
-is a dictionary.
+is the best way to add zxcvbn to your site. Host zxcvbn.js and
+zxcvbn-async.js somewhere on your web server, and make the hardcoded
+path inside zxcvbn-async.js point to zxcvbn.js. A relative path works
+well.
 
-(todo update size)
+zxcvbn-async.js is a tiny 350 bytes. On window.load, after your page
+loads and renders, it'll fetch zxcvbn.js, which is more like 700k (330k
+gzipped), most of which is a series of dictionaries.
 
 I haven't found 680k to be too large -- especially because a password
 isn't the first thing a user typically enters on a registration form.
@@ -41,7 +43,7 @@ zxcvbn.js can also be included directly:
 <script type="text/javascript" src="zxcvbn.js">
 </script>
 
-but this isn't recommended, as the 680k download will block your
+But this isn't recommended, as the 680k download will block your
 initial page load.
 
 zxcvbn adds a single function to the global namespace:

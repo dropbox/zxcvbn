@@ -1,28 +1,27 @@
 
 test_passwords = '''
 zxcvbn
-THEFUTUREISNOW
-backtothefuture
+tr0ub4d0ur&3
 correcthorsebatterystaple
 coRrecth0rseba++ery9.23.2007staple$
-tr0ub4d0ur&3
+
+do you know
 
 RAINBOWSHELL123698745
 
-changeme83
-sugarman4mayor
-sugarman
+temppass22
+briansmith
+briansmith4mayor
 password1
 viking
 thx1138
 ScoRpi0ns
 
-rianhunter2000
 ryanhunter2000
+rianhunter2000
 
 asdfghju7654rewq
 AOEUIDHG&*()LS_
-do you know
 
 12345678
 defghi6789
@@ -31,41 +30,21 @@ D0g..................
 
 rosebud
 Rosebud
-rosebuD
-RosebuD
 ROSEBUD
-rosebud99
-Rosebud99
-rosebuD99
-RosebuD99
-roSebud99
+rosebuD
+ros3bud99
 r0s3bud99
-r0$38ud99
 R0$38uD99
-R0$38UD99
-r0$38UD99
-r0$38Ud99
 
 verlineVANDERMARK
 
 eheuczkqyq
-jrfkfrgexjlt
-hztuyuyktcjhfoc
-jhynqzmmzumhihwegxyy
-
-DCcqyDaBdz
-issswmuZkNGM
-yUUjdWVoJBtErrM
 rWibMFACxAUGZmxhVncy
-
->XE<68L3ju
-WABu99[BK#6M
-GaGxt<2qp4u3<dN
-BgbH88Ba9ZyTofv)vs$w
 Ba9ZyWABu99[BK#6MBgbH88Tofv)vs$w
 '''
 
 results_tmpl = '''
+<h1 id="examples">examples</h1>
 {{#results}}
 <table class="result">
   <tr>

@@ -9,11 +9,12 @@
     <script type="text/javascript" src="test.js">
     </script>
 
-    <!--
-    <script type="text/javascript" src="http://dl.dropbox.com/u/209/zxcvbn-async.js">
+    <!-- best way to include zxcvbn: a small async loading script -->
+    <script type="text/javascript" src="zxcvbn-async.js">
     </script>
-    -->
 
+    <!-- development setup below -->
+    <!--
     <script type="text/javascript" src="../frequency_lists.js">
     </script>
     <script type="text/javascript" src="../adjacency_graphs.js">
@@ -24,71 +25,10 @@
     </script>
     <script type="text/javascript" src="../init.js">
     </script>
-
+    -->
   </head>
   <body>
     <style type="text/css">
-      /*
-      body {
-        font-family: monospace;
-      }
-      h1 {
-        font-weight: normal;
-        font-size: 120pt;
-        margin-bottom: 40px;
-        padding: 0;
-      }
-
-      h2 {
-        font-weight: normal;
-        font-size: 60pt;
-      }
-
-      h3 {
-        font-weight: normal;
-        font-size: 30pt;
-      }
-
-      #examples {
-        font-size: 40pt;
-      }
-
-      .match-sequence > table {
-        display: inline-block;
-      }
-
-      table#main {
-        width: 790;
-        border-collapse: collapse;
-        font-size: 16 px;
-      }
-      table#main > tr:nth-child(even) {
-        background-color: #ddd;
-      }
-      td, th {
-        padding: 20px 20px;
-      }
-
-      td:nth-child(1), th:nth-child(1) {
-        text-align: right;
-      }
-      .match-sequence td {
-        text-align: left;
-      }
-
-      #search-results td, #search-results th {
-        text-align: right;
-      }
-      .match:hover {
-        color: red;
-      }
-      #search-bar {
-        font-size: 50px;
-        padding: 25px;
-        width: 60%
-      }
-      */
-
 
       body {
         font-family: monospace;
@@ -124,7 +64,6 @@
     </div>
 
     <div id="examples-container">
-    <h1 id="examples">examples</h1>
     <div id="results">
     </div>
 
