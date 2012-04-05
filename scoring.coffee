@@ -56,8 +56,8 @@ minimum_entropy_match_sequence = (password, matches) ->
     i: i
     j: j
     token: password[i..j]
+    entropy: log2 Math.pow(bruteforce_cardinality, j - i + 1)
     cardinality: bruteforce_cardinality
-    display: "bruteforce-with-#{bruteforce_cardinality}-cardinality"
   k = 0
   match_sequence_copy = []
   for match in match_sequence

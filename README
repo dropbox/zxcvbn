@@ -17,7 +17,7 @@ patterns.
 
 For full motivation, see:
 
-...
+(todo)
 
 ------------------------------------------------------------------------
 Installation
@@ -30,6 +30,8 @@ is the best way to add zxcvbn to your site. zxcvbn-async.js is a
 tiny 350 bytes. On window.load, after your page loads and renders, it'll
 fetch zxcvbn.js, which is more like 680k (300k gzipped), most of which
 is a dictionary.
+
+(todo update size)
 
 I haven't found 680k to be too large -- especially because a password
 isn't the first thing a user typically enters on a registration form.
@@ -119,14 +121,14 @@ Acknowledgments
 ------------------------------------------------------------------------
 
 Dropbox, thank you in so many ways, but in particular, for supporting
-independent projects both inside and outside of hackweek. I love you.
+independent projects both inside and outside of hackweek.
 
 Many thanks to Mark Burnett for releasing his 10k top passwords list:
 http://xato.net/passwords/more-top-worst-passwords
 and for his 2006 book,
 "Perfect Passwords: Selection, Protection, Authentication"
 
-Huge thanks to Wiktionary contributor(s) for building a frequency list
+Huge thanks to Wiktionary contributors for building a frequency list
 of English as used in television and movies:
 http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists
 

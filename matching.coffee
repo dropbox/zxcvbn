@@ -49,7 +49,6 @@ build_dict_matcher = (dict_name, ranked_dict) ->
   (password) ->
     matches = dictionary_match(password, ranked_dict)
     match.dictionary_name = dict_name for match in matches
-    match.display = "dictionary-#{dict_name}-rank-#{match.rank}" for match in matches
     matches
 
 #-------------------------------------------------------------------------------
@@ -203,7 +202,6 @@ spatial_match_helper = (password, graph, graph_name) ->
             graph: graph_name
             turns: turns
             shifted_count: shifted_count
-            display: "spatial-#{graph_name}-#{turns}turns-#{shifted_count}shifts"
         break
     i = j
   result
@@ -229,7 +227,6 @@ repeat_match = (password) ->
             j: j-1
             token: password[i...j]
             repeated_char: password.charAt(i)
-            display: "repeat-#{password[i]}"
         break
     i = j
   result
@@ -272,7 +269,6 @@ sequence_match = (password) ->
               sequence_name: seq_name
               sequence_space: seq.length
               ascending: seq_direction  == 1
-              display: "sequence-#{seq_name}"
           break
     i = j
   result
@@ -302,7 +298,6 @@ digits_match = (password) ->
     i: i
     j: j
     token: password[i..j]
-    display: "#{j-i+1}-digits"
 
 year_rx = /19\d\d|200\d|201\d/ # 4-digit years only. 2-digit years have the same entropy as 2-digit brute force.
 year_match = (password) ->
@@ -312,7 +307,6 @@ year_match = (password) ->
     i: i
     j: j
     token: password[i..j]
-    display: 'year'
 
 # known bug: this doesn't cover all short dates w/o separators like 111911.
 
@@ -335,5 +329,4 @@ date_match = (password) ->
       day: day
       month: month
       year: year
-      display: 'date'
   matches
