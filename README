@@ -7,7 +7,7 @@ ________________________________________________________________________
 
 zxcvbn, named after a crappy password, is a JavaScript password strength
 estimation library. Use it to implement a custom strength bar on a
-registration form near you!
+signup form near you!
 
 zxcvbn attempts to give sound password advice through pattern matching
 and conservative entropy calculations. It finds 10k common passwords,

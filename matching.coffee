@@ -193,7 +193,7 @@ spatial_match_helper = (password, graph, graph_name) ->
               turns += 1
               last_direction = found_direction
             break
-      # if a pattern was found, extend j and try to grow again
+      # if the current pattern continued, extend j and try to grow again
       if found
         j += 1
       # otherwise push the pattern discovered so far, if any...
@@ -207,9 +207,9 @@ spatial_match_helper = (password, graph, graph_name) ->
             graph: graph_name
             turns: turns
             shifted_count: shifted_count
+        # ...and then start a new search for the rest of the password.
+        i = j
         break
-      # ...and start a new search for the rest of the password.
-    i = j
   result
 
 #-------------------------------------------------------------------------------
@@ -328,7 +328,7 @@ date_match = (password) ->
     if day > 31 or month > 12
       continue
     if year < 20
-      year += 2000 # this is only for display
+      year += 2000 # hey, it could be 1920, but this is only for display
     else if year < 100
       year += 1900
     matches.push

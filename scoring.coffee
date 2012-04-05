@@ -174,7 +174,7 @@ spatial_entropy = (match) ->
   possibilities = 0
   L = match.token.length
   t = match.turns
-  # calculates the number of possible patterns w/ length L or less with t turns or less.
+  # estimate the number of possible patterns w/ length L or less with t turns or less.
   for i in [2..L]
     possible_turns = Math.min(t, i - 1)
     for j in [1..possible_turns]
