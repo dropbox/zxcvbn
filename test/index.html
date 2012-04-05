@@ -28,6 +28,7 @@
   </head>
   <body>
     <style type="text/css">
+      /*
       body {
         font-family: monospace;
       }
@@ -48,56 +49,84 @@
         font-size: 30pt;
       }
 
-      #future-is-now {
+      #examples {
         font-size: 40pt;
       }
 
-      #results {
-        margin-bottom: 300px;
+      .match-sequence > table {
+        display: inline-block;
       }
 
-      table {
+      table#main {
         width: 790;
         border-collapse: collapse;
         font-size: 16 px;
       }
-      table tr:nth-child(even) {
+      table#main > tr:nth-child(even) {
         background-color: #ddd;
       }
       td, th {
         padding: 20px 20px;
       }
-      #results td:nth-child(1), #results th:nth-child(1) {
+
+      td:nth-child(1), th:nth-child(1) {
         text-align: right;
       }
+      .match-sequence td {
+        text-align: left;
+      }
+
       #search-results td, #search-results th {
         text-align: right;
       }
       .match:hover {
         color: red;
       }
-      #search {
+      #search-bar {
         font-size: 50px;
-        /* height: 100px; */
         padding: 25px;
         width: 60%
       }
+      */
+
+
+      body {
+        font-family: monospace;
+      }
+
+      .match-sequence table {
+        display: inline;
+        margin-right: 30px;
+      }
+
+      .match-sequence {
+        margin-bottom: 100px;
+      }
+
+      .match-sequence > table:nth-child(odd) {
+        background-color: #ccc;
+      }
+      .match-sequence > table:nth-child(even) {
+        background-color: #eee;
+      }
+
+      #examples-container {
+        position: absolute;
+        top: 700px;
+      }
+
     </style>
-    <center>
 
-    <h1>ZXCVBN</h1>
-    <h3>is inspired by this xkcd comic:</h3>
-    <img src="http://imgs.xkcd.com/comics/password_strength.png" />
+    <h1>try zxcvbn</h1>
 
-    <h2 id="give-a-spin">GIVE IT A TRY</h2>
-    <input id="search" type="text" size="50">
+    <input id="search-bar" type="text" size="50" />
     <div id="search-results">
     </div>
 
-    <h3 id="future-is-now">EXAMPLES</h3>
+    <div id="examples-container">
+    <h1 id="examples">examples</h1>
     <div id="results">
     </div>
 
-    </center>
   </body>
 </html>
