@@ -79,6 +79,7 @@ minimum_entropy_match_sequence = (password, matches) ->
   match_sequence: match_sequence
   crack_time: round_to_x_digits(crack_time, 3)
   crack_time_display: display_time crack_time
+  score: crack_time_to_score crack_time
 
 round_to_x_digits = (n, x) -> Math.round(n * Math.pow(10, x)) / Math.pow(10, x)
 
@@ -103,6 +104,13 @@ NUM_ATTACKERS = 100 # number of cores guessing in parallel.
 SECONDS_PER_GUESS = SINGLE_GUESS / NUM_ATTACKERS
 
 entropy_to_crack_time = (entropy) -> .5 * Math.pow(2, entropy) * SECONDS_PER_GUESS # average, not total
+
+crack_time_to_score = (seconds) ->
+  return 0 if seconds < Math.pow(10, 2)
+  return 1 if seconds < Math.pow(10, 4)
+  return 2 if seconds < Math.pow(10, 6)
+  return 3 if seconds < Math.pow(10, 8)
+  return 4
 
 # ------------------------------------------------------------------------------
 # entropy calcs -- one function per match pattern ------------------------------
