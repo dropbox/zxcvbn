@@ -148,6 +148,7 @@ l33t_match = (password) ->
         match.l33t = true
         match.token = token
         match.sub = match_sub
+        match.sub_display = ("#{k} -> #{v}" for k,v of sub).join(', ')
         matches.push match
   matches
 
