@@ -191,10 +191,10 @@ spatial_entropy = (match) ->
   entropy
 
 dictionary_entropy = (match) ->
-  entropy = log2 match.rank
-  entropy += extra_uppercase_entropy(match)
-  entropy += extra_l33t_entropy(match)
-  entropy
+  match.base_entropy = log2 match.rank # keep these as properties for display purposes
+  match.uppercase_entropy = extra_uppercase_entropy match
+  match.l33t_entropy = extra_l33t_entropy match
+  match.base_entropy + match.uppercase_entropy + match.l33t_entropy
 
 START_UPPER = /^[A-Z][^A-Z]+$/
 END_UPPER = /^[^A-Z]+[A-Z]$/
@@ -220,13 +220,11 @@ extra_uppercase_entropy = (match) ->
 extra_l33t_entropy = (match) ->
   return 0 if not match.l33t
   possibilities = 0
-  for unsubbed, subbed of match.sub
-    U = (chr for chr in match.token.split('') when chr == unsubbed).length # number of unsubbed characters.
+  for subbed, unsubbed of match.sub
     S = (chr for chr in match.token.split('') when chr == subbed).length   # number of subbed characters.
+    U = (chr for chr in match.token.split('') when chr == unsubbed).length # number of unsubbed characters.
     possibilities += nCk(U + S, i) for i in [0..Math.min(U, S)]
   log2 possibilities
-
-bruteforce_entropy = (match) -> log2 Math.pow(match.cardinality, match.token.length)
 
 # utilities --------------------------------------------------------------------
 

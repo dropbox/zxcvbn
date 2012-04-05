@@ -3,12 +3,12 @@ ranked_user_inputs_dict = {}
 
 # initialize matcher lists
 DICTIONARY_MATCHERS = [
-  build_dict_matcher('passwords', build_ranked_dict(passwords)),
-  build_dict_matcher('male_names', build_ranked_dict(male_names)),
+  build_dict_matcher('passwords',    build_ranked_dict(passwords)),
+  build_dict_matcher('english',      build_ranked_dict(english)),
+  build_dict_matcher('male_names',   build_ranked_dict(male_names)),
   build_dict_matcher('female_names', build_ranked_dict(female_names)),
-  build_dict_matcher('surnames', build_ranked_dict(surnames)),
-  build_dict_matcher('words', build_ranked_dict(english)),
-  build_dict_matcher('user_inputs', ranked_user_inputs_dict),
+  build_dict_matcher('surnames',     build_ranked_dict(surnames)),
+  build_dict_matcher('user_inputs',  ranked_user_inputs_dict),
 ]
 
 MATCHERS = DICTIONARY_MATCHERS.concat [

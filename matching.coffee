@@ -142,12 +142,12 @@ l33t_match = (password) ->
         if token.toLowerCase() == match.matched_word
           continue # only return the matches that contain an actual substitution
         match_sub = {} # subset of mappings in sub that are in use for this match
-        for subbed_chr, chr of sub when subbed_chr in token
+        for subbed_chr, chr of sub when token.indexOf(subbed_chr) != -1
           match_sub[subbed_chr] = chr
         match.l33t = true
         match.token = token
         match.sub = match_sub
-        match.sub_display = ("#{k} -> #{v}" for k,v of sub).join(', ')
+        match.sub_display = ("#{k} -> #{v}" for k,v of match_sub).join(', ')
         matches.push match
   matches
 
@@ -320,6 +320,10 @@ date_match = (password) ->
       [day, month] = [month, day]
     if day > 31 or month > 12
       continue
+    if year < 20
+      year += 2000 # this is only for display
+    else if year < 100
+      year += 1900
     matches.push
       pattern: 'date'
       i: match.i
