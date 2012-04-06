@@ -11,7 +11,7 @@ nCk = (n, k) ->
   k_fact *= m for m in [1..k]
   nPk(n, k) / k_fact
 
-log2 = (n) -> Math.log(n) / Math.log(2)
+lg = (n) -> Math.log(n) / Math.log(2)
 
 # ------------------------------------------------------------------------------
 # minimum entropy search -------------------------------------------------------
@@ -27,7 +27,7 @@ minimum_entropy_match_sequence = (password, matches) ->
   backpointers = [] # for the optimal sequence of matches up to k, holds the final match (match.j == k). null means the sequence ends w/ a brute-force character.
   for k in [0...password.length]
     # starting scenario to try and beat: adding a brute-force character to the minimum entropy sequence at k-1.
-    up_to_k[k] = (up_to_k[k-1] or 0) + log2 bruteforce_cardinality
+    up_to_k[k] = (up_to_k[k-1] or 0) + lg bruteforce_cardinality
     backpointers[k] = null
     for match in matches when match.j == k
       [i, j] = [match.i, match.j]
@@ -56,7 +56,7 @@ minimum_entropy_match_sequence = (password, matches) ->
     i: i
     j: j
     token: password[i..j]
-    entropy: log2 Math.pow(bruteforce_cardinality, j - i + 1)
+    entropy: lg Math.pow(bruteforce_cardinality, j - i + 1)
     cardinality: bruteforce_cardinality
   k = 0
   match_sequence_copy = []
@@ -130,7 +130,7 @@ calc_entropy = (match) ->
 
 repeat_entropy = (match) ->
   cardinality = calc_bruteforce_cardinality match.token
-  log2 (cardinality * match.token.length)
+  lg (cardinality * match.token.length)
 
 sequence_entropy = (match) ->
   first_chr = match.token.charAt(0)
@@ -138,28 +138,28 @@ sequence_entropy = (match) ->
     base_entropy = 1
   else
     if first_chr.match /\d/
-      base_entropy = log2(10) # digits
+      base_entropy = lg(10) # digits
     else if first_chr.match /[a-z]/
-      base_entropy = log2(26) # lower
+      base_entropy = lg(26) # lower
     else
-      base_entropy = log2(26) + 1 # extra bit for uppercase
+      base_entropy = lg(26) + 1 # extra bit for uppercase
   if not match.ascending
     base_entropy += 1 # extra bit for descending instead of ascending
-  base_entropy + log2 match.token.length
+  base_entropy + lg match.token.length
 
-digits_entropy = (match) -> log2 Math.pow(10, match.token.length)
+digits_entropy = (match) -> lg Math.pow(10, match.token.length)
 
 NUM_YEARS = 119 # years match against 1900 - 2019
 NUM_MONTHS = 12
 NUM_DAYS = 31
 
-year_entropy = (match) -> log2 NUM_YEARS
+year_entropy = (match) -> lg NUM_YEARS
 
 date_entropy = (match) ->
   if match.year < 100
-    entropy = log2(NUM_DAYS * NUM_MONTHS * 100) # two-digit year
+    entropy = lg(NUM_DAYS * NUM_MONTHS * 100) # two-digit year
   else
-    entropy = log2(NUM_DAYS * NUM_MONTHS * NUM_YEARS) # four-digit year
+    entropy = lg(NUM_DAYS * NUM_MONTHS * NUM_YEARS) # four-digit year
   if match.separator
     entropy += 2 # add two bits for separator selection [/,-,.,etc]
   entropy
@@ -179,7 +179,7 @@ spatial_entropy = (match) ->
     possible_turns = Math.min(t, i - 1)
     for j in [1..possible_turns]
       possibilities += nCk(i - 1, j - 1) * s * Math.pow(d, j)
-  entropy = log2 possibilities
+  entropy = lg possibilities
   # add extra entropy for shifted keys. (% instead of 5, A instead of a.)
   # math is similar to extra entropy from uppercase letters in dictionary matches.
   if match.shifted_count
@@ -187,11 +187,11 @@ spatial_entropy = (match) ->
     U = match.token.length - match.shifted_count # unshifted count
     possibilities = 0
     possibilities += nCk(S + U, i) for i in [0..Math.min(S, U)]
-    entropy += log2 possibilities
+    entropy += lg possibilities
   entropy
 
 dictionary_entropy = (match) ->
-  match.base_entropy = log2 match.rank # keep these as properties for display purposes
+  match.base_entropy = lg match.rank # keep these as properties for display purposes
   match.uppercase_entropy = extra_uppercase_entropy match
   match.l33t_entropy = extra_l33t_entropy match
   match.base_entropy + match.uppercase_entropy + match.l33t_entropy
@@ -215,7 +215,7 @@ extra_uppercase_entropy = (match) ->
   L = (chr for chr in word.split('') when chr.match /[a-z]/).length
   possibilities = 0
   possibilities += nCk(U + L, i) for i in [0..Math.min(U, L)]
-  log2 possibilities
+  lg possibilities
 
 extra_l33t_entropy = (match) ->
   return 0 if not match.l33t
@@ -224,7 +224,7 @@ extra_l33t_entropy = (match) ->
     S = (chr for chr in match.token.split('') when chr == subbed).length   # number of subbed characters.
     U = (chr for chr in match.token.split('') when chr == unsubbed).length # number of unsubbed characters.
     possibilities += nCk(U + S, i) for i in [0..Math.min(U, S)]
-  log2 possibilities
+  lg possibilities
 
 # utilities --------------------------------------------------------------------
 
