@@ -1,0 +1,3 @@
+The following file is licensed under the Apache 2.0 License:
+
+closure.jar, Copyright (c) Google, Inc.
