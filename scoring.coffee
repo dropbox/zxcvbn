@@ -40,7 +40,7 @@ minimum_entropy_match_sequence = (password, matches) ->
   # walk backwards and decode the best sequence
   match_sequence = []
   k = password.length - 1
-  while k > 0
+  while k >= 0
     match = backpointers[k]
     if match
       match_sequence.push match
@@ -224,7 +224,8 @@ extra_l33t_entropy = (match) ->
     S = (chr for chr in match.token.split('') when chr == subbed).length   # number of subbed characters.
     U = (chr for chr in match.token.split('') when chr == unsubbed).length # number of unsubbed characters.
     possibilities += nCk(U + S, i) for i in [0..Math.min(U, S)]
-  lg possibilities
+  # corner: return 1 bit for single-letter subs, like 4pple -> apple, instead of 0.
+  lg(possibilities) or 1
 
 # utilities --------------------------------------------------------------------
 
