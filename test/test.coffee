@@ -1,13 +1,15 @@
 
 test_passwords = '''
 zxcvbn
-tr0ub4d0ur&3
+qwER43@!
+Tr0ub4dour&3
 correcthorsebatterystaple
 coRrecth0rseba++ery9.23.2007staple$
 
-do you know
-
-RAINBOWSHELL123698745
+D0g..................
+abcdefghijk987654321
+neverforget13/3/1997
+1qaz2wsx3edc
 
 temppass22
 briansmith
@@ -16,6 +18,7 @@ password1
 viking
 thx1138
 ScoRpi0ns
+do you know
 
 ryanhunter2000
 rianhunter2000
@@ -25,8 +28,6 @@ AOEUIDHG&*()LS_
 
 12345678
 defghi6789
-
-D0g..................
 
 rosebud
 Rosebud
@@ -44,7 +45,6 @@ Ba9ZyWABu99[BK#6MBgbH88Tofv)vs$w
 '''
 
 results_tmpl = '''
-<h1 id="examples">examples</h1>
 {{#results}}
 <table class="result">
   <tr>
