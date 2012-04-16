@@ -1,15 +1,14 @@
 
-nPk = (n, k) ->
-  return 0 if k > n
-  result = 1
-  result *= m for m in [n-k+1..n]
-  result
-
 nCk = (n, k) ->
+  # http://blog.plover.com/math/choose.html
+  return 0 if k > n
   return 1 if k == 0
-  k_fact = 1
-  k_fact *= m for m in [1..k]
-  nPk(n, k) / k_fact
+  r = 1
+  for d in [1..k]
+    r *= n
+    r /= d
+    n -= 1
+  r
 
 lg = (n) -> Math.log(n) / Math.log(2)
 
