@@ -54,4 +54,4 @@ window.zxcvbn = (password, user_inputs) ->
   result.calc_time = time() - start
   result
 
-zxcvbn_load_hook?() # run load hook from user, if defined
+window.zxcvbn_load_hook?() # run load hook from user, if defined
