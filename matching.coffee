@@ -198,7 +198,7 @@ spatial_match_helper = (password, graph, graph_name) ->
         j += 1
       # otherwise push the pattern discovered so far, if any...
       else
-        if j - i > 2 # only consider length-3 chains and up
+        if j - i > 1 # don't consider length-1 chains
           result.push
             pattern: 'spatial'
             i: i
@@ -226,7 +226,7 @@ repeat_match = (password) ->
       if password.charAt(j-1) == password.charAt(j)
         j += 1
       else
-        if j - i > 2 # length-3 chains and up
+        if j - i > 1
           result.push
             pattern: 'repeat'
             i: i
@@ -266,7 +266,7 @@ sequence_match = (password) ->
         if cur_n - prev_n == seq_direction
           j += 1
         else
-          if j - i > 2 # length-3 chains and up
+          if j - i > 1
             result.push
               pattern: 'sequence'
               i: i
