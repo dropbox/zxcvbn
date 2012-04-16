@@ -315,29 +315,130 @@ year_match = (password) ->
     j: j
     token: password[i..j]
 
-# known bug: this doesn't cover all short dates w/o separators like 111911.
-
-date_rx = /(\d{1,2})( |-|\/|\.|_)?(\d{1,2}?)\2?(19\d{2}|200\d|201\d|\d{2})/
 date_match = (password) ->
+  # match dates with separators 1/1/1911 and dates without 111997
+  result = date_without_sep_match(password).concat date_sep_match(password)
+  console.log result
+  result
+
+date_without_sep_match = (password) ->
+  date_matches = []
+  for digit_match in findall password, /\d{4,8}/ # 1197 is length-4, 01011997 is length 8
+    [i, j] = [digit_match.i, digit_match.j]
+    token = password[i..j]
+    end = token.length
+    candidates_round_1 = [] # parse year alternatives
+    if token.length <= 6
+      candidates_round_1.push # 2-digit year prefix
+        daymonth: token[2..]
+        year: token[0..1]
+        i: i
+        j: j
+      candidates_round_1.push # 2-digit year suffix
+        daymonth: token[0...end-2]
+        year: token[end-2..]
+        i: i
+        j: j
+    if token.length >= 6
+      candidates_round_1.push # 4-digit year prefix
+        daymonth: token[4..]
+        year: token[0..3]
+        i: i
+        j: j
+      candidates_round_1.push # 4-digit year suffix
+        daymonth: token[0...end-4]
+        year: token[end-4..]
+        i: i
+        j: j
+    candidates_round_2 = [] # parse day/month alternatives
+    for candidate in candidates_round_1
+      switch candidate.daymonth.length
+        when 2 # ex. 1 1 97
+          candidates_round_2.push
+            day: candidate.daymonth[0]
+            month: candidate.daymonth[1]
+            year: candidate.year
+            i: candidate.i
+            j: candidate.j
+        when 3 # ex. 11 1 97 or 1 11 97
+          candidates_round_2.push
+            day: candidate.daymonth[0..1]
+            month: candidate.daymonth[2]
+            year: candidate.year
+            i: candidate.i
+            j: candidate.j
+          candidates_round_2.push
+            day: candidate.daymonth[0]
+            month: candidate.daymonth[1..2]
+            year: candidate.year
+            i: candidate.i
+            j: candidate.j
+        when 4 # ex. 11 11 97
+          candidates_round_2.push
+            day: candidate.daymonth[0..1]
+            month: candidate.daymonth[2..3]
+            year: candidate.year
+            i: candidate.i
+            j: candidate.j
+    # final loop: reject invalid dates
+    for candidate in candidates_round_2
+      day = parseInt(candidate.day)
+      month = parseInt(candidate.month)
+      year = parseInt(candidate.year)
+      [valid, [day, month, year]] = check_date(day, month, year)
+      continue unless valid
+      date_matches.push
+        pattern: 'date'
+        i: candidate.i
+        j: candidate.j
+        token: password[i..j]
+        separator: ''
+        day: day
+        month: month
+        year: year
+  date_matches
+
+date_rx_year_suffix = ///
+  ( \d{1,2} )                         # day or month
+  ( \s | - | / | \\ | _ | \. )        # separator
+  ( \d{1,2} )                         # month or day
+  \2                                  # same separator
+  ( 19\d{2} | 200\d | 201\d | \d{2} ) # year
+///
+date_rx_year_prefix = ///
+  ( 19\d{2} | 200\d | 201\d | \d{2} ) # year
+  ( \s | - | / | \\ | _ | \. )        # separator
+  ( \d{1,2} )                         # day or month
+  \2                                  # same separator
+  ( \d{1,2} )                         # month or day
+///
+date_sep_match = (password) ->
   matches = []
-  for match in findall password, date_rx
-    [day, month, year] = (parseInt(match[k]) for k in [1,3,4])
-    separator = match[2] or ''
-    if 12 <= month <= 31 and day <= 12
-      [day, month] = [month, day]
-    if day > 31 or month > 12
-      continue
-    if year < 20
-      year += 2000 # hey, it could be 1920, but this is only for display
-    else if year < 100
-      year += 1900
-    matches.push
-      pattern: 'date'
-      i: match.i
-      j: match.j
-      token: password[match.i..match.j]
-      separator: separator
-      day: day
-      month: month
-      year: year
-  matches
+  for match in findall password, date_rx_year_suffix
+    [match.day, match.month, match.year] = (parseInt(match[k]) for k in [1,3,4])
+    match.sep = match[2]
+    matches.push match
+  for match in findall password, date_rx_year_prefix
+    [match.day, match.month, match.year] = (parseInt(match[k]) for k in [4,3,1])
+    match.sep = match[2]
+    matches.push match
+  for match in matches
+    [valid, [day, month, year]] = check_date(match.day, match.month, match.year)
+    continue unless valid
+    pattern: 'date'
+    i: match.i
+    j: match.j
+    token: password[match.i..match.j]
+    separator: match.sep
+    day: day
+    month: month
+    year: year
+
+check_date = (day, month, year) ->
+  if 12 <= month <= 31 and day <= 12 # tolerate both day-month and month-day order
+    [day, month] = [month, day]
+  if day > 31 or month > 12
+    return [false, []]
+  unless 1900 <= year <= 2019
+    return [false, []]
+  [true, [day, month, year]]
