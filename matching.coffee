@@ -317,9 +317,7 @@ year_match = (password) ->
 
 date_match = (password) ->
   # match dates with separators 1/1/1911 and dates without 111997
-  result = date_without_sep_match(password).concat date_sep_match(password)
-  console.log result
-  result
+  date_without_sep_match(password).concat date_sep_match(password)
 
 date_without_sep_match = (password) ->
   date_matches = []
