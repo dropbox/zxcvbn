@@ -10,7 +10,10 @@ async_load = ->
   first = document.getElementsByTagName('script')[0]
   first.parentNode.insertBefore s, first
 
-if window.attachEvent?
-  window.attachEvent 'onload', async_load
+if document.readyState is "complete"
+  async_load()
 else
-  window.addEventListener 'load', async_load, false
+  if window.attachEvent?
+    window.attachEvent 'onload', async_load
+  else
+    window.addEventListener 'load', async_load, false
