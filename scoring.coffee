@@ -234,9 +234,9 @@ calc_bruteforce_cardinality = (password) ->
     ord = chr.charCodeAt(0)
     if 0x30 <= ord <= 0x39
       digits = true
-    if 0x41 <= ord <= 0x5a
+    else if 0x41 <= ord <= 0x5a
       upper = true
-    if 0x61 <= ord <= 0x7a
+    else if 0x61 <= ord <= 0x7a
       lower = true
     else
       symbols = true
