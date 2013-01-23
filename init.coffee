@@ -48,7 +48,7 @@ zxcvbn = (password, user_inputs) ->
     for i in [0...user_inputs.length]
       # update ranked_user_inputs_dict.
       # i+1 instead of i b/c rank starts at 1.
-      ranked_user_inputs_dict[user_inputs[i]] = i + 1
+      ranked_user_inputs_dict[user_inputs[i].toLowerCase()] = i + 1
   matches = omnimatch password
   result = minimum_entropy_match_sequence password, matches
   result.calc_time = time() - start
