@@ -5,13 +5,13 @@ _____/\/\______/\/\/\____/\/\________/\/\__/\/\__/\/\/\/\____/\/\__/\/\_
 ___/\/\________/\/\/\____/\/\__________/\/\/\____/\/\__/\/\__/\/\__/\/\_
 _/\/\/\/\/\__/\/\__/\/\____/\/\/\/\______/\______/\/\/\/\____/\/\__/\/\_
 ________________________________________________________________________
-````
+```
 
 `zxcvbn`, named after a crappy password, is a JavaScript password strength
 estimation library. Use it to implement a custom strength bar on a
 signup form near you!
 
-zxcvbn attempts to give sound password advice through pattern matching
+`zxcvbn` attempts to give sound password advice through pattern matching
 and conservative entropy calculations. It finds 10k common passwords,
 common American names and surnames, common English words, and common
 patterns like dates, repeats (aaa), sequences (abcd), and QWERTY
@@ -78,7 +78,7 @@ result.calculation_time   # how long it took to calculate an answer,
                           # in milliseconds. usually only a few ms.
 ````
 
-The optional user_inputs argument is an array of strings that `zxcvbn`
+The optional `user_inputs` argument is an array of strings that `zxcvbn`
 will add to its internal dictionary. This can be whatever list of
 strings you like, but is meant for user inputs from other fields of the
 form, like name and email. That way a password that includes the user's
@@ -135,7 +135,9 @@ Dropbox, thank you in so many ways, but in particular, for supporting
 independent projects both inside and outside of hackweek.
 
 Many thanks to Mark Burnett for releasing his 10k top passwords list:
-> http://xato.net/passwords/more-top-worst-passwords
+
+http://xato.net/passwords/more-top-worst-passwords
+
 and for his 2006 book,
 "Perfect Passwords: Selection, Protection, Authentication"
 
