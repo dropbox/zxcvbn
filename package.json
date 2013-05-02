@@ -2,7 +2,7 @@
     "name": "zxcvbn",
     "version": "1.0.0",
     "description": "realistic password strength estimation",
-    "main": "zxcvbn.js",
+    "main": "index.js",
     "scripts": {
         "test": "xdg-open zxcvbn/test/index.html"
     },
