@@ -1,8 +1,8 @@
 .gitignore
 *.sh
 README*
-zxcvbn/data
-zxcvbn/test
-zxcvbn/tools
-zxcvbn/scripts
-zxcvbn/*.coffee
+data
+test
+tools
+scripts
+*.coffee
