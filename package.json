@@ -1,0 +1,25 @@
+{
+    "name": "zxcvbn",
+    "version": "1.0.0",
+    "description": "realistic password strength estimation",
+    "main": "index.js",
+    "scripts": {
+        "test": "xdg-open zxcvbn/test/index.html"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/lowe/zxcvbn.git"
+    },
+    "keywords": [
+        "realistic",
+        "password",
+        "strength",
+        "estimation",
+        "estimate",
+        "meter",
+        "validate",
+        "validation"
+    ],
+    "author": "Dan Wheeler",
+    "license": "MIT"
+}
