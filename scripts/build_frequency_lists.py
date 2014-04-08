@@ -145,7 +145,7 @@ def filter_ascii(lst):
     return [word for word in lst if all(ord(c) < 128 for c in word)]
 
 def to_js(lst, lst_name):
-    return 'var %s = %s;\n\n' % (lst_name, simplejson.dumps(lst))
+    return 'DICTIONARIES["%s"] = %s;\n\n' % (lst_name, simplejson.dumps(lst))
 
 def main():
     english = get_ranked_english()
@@ -164,13 +164,14 @@ def main():
     male_names   = filter_dup(male_names,   all_dicts - set([tuple(male_names)]))
     female_names = filter_dup(female_names, all_dicts - set([tuple(female_names)]))
     surnames     = filter_dup(surnames,     all_dicts - set([tuple(surnames)]))
-    english      = filter_dup(english,      all_dicts - set([tuple(english)]))
-
-    with open('../frequency_lists.js', 'w') as f: # words are all ascii at this point
-        lsts = locals()
-        for lst_name in 'passwords male_names female_names surnames english'.split():
+    words        = filter_dup(english,      all_dicts - set([tuple(english)]))
+    
+    for lst_name in 'passwords male_names female_names surnames words'.split():
+        with open('../dictionaries-available/english/%s.js' % (lst_name), 'w') as f: # words are all ascii at this point
+            lsts = locals()
+            
             lst = lsts[lst_name]
-            f.write(to_js(lst, lst_name))
+            f.write(to_js(lst, 'english/%s'%lst_name))
 
     print '\nall done! totals:\n'
     print 'passwords....', len(passwords)

@@ -1,5 +1,8 @@
 
-ZXCVBN_SRC = 'http://dl.dropbox.com/u/209/zxcvbn/zxcvbn.js'
+# ZXCVBN_SRC = '/zxcvbn/zxcvbn.js'
+scripts = document.getElementsByTagName("script")
+index = scripts.length - 1
+ZXCVBN_SRC = scripts[index].src + "/../zxcvbn.js"
 
 # adapted from http://friendlybit.com/js/lazy-loading-asyncronous-javascript/
 async_load = ->

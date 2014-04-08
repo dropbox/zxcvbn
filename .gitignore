@@ -1,3 +1,4 @@
 *~
-*.js
+test/test.js
+async.js
 test/index_dev.html
