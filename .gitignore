@@ -1,3 +1,4 @@
 *~
 *.js
+!zxcvbn.js
 test/index_dev.html
