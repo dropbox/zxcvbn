@@ -41,14 +41,16 @@ KEYPAD_STARTING_POSITIONS   = (k for k,v of keypad).length
 
 time = -> (new Date()).getTime()
 
-# now that frequency lists are loaded, replace zxcvbn stub function.
+# now that frequency lists are loaded, replace zxcvbn stub function. reset everything related to user_input on each call because it can change with each call.
 zxcvbn = (password, user_inputs) ->
   start = time()
+  ranked_user_inputs_dict = {} 
   if user_inputs?
     for i in [0...user_inputs.length]
       # update ranked_user_inputs_dict.
       # i+1 instead of i b/c rank starts at 1.
       ranked_user_inputs_dict[user_inputs[i].toLowerCase()] = i + 1
+  MATCHERS[5] = build_dict_matcher('user_inputs', ranked_user_inputs_dict)
   matches = omnimatch password
   result = minimum_entropy_match_sequence password, matches
   result.calc_time = time() - start
