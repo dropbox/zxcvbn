@@ -56,8 +56,8 @@ zxcvbn = (password, user_inputs) ->
 
 # make zxcvbn function globally available
 # via window or exports object, depending on the environment
-if window?
+if exports?
+  exports.zxcvbn = zxcvbn
+else if window?
   window.zxcvbn = zxcvbn
   window.zxcvbn_load_hook?() # run load hook from user, if defined
-else if exports?
-  exports.zxcvbn = zxcvbn
