@@ -7,9 +7,9 @@ translate = (string, chr_map) -> (chr_map[chr] or chr for chr in string.split(''
 # omnimatch -- combine everything ----------------------------------------------
 # ------------------------------------------------------------------------------
 
-omnimatch = (password) ->
+omnimatch = (password, matchers) ->
   matches = []
-  for matcher in MATCHERS
+  for matcher in matchers
     extend matches, matcher(password)
   matches.sort (match1, match2) ->
     (match1.i - match2.i) or (match1.j - match2.j)
