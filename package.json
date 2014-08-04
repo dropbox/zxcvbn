@@ -4,7 +4,11 @@
     "description": "realistic password strength estimation",
     "main": "index.js",
     "scripts": {
-        "test": "xdg-open zxcvbn/test/index.html"
+        "test": "mocha test/test-*.js",
+        "watch": "npm-watch"
+    },
+    "watch": {
+        "test": "tests/test-*.js"
     },
     "repository": {
         "type": "git",
@@ -21,5 +25,11 @@
         "validation"
     ],
     "author": "Dan Wheeler",
-    "license": "MIT"
+    "license": "MIT",
+    "devDependencies": {
+        "coffee-script": "1.7.x",
+        "mocha": "1.21.x",
+        "npm-watch": "0.0.0",
+        "sinon": "1.10.x"
+    }
 }
