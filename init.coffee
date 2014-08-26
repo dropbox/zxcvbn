@@ -52,6 +52,9 @@ zxcvbn = (password, user_inputs) ->
   matches = omnimatch password
   result = minimum_entropy_match_sequence password, matches
   result.calc_time = time() - start
+  #This is going to be run on server instead of client, do not
+  #persist each requests user inputs
+  ranked_user_inputs_dict = {}
   result
 
 # make zxcvbn function globally available
