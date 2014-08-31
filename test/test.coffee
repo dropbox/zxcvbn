@@ -1,5 +1,6 @@
 
 test_passwords = '''
+dark dark dark
 zxcvbn
 qwER43@!
 Tr0ub4dour&3
@@ -94,96 +95,104 @@ props_tmpl = '''
     <td>entropy:</td>
     <td>{{entropy}}</td>
   </tr>
-  {{#cardinality}}
+  {{#repeated}}
   <tr>
-    <td>cardinality:</td>
-    <td>{{cardinality}}</td>
+    <td>repeated:</td>
+    <td>{{repeated}}</td>
   </tr>
-  {{/cardinality}}
-  {{#rank}}
-  <tr>
-    <td>dict-name:</td>
-    <td>{{dictionary_name}}</td>
-  </tr>
-  <tr>
-    <td>rank:</td>
-    <td>{{rank}}</td>
-  </tr>
-  <tr>
-    <td>base-entropy:</td>
-    <td>{{base_entropy}}</td>
-  </tr>
-  <tr>
-    <td>upper-entropy:</td>
-    <td>{{uppercase_entropy}}</td>
-  </tr>
-  {{/rank}}
-  {{#l33t}}
-  <tr>
-    <td>l33t-entropy:</td>
-    <td>{{l33t_entropy}}</td>
-  </tr>
-  <tr>
-    <td>l33t subs:</td>
-    <td>{{sub_display}}</td>
-  </tr>
-  <tr>
-    <td>un-l33ted:</td>
-    <td>{{matched_word}}</td>
-  </tr>
-  {{/l33t}}
-  {{#graph}}
-  <tr>
-    <td>graph: </td>
-    <td>{{graph}}</td>
-  </tr>
-  <tr>
-    <td>turns: </td>
-    <td>{{turns}}</td>
-  </tr>
-  <tr>
-    <td>shifted keys: </td>
-    <td>{{shifted_count}}</td>
-  </tr>
-  {{/graph}}
-  {{#repeated_char}}
-  <tr>
-    <td>repeat-char:</td>
-    <td>'{{repeated_char}}'</td>
-  </tr>
-  {{/repeated_char}}
-  {{#sequence_name}}
-  <tr>
-    <td>sequence-name:</td>
-    <td>{{sequence_name}}</td>
-  </tr>
-  <tr>
-    <td>sequence-size</td>
-    <td>{{sequence_space}}</td>
-  </tr>
-  <tr>
-    <td>ascending:</td>
-    <td>{{ascending}}</td>
-  </tr>
-  {{/sequence_name}}
-  {{#day}}
-  <tr>
-    <td>day:</td>
-    <td>{{day}}</td>
-  </tr>
-  <tr>
-    <td>month:</td>
-    <td>{{month}}</td>
-  </tr>
-  <tr>
-    <td>year:</td>
-    <td>{{year}}</td>
-  </tr>
-  <tr>
-    <td>separator:</td>
-    <td>'{{separator}}'</td>
-  </tr>
-  {{/day}}
+  {{/repeated}}
+  {{^repeated}}
+    {{#cardinality}}
+    <tr>
+      <td>cardinality:</td>
+      <td>{{cardinality}}</td>
+    </tr>
+    {{/cardinality}}
+    {{#rank}}
+    <tr>
+      <td>dict-name:</td>
+      <td>{{dictionary_name}}</td>
+    </tr>
+    <tr>
+      <td>rank:</td>
+      <td>{{rank}}</td>
+    </tr>
+    <tr>
+      <td>base-entropy:</td>
+      <td>{{base_entropy}}</td>
+    </tr>
+    <tr>
+      <td>upper-entropy:</td>
+      <td>{{uppercase_entropy}}</td>
+    </tr>
+    {{/rank}}
+    {{#l33t}}
+    <tr>
+      <td>l33t-entropy:</td>
+      <td>{{l33t_entropy}}</td>
+    </tr>
+    <tr>
+      <td>l33t subs:</td>
+      <td>{{sub_display}}</td>
+    </tr>
+    <tr>
+      <td>un-l33ted:</td>
+      <td>{{matched_word}}</td>
+    </tr>
+    {{/l33t}}
+    {{#graph}}
+    <tr>
+      <td>graph: </td>
+      <td>{{graph}}</td>
+    </tr>
+    <tr>
+      <td>turns: </td>
+      <td>{{turns}}</td>
+    </tr>
+    <tr>
+      <td>shifted keys: </td>
+      <td>{{shifted_count}}</td>
+    </tr>
+    {{/graph}}
+    {{#repeated_char}}
+    <tr>
+      <td>repeat-char:</td>
+      <td>'{{repeated_char}}'</td>
+    </tr>
+    {{/repeated_char}}
+    {{#sequence_name}}
+    <tr>
+      <td>sequence-name:</td>
+      <td>{{sequence_name}}</td>
+    </tr>
+    <tr>
+      <td>sequence-size</td>
+      <td>{{sequence_space}}</td>
+    </tr>
+    <tr>
+      <td>ascending:</td>
+      <td>{{ascending}}</td>
+    </tr>
+    {{/sequence_name}}
+    {{#day}}
+    <tr>
+      <td>day:</td>
+      <td>{{day}}</td>
+    </tr>
+    <tr>
+      <td>month:</td>
+      <td>{{month}}</td>
+    </tr>
+    <tr>
+      <td>year:</td>
+      <td>{{year}}</td>
+    </tr>
+    <tr>
+      <td>separator:</td>
+      <td>'{{separator}}'</td>
+    </tr>
+    {{/day}}
+  {{/repeated}}
 </table>
 {{/match_sequence}}
 </div>
