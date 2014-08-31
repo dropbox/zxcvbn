@@ -30,6 +30,9 @@ minimum_entropy_match_sequence = (password, matches) ->
     backpointers[k] = null
     for match in matches when match.j == k
       [i, j] = [match.i, match.j]
+      for matched in backpointers[0..i] when matched?
+        if matched.token == match.token
+          match.repeated = true
       # see if best entropy up to i-1 + entropy of this match is less than the current minimum at j.
       candidate_entropy = (up_to_k[i-1] or 0) + calc_entropy(match)
       if candidate_entropy < up_to_k[j]
@@ -116,6 +119,7 @@ crack_time_to_score = (seconds) ->
 # ------------------------------------------------------------------------------
 
 calc_entropy = (match) ->
+  match.entropy = 1 if match.repeated?
   return match.entropy if match.entropy? # a match's entropy doesn't change. cache it.
   entropy_func = switch match.pattern
     when 'repeat'     then repeat_entropy
