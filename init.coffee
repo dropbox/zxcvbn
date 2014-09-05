@@ -1,14 +1,11 @@
 
-ranked_user_inputs_dict = {}
-
 # initialize matcher lists
 DICTIONARY_MATCHERS = [
   build_dict_matcher('passwords',    build_ranked_dict(passwords)),
   build_dict_matcher('english',      build_ranked_dict(english)),
   build_dict_matcher('male_names',   build_ranked_dict(male_names)),
   build_dict_matcher('female_names', build_ranked_dict(female_names)),
-  build_dict_matcher('surnames',     build_ranked_dict(surnames)),
-  build_dict_matcher('user_inputs',  ranked_user_inputs_dict),
+  build_dict_matcher('surnames',     build_ranked_dict(surnames))
 ]
 
 MATCHERS = DICTIONARY_MATCHERS.concat [
@@ -44,17 +41,16 @@ time = -> (new Date()).getTime()
 # now that frequency lists are loaded, replace zxcvbn stub function.
 zxcvbn = (password, user_inputs) ->
   start = time()
+  ranked_user_inputs_dict = []
   if user_inputs?
     for i in [0...user_inputs.length]
       # update ranked_user_inputs_dict.
       # i+1 instead of i b/c rank starts at 1.
       ranked_user_inputs_dict[user_inputs[i].toLowerCase()] = i + 1
-  matches = omnimatch password
+  matches = omnimatch password, ranked_user_inputs_dict
   result = minimum_entropy_match_sequence password, matches
   result.calc_time = time() - start
-  #This is going to be run on server instead of client, do not
-  #persist each requests user inputs
-  ranked_user_inputs_dict = {}
+
   result
 
 # make zxcvbn function globally available
