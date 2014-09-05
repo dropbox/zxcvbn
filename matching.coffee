@@ -7,10 +7,14 @@ translate = (string, chr_map) -> (chr_map[chr] or chr for chr in string.split(''
 # omnimatch -- combine everything ----------------------------------------------
 # ------------------------------------------------------------------------------
 
-omnimatch = (password) ->
+omnimatch = (password, ranked_user_inputs_dict) ->
   matches = []
+  user_inputs_matcher = build_dict_matcher 'user_inputs', ranked_user_inputs_dict
   for matcher in MATCHERS
     extend matches, matcher(password)
+
+  extend matches, user_inputs_matcher(password)
+
   matches.sort (match1, match2) ->
     (match1.i - match2.i) or (match1.j - match2.j)
 
