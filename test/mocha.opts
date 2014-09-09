@@ -1,0 +1,3 @@
+--reporter min
+--ui bdd
+--compilers coffee:coffee-script/register
