@@ -1,8 +1,4 @@
 .gitignore
-*.sh
-README*
-data
+src
+build
 test
-tools
-scripts
-*.coffee
