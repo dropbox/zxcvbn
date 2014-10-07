@@ -1,5 +1,7 @@
+prot = location.protocol
+prot = 'http:' if location.protocol == 'file:'
 
-ZXCVBN_SRC = '//dl.dropbox.com/u/209/zxcvbn/zxcvbn.js'
+ZXCVBN_SRC = prot + '//dl.dropbox.com/u/209/zxcvbn/zxcvbn.js'
 
 # adapted from http://friendlybit.com/js/lazy-loading-asyncronous-javascript/
 async_load = ->

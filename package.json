@@ -1,10 +1,13 @@
 {
     "name": "zxcvbn",
-    "version": "1.0.0",
+    "version": "1.1.0-unstable",
     "description": "realistic password strength estimation",
     "main": "index.js",
     "scripts": {
-        "test": "mocha test/test-*.js",
+        "build": "npm run build-zxcvbn && npm run build-demo",
+        "build-zxcvbn": "./build/compile_and_minify.sh",
+        "build-demo": "./build/build_demo.sh",
+        "test": "mocha --reporter spec test/test-*.coffee",
         "watch": "npm-watch"
     },
     "watch": {
