@@ -74,7 +74,7 @@ result.score              # [0,1,2,3,4] if crack time is less than
 result.match_sequence     # the list of patterns that zxcvbn based the
                           # entropy calculation on.
 
-result.calculation_time   # how long it took to calculate an answer,
+result.calc_time          # how long it took to calculate an answer,
                           # in milliseconds. usually only a few ms.
 ````
 
