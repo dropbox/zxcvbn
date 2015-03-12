@@ -118,6 +118,7 @@ crack_time_to_score = (seconds) ->
 calc_entropy = (match) ->
   return match.entropy if match.entropy? # a match's entropy doesn't change. cache it.
   entropy_func = switch match.pattern
+    when 'haystack'   then haystack_entropy
     when 'repeat'     then repeat_entropy
     when 'sequence'   then sequence_entropy
     when 'digits'     then digits_entropy
@@ -130,6 +131,12 @@ calc_entropy = (match) ->
 repeat_entropy = (match) ->
   cardinality = calc_bruteforce_cardinality match.token
   lg (cardinality * match.token.length)
+
+haystack_entropy = (match) ->
+  cardinality = calc_bruteforce_cardinality match.haystack_base
+  base = match.haystack_base.length * lg(cardinality)
+  repeat = lg( match.repeat_count )
+  base + repeat
 
 sequence_entropy = (match) ->
   first_chr = match.token.charAt(0)

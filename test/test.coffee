@@ -7,6 +7,7 @@ correcthorsebatterystaple
 coRrecth0rseba++ery9.23.2007staple$
 
 D0g..................
+D0g.-.-.-.-.-.-.-.-.-.-
 abcdefghijk987654321
 neverforget13/3/1997
 1qaz2wsx3edc
@@ -152,6 +153,16 @@ props_tmpl = '''
     <td>'{{repeated_char}}'</td>
   </tr>
   {{/repeated_char}}
+  {{#haystack_base}}
+  <tr>
+    <td>haystack-base:</td>
+    <td>'{{haystack_base}}'</td>
+  </tr>
+  <tr>
+    <td>repeat-count:</td>
+    <td>{{repeat_count}}</td>
+  </tr>
+  {{/haystack_base}}
   {{#sequence_name}}
   <tr>
     <td>sequence-name:</td>
