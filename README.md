@@ -145,5 +145,7 @@ Huge thanks to Wiktionary contributors for building a frequency list
 of English as used in television and movies:
 http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists
 
+Researchers encourage others to model their strength meters after this one: http://www.concordia.ca/cunews/main/stories/2015/03/25/does-your-password-pass-muster.html
+
 Last but not least, big thanks to xkcd :)
 https://xkcd.com/936/
