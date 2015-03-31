@@ -46,7 +46,7 @@ def wiki_download(url):
     '''
     scrape friendly: sleep 20 seconds between each request, cache each result.
     '''
-    DOWNLOAD_TMPL = '../data/tv_and_movie_freqlist%s.html'
+    DOWNLOAD_TMPL = '../data-cache/tv_and_movie_freqlist%s.html'
     freq_range = url[url.rindex('/')+1:]
 
     tmp_path = DOWNLOAD_TMPL % freq_range
@@ -97,7 +97,7 @@ def get_ranked_census_names():
     http://www.census.gov/genealogy/names/dist.male.first
     http://www.census.gov/genealogy/names/dist.female.first
     '''
-    FILE_TMPL = '../data/us_census_2000_%s.txt'
+    FILE_TMPL = '../data-cache/us_census_2000_%s.txt'
     SURNAME_CUTOFF_PERCENTILE = 85 # ie7 can't handle huge lists. cut surname list off at a certain percentile.
     lists = []
     for list_name in ['surnames', 'male_first', 'female_first']:
@@ -114,7 +114,7 @@ def get_ranked_census_names():
 
 def get_ranked_common_passwords():
     lst = []
-    for line in codecs.open('../data/common_passwords.txt', 'r', 'utf8'):
+    for line in codecs.open('../data-cache/common_passwords.txt', 'r', 'utf8'):
         if line.strip():
             lst.append(line.strip())
     return lst

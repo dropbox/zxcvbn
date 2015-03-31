@@ -1,1 +1,1 @@
-module.exports = require('./zxcvbn').zxcvbn;
+module.exports = require('.dist/zxcvbn').zxcvbn;
