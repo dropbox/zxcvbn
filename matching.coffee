@@ -237,6 +237,39 @@ repeat_match = (password) ->
     i = j
   result
 
+haystack_match = (password) ->
+  result = []
+  j = 0
+  x = 0
+  while x < password.length
+    y = x + 1
+    while y < password.length
+      len = y - x
+      base = password.slice(x, y)
+      repeat = password.slice(y, y + len)
+      j = y + len
+      if base == repeat
+        count = 2
+        z = y + len
+        while z < password.length
+          repeat = password.slice(z, z + len)
+          if base == repeat
+            count += 1
+            j = z + len
+          else
+            break
+          z += len
+        result.push
+          pattern: 'haystack'
+          i: x
+          j: j - 1
+          token: password.slice(x, j)
+          haystack_base: base
+          repeat_count: count
+      y += 1
+    x += 1
+  result
+
 SEQUENCES =
   lower: 'abcdefghijklmnopqrstuvwxyz'
   upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
