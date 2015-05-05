@@ -192,8 +192,10 @@ spatial_entropy = (match) ->
 dictionary_entropy = (match) ->
   match.base_entropy = lg match.rank # keep these as properties for display purposes
   match.uppercase_entropy = extra_uppercase_entropy match
+  match.caesar_entropy = extra_caesar_entropy match
   match.l33t_entropy = extra_l33t_entropy match
-  match.base_entropy + match.uppercase_entropy + match.l33t_entropy
+  match.base_entropy + match.uppercase_entropy + match.caesar_entropy +
+    match.l33t_entropy
 
 START_UPPER = /^[A-Z][^A-Z]+$/
 END_UPPER = /^[^A-Z]+[A-Z]$/
@@ -215,6 +217,8 @@ extra_uppercase_entropy = (match) ->
   possibilities = 0
   possibilities += nCk(U + L, i) for i in [0..Math.min(U, L)]
   lg possibilities
+
+extra_caesar_entropy = (match) -> if match.caesar then lg 26 else 0
 
 extra_l33t_entropy = (match) ->
   return 0 if not match.l33t
