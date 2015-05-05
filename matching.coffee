@@ -70,15 +70,15 @@ l33t_table =
   z: ['2']
 
 # makes a pruned copy of l33t_table that only includes password's possible substitutions
-relevent_l33t_subtable = (password) ->
+relevant_l33t_subtable = (password) ->
   password_chars = {}
   for chr in password.split('')
     password_chars[chr] = true
   filtered = {}
   for letter, subs of l33t_table
-    relevent_subs = (sub for sub in subs when sub of password_chars)
-    if relevent_subs.length > 0
-      filtered[letter] = relevent_subs
+    relevant_subs = (sub for sub in subs when sub of password_chars)
+    if relevant_subs.length > 0
+      filtered[letter] = relevant_subs
   filtered
 
 # returns the list of possible 1337 replacement dictionaries for a given password
@@ -133,8 +133,8 @@ enumerate_l33t_subs = (table) ->
 
 l33t_match = (password) ->
   matches = []
-  for sub in enumerate_l33t_subs relevent_l33t_subtable password
-    break if empty sub # corner case: password has no relevent subs.
+  for sub in enumerate_l33t_subs relevant_l33t_subtable password
+    break if empty sub # corner case: password has no relevant subs.
     for matcher in DICTIONARY_MATCHERS
       subbed_password = translate password, sub
       for match in matcher(subbed_password)
