@@ -1,8 +1,26 @@
 {
   "name": "zxcvbn",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": [
     "zxcvbn.js", 
     "zxcvbn-async.js"
+  ],
+  "ignore": [
+  	".gitignore",
+  	".npmignore",
+  	".adjacency_graphs.js",
+  	"async.coffee",
+  	"bower.json",
+  	"compile_and_minify.sh",
+  	"data",
+  	"frequency_lists.js",
+  	"index.js",
+  	"init.coffee",
+  	"matching.coffee",
+  	"package.json",
+  	"scoring.coffee",
+  	"scripts",
+  	"test",
+  	"tools"  	
   ]
 }
