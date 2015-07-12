@@ -7,15 +7,9 @@ _/\/\/\/\/\__/\/\__/\/\____/\/\/\/\______/\______/\/\/\/\____/\/\__/\/\_
 ________________________________________________________________________
 ```
 
-`zxcvbn`, named after a crappy password, is a JavaScript password strength
-estimation library. Use it to implement a custom strength bar on a
-signup form near you!
+`zxcvbn`, named after a crappy password, is a JavaScript password strength estimation library. Use it to implement a custom strength bar on a signup form near you!
 
-`zxcvbn` attempts to give sound password advice through pattern matching
-and conservative entropy calculations. It finds 10k common passwords,
-common American names and surnames, common English words, and common
-patterns like dates, repeats (aaa), sequences (abcd), and QWERTY
-patterns.
+`zxcvbn` attempts to give sound password advice through pattern matching and conservative entropy calculations. It finds 10k common passwords, common American names and surnames, common English words, and common patterns like dates, repeats (aaa), sequences (abcd), and QWERTY patterns.
 
 For full motivation, see:
 
@@ -23,32 +17,51 @@ http://tech.dropbox.com/?p=165
 
 # Installation
 
+## Using bower (recommended)
+
+Get `zxcvbn`:
+
+``` shell
+cd /path/to/project/root # your index.html lives here
+bower install zxcvbn
+```
+
+Add this script to your index.html:
+
 ``` html
-<script type="text/javascript" src="zxcvbn-async.js">
+<script type="text/javascript" src="bower_components/zxcvbn/zxcvbn-async-bower.js">
 </script>
 ```
 
-is the best way to add `zxcvbn` to your site. Host `zxcvbn.js` and
-`zxcvbn-async.js` somewhere on your web server, and make the hardcoded
-path inside `zxcvbn-async.js` point to `zxcvbn.js`. A relative path works
-well.
+That's it!
 
-`zxcvbn-async.js` is a tiny 350 bytes. On `window.load`, after your page
-loads and renders, it'll fetch `zxcvbn.js`, which is more like 700k (330k
-gzipped), most of which is a series of dictionaries.
+How it works: `zxcvbn-async-bower.js` is a tiny script. On `window.load`,  after your page loads and renders, it'll fetch `zxcvbn.js` in the background, which is more like 680kb (320kb gzipped), most of which is a series of dictionaries.
 
-I haven't found 700k to be too large -- especially because a password
-isn't the first thing a user typically enters on a registration form.
+680kb may seem large for a script, but since it loads in the background, and because passwords come later in most registration flows, we've never had an issue.
 
-`zxcvbn.js` can also be included directly:
+## Manual install 
+
+Copy `zxcvbn.js` and `zxcvbn-async.js` into your codebase.
+
+Add to your `index.html`:
+
+``` html
+<script type="text/javascript" src="path/to/zxcvbn-async.js">
+</script>
+```
+
+Open zxcvbn-async.js and edit the `ZXCVBN_SRC` variable to point to whereever you put `zxcvbn.js`. If `index.html` and `zxcvbn.js` sit next to each other, it'll work as-is.   
+
+Note that `zxcvbn.js` can also be included directly:
 
 ``` html
 <script type="text/javascript" src="zxcvbn.js">
 </script>
 ```
 
-But this isn't recommended, as the 700k download will block your
-initial page load.
+But this isn't recommended, as the 680k download will block your initial page load.
+
+# Usage
 
 `zxcvbn` adds a single function to the global namespace:
 
@@ -56,8 +69,7 @@ initial page load.
 zxcvbn(password, user_inputs)
 ```
 
-It takes one required argument, a password, and returns a result object.
-The result includes a few properties:
+It takes one required argument, a password, and returns a result object. The result includes a few properties:
 
 ``` coffeescript
 result.entropy            # bits
@@ -78,24 +90,15 @@ result.calc_time          # how long it took to calculate an answer,
                           # in milliseconds. usually only a few ms.
 ````
 
-The optional `user_inputs` argument is an array of strings that `zxcvbn`
-will add to its internal dictionary. This can be whatever list of
-strings you like, but is meant for user inputs from other fields of the
-form, like name and email. That way a password that includes the user's
-personal info can be heavily penalized. This list is also good for
-site-specific vocabulary.
+The optional `user_inputs` argument is an array of strings that `zxcvbn` will add to its internal dictionary. This can be whatever list of strings you like, but is meant for user inputs from other fields of the form, like name and email. That way a password that includes the user's personal info can be heavily penalized. This list is also good for site-specific vocabulary.
 
-When `zxcvbn` loads (after the async script fetch is complete), it'll
-check if a function named `zxcvbn_load_hook` is defined, and run it with
-no arguments if so. Most sites shouldn't need this.
+When `zxcvbn` loads (after the async script fetch is complete), it'll check if a function named `zxcvbn_load_hook` is defined, and run it with no arguments if so. Most sites shouldn't need this.
 
 # Development
 
 Bug reports and pull requests welcome!
 
-`zxcvbn` is written in CoffeeScript and Python. `zxcvbn.js` is built with
-`compile_and_minify.sh`, which compiles CoffeeScript into JavaScript,
-then JavaScript into efficient, minified JavaScript.
+`zxcvbn` is written in CoffeeScript and Python. `zxcvbn.js` is built with `compile_and_minify.sh`, which compiles CoffeeScript into JavaScript, then JavaScript into efficient, minified JavaScript.
 
 For development, include these scripts instead of `zxcvbn.js`:
 
@@ -112,40 +115,27 @@ For development, include these scripts instead of `zxcvbn.js`:
 </script>
 ```
 
-Data lives in the first two scripts. These get produced by:
+Data lives in the first two scripts. These are produced by:
 
 ```
 scripts/build_keyboard_adjacency_graph.py
 scripts/build_frequency_lists.py
 ```
 
-`matching.coffee`, `scoring.coffee`, and `init.coffee` make up the rest of the
-library.
+`matching.coffee`, `scoring.coffee`, and `init.coffee` make up the rest of the library.
 
 `init.js` needs to come last, otherwise script order doesn't matter.
 
-I recommend setting up coffee-mode in emacs, or whatever equivalent, so
-that CoffeeScript compiles to js on save. Otherwise you'll need to
-repetitively run `compile_and_minify.js`
-
+I recommend setting up coffee-mode in emacs, or whatever equivalent, so that CoffeeScript compiles to js on save. Otherwise you'll need to repetitively run `compile_and_minify.js`
 
 # Acknowledgments
 
-Dropbox, thank you in so many ways, but in particular, for supporting
-independent projects both inside and outside of hackweek.
+Dropbox for supporting open source!
 
-Many thanks to Mark Burnett for releasing his 10k top passwords list:
+Mark Burnett for releasing his [10k top passwords list](http://xato.net/passwords/more-top-worst-passwords) and for his 2006 book, [Perfect Passwords: Selection, Protection, Authentication](http://www.amazon.com/Perfect-Passwords-Selection-Protection-Authentication/dp/1597490415).
 
-http://xato.net/passwords/more-top-worst-passwords
+Wiktionary contributors for building a [frequency list of English](http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists) as used in television and movies.
 
-and for his 2006 book,
-"Perfect Passwords: Selection, Protection, Authentication"
+Researchers at Concordia University for [studying password meters rigorously](http://www.concordia.ca/cunews/main/stories/2015/03/25/does-your-password-pass-muster.html) and recommending zxcvbn. 
 
-Huge thanks to Wiktionary contributors for building a frequency list
-of English as used in television and movies:
-http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists
-
-Researchers encourage others to model their strength meters after this one: http://www.concordia.ca/cunews/main/stories/2015/03/25/does-your-password-pass-muster.html
-
-Last but not least, big thanks to xkcd :)
-https://xkcd.com/936/
+And [xkcd](https://xkcd.com/936/) for the inspiration <3
