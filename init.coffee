@@ -42,9 +42,13 @@ zxcvbn = (password, user_inputs = []) ->
   start = time()
 
   # add the user inputs matcher on a per-request basis to keep things stateless
-  matches = omnimatch password, MATCHERS.concat [
-    build_dict_matcher('user_inputs',  build_ranked_dict(user_inputs.map (_) -> _.toLowerCase()))
-  ]
+  sanitized_inputs = []
+  for arg in user_inputs
+    if arg?
+      sanitized_inputs.push arg.toString().toLowerCase()
+  user_inputs_matcher = build_dict_matcher 'user_inputs', build_ranked_dict(sanitized_inputs)
+
+  matches = omnimatch password, MATCHERS.concat(user_inputs_matcher)
 
   result = minimum_entropy_match_sequence password, matches
   result.calc_time = time() - start

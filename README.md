@@ -9,7 +9,7 @@ ________________________________________________________________________
 
 `zxcvbn`, named after a crappy password, is a JavaScript password strength estimation library. Use it to implement a custom strength bar on a signup form near you!
 
-`zxcvbn` attempts to give sound password advice through pattern matching and conservative entropy calculations. It finds 10k common passwords, common American names and surnames, common English words, and common patterns like dates, repeats (aaa), sequences (abcd), and QWERTY patterns.
+`zxcvbn` attempts to give sound password advice through pattern matching and conservative entropy calculations. It finds 10k common passwords, common names and surnames according to US census data, common English words, and common patterns like dates, repeats (aaa), sequences (abcd), and QWERTY patterns.
 
 For full motivation, see:
 
