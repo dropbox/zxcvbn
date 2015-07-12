@@ -60,4 +60,4 @@ if window?
   window.zxcvbn = zxcvbn
   window.zxcvbn_load_hook?() # run load hook from user, if defined
 else if exports?
-  exports.zxcvbn = zxcvbn
+  module.exports = zxcvbn
