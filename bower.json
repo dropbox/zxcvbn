@@ -3,7 +3,7 @@
     "version": "1.0.2",
     "main": [
         "zxcvbn.js",
-        "zxcvbn-async.js"
+        "zxcvbn-async-bower.js"
     ],
     "ignore": [
         ".gitignore",
