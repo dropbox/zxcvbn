@@ -19,6 +19,8 @@ http://tech.dropbox.com/?p=165
 
 ## Using bower (recommended)
 
+Get [`bower`](http://bower.io/)
+
 Get `zxcvbn`:
 
 ``` shell
@@ -35,11 +37,17 @@ Add this script to your index.html:
 
 That's it!
 
-How it works: `zxcvbn-async-bower.js` is a tiny script. On `window.load`,  after your page loads and renders, it'll fetch `zxcvbn.js` in the background, which is more like 680kb (320kb gzipped), most of which is a series of dictionaries.
+To pull in updates and bugfixes:
+
+``` shell
+bower update zxcvbn
+```
+
+How loading works: `zxcvbn-async-bower.js` is a tiny script. On `window.load`,  after your page loads and renders, it'll fetch `zxcvbn.js` in the background, which is more like 680kb (320kb gzipped), most of which is a series of dictionaries.
 
 680kb may seem large for a script, but since it loads in the background, and because passwords come later in most registration flows, we've never had an issue.
 
-## Manual install 
+## Manual installation
 
 Copy `zxcvbn.js` and `zxcvbn-async.js` into your codebase.
 
@@ -50,7 +58,7 @@ Add to your `index.html`:
 </script>
 ```
 
-Open zxcvbn-async.js and edit the `ZXCVBN_SRC` variable to point to whereever you put `zxcvbn.js`. If `index.html` and `zxcvbn.js` sit next to each other, it'll work as-is.   
+Open zxcvbn-async.js and edit the `ZXCVBN_SRC` variable to point to wherever you put `zxcvbn.js`. If `index.html` and `zxcvbn.js` sit next to each other, it'll work as-is.
 
 Note that `zxcvbn.js` can also be included directly:
 
