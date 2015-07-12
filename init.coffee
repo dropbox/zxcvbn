@@ -54,10 +54,20 @@ zxcvbn = (password, user_inputs = []) ->
   result.calc_time = time() - start
   result
 
-# make zxcvbn function globally available
-# via window or exports object, depending on the environment
-if window?
-  window.zxcvbn = zxcvbn
-  window.zxcvbn_load_hook?() # run load hook from user, if defined
-else if exports?
+# universal module definition based on:
+# https://github.com/umdjs/umd/blob/master/commonjsStrict.js
+loader = (root, factory) ->
+  if typeof define == 'function' and define.amd?
+    # AMD. Register as an anonymous module
+    define ['exports'], factory
+  else if typeof exports == 'object'
+    # CommonJS (including node support)
+    factory exports
+  else
+    # Add browser global
+    root.zxcvbn = {}
+    factory root.zxcvbn
+  root.zxcvbn_load_hook?() # run load hook from user, if defined
+
+loader this, (exports) ->
   exports.zxcvbn = zxcvbn

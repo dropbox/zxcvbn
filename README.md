@@ -17,9 +17,11 @@ http://tech.dropbox.com/?p=165
 
 # Installation
 
-## Using bower (recommended)
+`zxcvbn` automatically detects and supports CommonJS (node, browserify) and AMD (RequireJS). In the absense of those, it adds a single function `zxcvbn` to the global namespace.
 
-Get [`bower`](http://bower.io/)
+## Using bower
+
+Install [`node`](https://nodejs.org/download/) and [`bower`](http://bower.io/) if you haven't already. This won't make your codebase dependent on node.
 
 Get `zxcvbn`:
 
@@ -47,7 +49,21 @@ How loading works: `zxcvbn-async-bower.js` is a tiny script. On `window.load`,  
 
 680kb may seem large for a script, but since it loads in the background, and because passwords come later in most registration flows, we've never had an issue.
 
+## Using RequireJS
+
+Add [zxcvbn.js](https://raw.githubusercontent.com/dropbox/zxcvbn/master/zxcvbn.js) to your project (using bower or direct download) and import as usual:
+
+``` javascript
+requirejs(["relpath/to/zxcvbn"], function (zxcvbn) {
+    console.log(zxcvbn('Tr0ub4dour&3'));
+});
+```
+
+Note: `zxcvbn-async.js` is for manual installations. There is no need to add it to a RequireJS setup, which already provides the same asynchronous loading support.
+
 ## Manual installation
+
+This works the same as the bower instructions, without the bower dependency.
 
 Copy `zxcvbn.js` and `zxcvbn-async.js` into your codebase.
 
@@ -67,11 +83,9 @@ Note that `zxcvbn.js` can also be included directly:
 </script>
 ```
 
-But this isn't recommended, as the 680k download will block your initial page load.
+But this isn't recommended, as the 680k download will block your initial page load. Note: the advantage of using `zxcvbn-async.js` over the HTML5 `async` script attribute is that it works in old browsers.
 
 # Usage
-
-`zxcvbn` adds a single function to the global namespace:
 
 ``` javascript
 zxcvbn(password, user_inputs)
