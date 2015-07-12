@@ -9,7 +9,12 @@ function_wrap () {
 
 echo 'compiling cs -> js'
 coffee --compile --bare {matching,scoring,init}.coffee
-coffee --compile async.coffee
+
+# bower's async loading uses a different relative path 
+cp zxcvbn-async.js zxcvbn-async-bower.js
+sed -i '' 's/zxcvbn.js/bower_components\/zxcvbn\/zxcvbn.js/' zxcvbn-async-bower.js
+sed -i '' '/^\/\//d' zxcvbn-async-bower.js
+sed -i '' '/^$/d' zxcvbn-async-bower.js
 
 echo 'compiling js -> js'
 # closure's simple optimizations ended up being about 200k better than whitespace-only.
@@ -18,6 +23,5 @@ echo 'compiling js -> js'
 COMPILATION_LEVEL=SIMPLE_OPTIMIZATIONS
 cat {matching,scoring,adjacency_graphs,frequency_lists,init}.js  | function_wrap > compiled.js
 java -jar tools/closure.jar --compilation_level $COMPILATION_LEVEL --js compiled.js --js_output_file zxcvbn.js
-java -jar tools/closure.jar --compilation_level $COMPILATION_LEVEL --js async.js    --js_output_file zxcvbn-async.js
 rm -f compiled.js
-echo 'done. produced zxcvbn.js and zxcvbn-async.js'
+echo 'done'
