@@ -19,7 +19,7 @@ http://tech.dropbox.com/?p=165
 
 `zxcvbn` automatically detects and supports CommonJS (node, browserify) and AMD (RequireJS). In the absense of those, it adds a single function `zxcvbn` to the global namespace.
 
-## Using bower
+## Bower (recommended)
 
 Install [`node`](https://nodejs.org/download/) and [`bower`](http://bower.io/) if you haven't already. This won't make your codebase dependent on node.
 
@@ -49,7 +49,7 @@ How loading works: `zxcvbn-async-bower.js` is a tiny script. On `window.load`,  
 
 680kb may seem large for a script, but since it loads in the background, and because passwords come later in most registration flows, we've never had an issue.
 
-## Using RequireJS
+## RequireJS 
 
 Add [zxcvbn.js](https://raw.githubusercontent.com/dropbox/zxcvbn/master/zxcvbn.js) to your project (using bower or direct download) and import as usual:
 

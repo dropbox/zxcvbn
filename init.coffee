@@ -65,8 +65,7 @@ loader = (root, factory) ->
     factory exports
   else
     # Add browser global
-    root.zxcvbn = {}
-    factory root.zxcvbn
+    root.zxcvbn = zxcvbn
   root.zxcvbn_load_hook?() # run load hook from user, if defined
 
 loader this, (exports) ->
