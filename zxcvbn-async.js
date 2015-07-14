@@ -1,9 +1,8 @@
 // cross-browser asynchronous script loading for zxcvbn.
 // adapted from http://friendlybit.com/js/lazy-loading-asyncronous-javascript/
 
-// Suggestion: instead of manually configuring this script,
-// follow the bower setup instructions (see README) for easier installation and
-// updating.
+// You probably don't need this script; see README for bower/npm/requirejs setup
+// instructions.
 
 // If you do want to manually include zxcvbn, you'll likely only need to change
 // ZXCVBN_SRC to point to the correct relative path from your index.html.

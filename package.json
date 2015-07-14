@@ -1,18 +1,11 @@
 {
     "name": "zxcvbn",
-    "version": "1.0.0",
+    "version": "1.0.7",
     "description": "realistic password strength estimation",
-    "main": "index.js",
-    "scripts": {
-        "test": "mocha test/test-*.js",
-        "watch": "npm-watch"
-    },
-    "watch": {
-        "test": "tests/test-*.js"
-    },
+    "main": "zxcvbn.js",
     "repository": {
         "type": "git",
-        "url": "git://github.com/lowe/zxcvbn.git"
+        "url": "git://github.com/dropbox/zxcvbn.git"
     },
     "keywords": [
         "realistic",
@@ -25,11 +18,5 @@
         "validation"
     ],
     "author": "Dan Wheeler",
-    "license": "MIT",
-    "devDependencies": {
-        "coffee-script": "1.7.x",
-        "mocha": "1.21.x",
-        "npm-watch": "0.0.0",
-        "sinon": "1.10.x"
-    }
+    "license": "MIT"
 }

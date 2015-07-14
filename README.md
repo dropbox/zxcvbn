@@ -19,7 +19,7 @@ http://tech.dropbox.com/?p=165
 
 `zxcvbn` automatically detects and supports CommonJS (node, browserify) and AMD (RequireJS). In the absense of those, it adds a single function `zxcvbn` to the global namespace.
 
-## Bower (recommended)
+## Bower
 
 Install [`node`](https://nodejs.org/download/) and [`bower`](http://bower.io/) if you haven't already. This won't make your codebase dependent on node.
 
@@ -48,6 +48,19 @@ bower update zxcvbn
 How loading works: `zxcvbn-async-bower.js` is a tiny script. On `window.load`,  after your page loads and renders, it'll fetch `zxcvbn.js` in the background, which is more like 680kb (320kb gzipped), most of which is a series of dictionaries.
 
 680kb may seem large for a script, but since it loads in the background, and because passwords come later in most registration flows, we've never had an issue.
+
+## Node / npm / browserify
+
+zxcvbn works identically on the server.
+
+``` shell
+$ npm install zxcvbn
+$ node
+> var zxcvbn = require('zxcvbn').zxcvbn;
+> zxcvbn('Tr0ub4dour&3');
+```
+
+And should automatically work with browserify. The easiest browserify setup is to include `zxcvbn.js` in your main bundle. If the size of the script is an issue, consider instead adding a tiny loading script modeled after `zxcvbn-async.js` to your main bundle, similar to the bower setup described above. See comments in `zxcvbn-async.js` -- you'll likely only need to change `ZXCVBN_SRC` to make it work. 
 
 ## RequireJS 
 
