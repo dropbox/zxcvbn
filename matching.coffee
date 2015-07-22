@@ -52,6 +52,33 @@ build_dict_matcher = (dict_name, ranked_dict) ->
     matches
 
 #-------------------------------------------------------------------------------
+# dictionary match with caesar shift -------------------------------------------
+#-------------------------------------------------------------------------------
+
+caesar_variants = (password) ->
+  variants = []
+  shift = (chr) ->
+    if chr.match /[a-z]/
+      chr = String.fromCharCode 97 + (chr.charCodeAt(0) - 97 + n) % 26
+    chr
+  for n in [1..25]
+    variants.push (password.split('').map shift).join ''
+  variants
+
+caesar_match = (password) ->
+  matches = []
+  for variant in caesar_variants password.toLowerCase()
+    for matcher in DICTIONARY_MATCHERS
+      for match in matcher(variant)
+        token = password[match.i..match.j]
+        if token.toLowerCase() == match.matched_word
+          continue
+        match.caesar = true
+        match.token = token
+        matches.push match
+  matches
+
+#-------------------------------------------------------------------------------
 # dictionary match with common l33t substitutions ------------------------------
 #-------------------------------------------------------------------------------
 
