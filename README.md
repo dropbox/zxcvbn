@@ -37,7 +37,7 @@ Add this script to your index.html:
 </script>
 ```
 
-That's it!
+That's it! To make sure it loaded properly, open index.html in a browser and type `zxcvbn('Tr0ub4dour&3')` into the console.
 
 To pull in updates and bugfixes:
 
@@ -60,7 +60,7 @@ $ node
 > zxcvbn('Tr0ub4dour&3');
 ```
 
-And should automatically work with browserify. The easiest browserify setup is to include `zxcvbn.js` in your main bundle. If the size of the script is an issue, consider instead adding a tiny loading script modeled after `zxcvbn-async.js` to your main bundle, similar to the bower setup described above. See comments in `zxcvbn-async.js` -- you'll likely only need to change `ZXCVBN_SRC` to make it work. 
+And should automatically work with browserify. The easiest browserify setup is to include `zxcvbn.js` in your main bundle. If the size of the script is an issue, consider instead adding a loading script modeled after `zxcvbn-async.js` to your main bundle, such that `zxcvbn.js` loads asynchronously in the background without blocking page load. See comments in `zxcvbn-async.js` -- you'll likely only need to change `ZXCVBN_SRC` to make it work. 
 
 ## RequireJS 
 
@@ -75,8 +75,6 @@ requirejs(["relpath/to/zxcvbn"], function (zxcvbn) {
 Note: `zxcvbn-async.js` is for manual installations. There is no need to add it to a RequireJS setup, which already provides the same asynchronous loading support.
 
 ## Manual installation
-
-This works the same as the bower instructions, without the bower dependency.
 
 Copy `zxcvbn.js` and `zxcvbn-async.js` into your codebase.
 
