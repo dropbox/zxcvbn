@@ -17,7 +17,7 @@ http://tech.dropbox.com/?p=165
 
 # Installation
 
-`zxcvbn` automatically detects and supports CommonJS (node, browserify) and AMD (RequireJS). In the absense of those, it adds a single function `zxcvbn` to the global namespace.
+`zxcvbn` automatically detects and supports CommonJS (node, browserify) and AMD (RequireJS). In the absence of those, it adds a single function `zxcvbn` to the global namespace.
 
 ## Bower
 
@@ -39,7 +39,7 @@ Add this script to your index.html:
 
 That's it! To make sure it loaded properly, open index.html in a browser and type `zxcvbn('Tr0ub4dour&3')` into the console.
 
-To pull in updates and bugfixes:
+To pull in updates and bug fixes:
 
 ``` shell
 bower update zxcvbn
@@ -56,7 +56,7 @@ zxcvbn works identically on the server.
 ``` shell
 $ npm install zxcvbn
 $ node
-> var zxcvbn = require('zxcvbn').zxcvbn;
+> var zxcvbn = require('zxcvbn');
 > zxcvbn('Tr0ub4dour&3');
 ```
 
@@ -85,7 +85,7 @@ Add to your `index.html`:
 </script>
 ```
 
-Open zxcvbn-async.js and edit the `ZXCVBN_SRC` variable to point to wherever you put `zxcvbn.js`. If `index.html` and `zxcvbn.js` sit next to each other, it'll work as-is.
+Open zxcvbn-async.js and edit the `ZXCVBN_SRC` variable to point to wherever you put `zxcvbn.js`. If `zxcvbn.js` sits at the top-level directory of your project, it'll work as-is.
 
 Note that `zxcvbn.js` can also be included directly:
 
@@ -124,8 +124,6 @@ result.calc_time          # how long it took to calculate an answer,
 ````
 
 The optional `user_inputs` argument is an array of strings that `zxcvbn` will add to its internal dictionary. This can be whatever list of strings you like, but is meant for user inputs from other fields of the form, like name and email. That way a password that includes the user's personal info can be heavily penalized. This list is also good for site-specific vocabulary.
-
-When `zxcvbn` loads (after the async script fetch is complete), it'll check if a function named `zxcvbn_load_hook` is defined, and run it with no arguments if so. Most sites shouldn't need this.
 
 # Development
 
