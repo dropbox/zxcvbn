@@ -18,5 +18,8 @@
     "validation"
   ],
   "author": "Dan Wheeler",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "^2.2.5"
+  }
 }
