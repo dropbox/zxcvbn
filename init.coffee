@@ -55,18 +55,17 @@ zxcvbn = (password, user_inputs = []) ->
   result
 
 # universal module definition based on:
-# https://github.com/umdjs/umd/blob/master/commonjsStrict.js
+# https://github.com/umdjs/umd/blob/master/returnExports.js
 loader = (root, factory) ->
   if typeof define == 'function' and define.amd?
     # AMD. Register as an anonymous module
-    define ['exports'], factory
-  else if typeof exports == 'object'
-    # CommonJS (including node support)
-    factory exports
+    define [], factory
+  else if typeof module == 'object' and module.exports?
+    # works with CommonJS environments that support module.exports, like node
+    module.exports = factory()
   else
     # Add browser global
-    root.zxcvbn = zxcvbn
+    root.zxcvbn = factory()
   root.zxcvbn_load_hook?() # run load hook from user, if defined
 
-loader this, (exports) ->
-  exports.zxcvbn = zxcvbn
+loader this, -> zxcvbn
