@@ -1,6 +1,6 @@
 {
   "name": "zxcvbn",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "realistic password strength estimation",
   "main": "zxcvbn.js",
   "repository": {
