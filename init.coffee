@@ -1,71 +1,85 @@
-# initialize matcher lists
-DICTIONARY_MATCHERS = [
-  build_dict_matcher('passwords',    build_ranked_dict(passwords)),
-  build_dict_matcher('english',      build_ranked_dict(english)),
-  build_dict_matcher('male_names',   build_ranked_dict(male_names)),
-  build_dict_matcher('female_names', build_ranked_dict(female_names)),
-  build_dict_matcher('surnames',     build_ranked_dict(surnames))
-]
+Init = do ->
 
-MATCHERS = DICTIONARY_MATCHERS.concat [
-  l33t_match,
-  digits_match, year_match, date_match,
-  repeat_match, sequence_match,
-  spatial_match
-]
+  # on qwerty, 'g' has degree 6, being adjacent to 'ftyhbv'. '\' has degree 1.
+  # this calculates the average over all keys.
+  # TODO move this outside of init code.
+  calc_average_degree = (graph) ->
+    average = 0
+    for key, neighbors of graph
+      average += (n for n in neighbors when n).length
+    average /= (k for k,v of graph).length
+    average
 
-GRAPHS =
-  'qwerty': qwerty
-  'dvorak': dvorak
-  'keypad': keypad
-  'mac_keypad': mac_keypad
+  time = -> (new Date()).getTime()
 
-# on qwerty, 'g' has degree 6, being adjacent to 'ftyhbv'. '\' has degree 1.
-# this calculates the average over all keys.
-calc_average_degree = (graph) ->
-  average = 0
-  for key, neighbors of graph
-    average += (n for n in neighbors when n).length
-  average /= (k for k,v of graph).length
-  average
+  zxcvbn = (password, user_inputs = []) ->
+    start = time()
 
-KEYBOARD_AVERAGE_DEGREE     = calc_average_degree(qwerty)
-KEYPAD_AVERAGE_DEGREE       = calc_average_degree(keypad) # slightly different for keypad/mac keypad, but close enough
+    # add the user inputs matcher on a per-request basis to keep things stateless
+    sanitized_inputs = []
+    for arg in user_inputs
+      if typeof arg in ["string", "number", "boolean"]
+        sanitized_inputs.push arg.toString().toLowerCase()
+    user_inputs_matcher = Matching.build_dict_matcher 'user_inputs', Matching.build_ranked_dict(sanitized_inputs)
 
-KEYBOARD_STARTING_POSITIONS = (k for k,v of qwerty).length
-KEYPAD_STARTING_POSITIONS   = (k for k,v of keypad).length
+    matches = Matching.omnimatch password, Init.MATCHERS.concat(user_inputs_matcher)
 
-time = -> (new Date()).getTime()
+    result = Scoring.minimum_entropy_match_sequence password, matches
+    result.calc_time = time() - start
+    result
 
-# now that frequency lists are loaded, replace zxcvbn stub function.
-zxcvbn = (password, user_inputs = []) ->
-  start = time()
+  dictionary_matchers = [
+    Matching.build_dict_matcher('passwords',     Matching.build_ranked_dict(FrequencyLists.passwords)),
+    Matching.build_dict_matcher('english',       Matching.build_ranked_dict(FrequencyLists.english)),
+    Matching.build_dict_matcher('male_names',    Matching.build_ranked_dict(FrequencyLists.male_names)),
+    Matching.build_dict_matcher('female_names',  Matching.build_ranked_dict(FrequencyLists.female_names)),
+    Matching.build_dict_matcher('surnames',      Matching.build_ranked_dict(FrequencyLists.surnames))
+  ]
 
-  # add the user inputs matcher on a per-request basis to keep things stateless
-  sanitized_inputs = []
-  for arg in user_inputs
-    if arg?
-      sanitized_inputs.push arg.toString().toLowerCase()
-  user_inputs_matcher = build_dict_matcher 'user_inputs', build_ranked_dict(sanitized_inputs)
+  # ------------------------------------------------------------------------------
+  # universal module definition based on: ----------------------------------------
+  # https://github.com/umdjs/umd/blob/master/returnExports.js --------------------
+  # ------------------------------------------------------------------------------
 
-  matches = omnimatch password, MATCHERS.concat(user_inputs_matcher)
+  umd = (root, factory) ->
+    if typeof define == 'function' and define.amd?
+      # AMD. Register as an anonymous module
+      define [], factory
+    else if typeof module == 'object' and module.exports?
+      # works with CommonJS environments that support module.exports, like node
+      module.exports = factory()
+    else
+      # Add browser global
+      root.zxcvbn = factory()
+    root.zxcvbn_load_hook?() # DEPRICATED run load hook from user, if defined. TODO remove 
 
-  result = minimum_entropy_match_sequence password, matches
-  result.calc_time = time() - start
-  result
+  # do module export
+  umd this, -> zxcvbn
 
-# universal module definition based on:
-# https://github.com/umdjs/umd/blob/master/returnExports.js
-loader = (root, factory) ->
-  if typeof define == 'function' and define.amd?
-    # AMD. Register as an anonymous module
-    define [], factory
-  else if typeof module == 'object' and module.exports?
-    # works with CommonJS environments that support module.exports, like node
-    module.exports = factory()
-  else
-    # Add browser global
-    root.zxcvbn = factory()
-  root.zxcvbn_load_hook?() # run load hook from user, if defined
+  # ------------------------------------------------------------------------------
+  # return value: graphs and matchers --------------------------------------------
+  # ------------------------------------------------------------------------------
 
-loader this, -> zxcvbn
+  DICTIONARY_MATCHERS: dictionary_matchers
+
+  MATCHERS: dictionary_matchers.concat [
+    Matching.l33t_match,
+    Matching.digits_match, 
+    Matching.year_match, 
+    Matching.date_match,
+    Matching.repeat_match, 
+    Matching.sequence_match,
+    Matching.spatial_match
+  ]
+
+  GRAPHS:
+    'qwerty':     AdjacencyGraphs.qwerty
+    'dvorak':     AdjacencyGraphs.dvorak
+    'keypad':     AdjacencyGraphs.keypad
+    'mac_keypad': AdjacencyGraphs.mac_keypad
+
+  KEYBOARD_AVERAGE_DEGREE: calc_average_degree(AdjacencyGraphs.qwerty)
+  KEYPAD_AVERAGE_DEGREE:   calc_average_degree(AdjacencyGraphs.keypad) # slightly different for keypad/mac keypad, but close enough
+
+  KEYBOARD_STARTING_POSITIONS: (k for k,v of AdjacencyGraphs.qwerty).length
+  KEYPAD_STARTING_POSITIONS:   (k for k,v of AdjacencyGraphs.keypad).length

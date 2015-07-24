@@ -1,4 +1,4 @@
-zxcvbn = require('../zxcvbn').zxcvbn;
+zxcvbn = require('../zxcvbn');
 assert = require('assert');
 
 describe 'zxcvbn', ->

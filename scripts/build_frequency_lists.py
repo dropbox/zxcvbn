@@ -145,7 +145,7 @@ def filter_ascii(lst):
     return [word for word in lst if all(ord(c) < 128 for c in word)]
 
 def to_js(lst, lst_name):
-    return 'var %s = %s;\n\n' % (lst_name, simplejson.dumps(lst))
+    return '%s: %s' % (lst_name, simplejson.dumps(lst))
 
 def main():
     english = get_ranked_english()
@@ -168,9 +168,15 @@ def main():
 
     with open('../frequency_lists.js', 'w') as f: # words are all ascii at this point
         lsts = locals()
+        f.write('var FrequencyLists = {\n    ')
+
+        lines = []
         for lst_name in 'passwords male_names female_names surnames english'.split():
             lst = lsts[lst_name]
-            f.write(to_js(lst, lst_name))
+            lines.append(to_js(lst, lst_name))
+
+        f.write(',\n    '.join(lines))
+        f.write('\n};\n')
 
     print '\nall done! totals:\n'
     print 'passwords....', len(passwords)

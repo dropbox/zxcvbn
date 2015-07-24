@@ -77,9 +77,14 @@ def build_graph(layout_str, slanted):
 
 if __name__ == '__main__':
     with open('adjacency_graphs.js', 'w') as f:
+        f.write('var AdjacencyGraphs = {\n    ')
+        lines = []
         for graph_name, args in [('qwerty', (qwerty, True)),
                                  ('dvorak', (dvorak, True)),
                                  ('keypad', (keypad, False)),
                                  ('mac_keypad', (mac_keypad, False))]:
-            graph = build_graph(*args)
-            f.write('var %s = %s;\n\n' % (graph_name, simplejson.dumps(graph, sort_keys=True)))
+            graph = build_graph(*args)            
+            lines.append('%s: %s' % (graph_name, simplejson.dumps(graph, sort_keys=True)))
+        f.write(',\n    '.join(lines))
+        f.write('\n};\n')
+
