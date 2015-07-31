@@ -32,15 +32,16 @@ mac_keypad = r'''
 
 def get_slanted_adjacent_coords(x, y):
     '''
-    returns the six adjacent coordinates on a standard keyboard, where each row is slanted to the right from the last.
-    adjacencies are clockwise, starting with key to the left, then two keys above, then right key, then two keys below.
-    (that is, only near-diagonal keys are adjacent, so g's coordinate is adjacent to those of t,y,b,v, but not those of r,u,n,c.)
+    returns the six adjacent coordinates on a standard keyboard, where each row is slanted to the
+    right from the last. adjacencies are clockwise, starting with key to the left, then two keys
+    above, then right key, then two keys below. (that is, only near-diagonal keys are adjacent,
+    so g's coordinate is adjacent to those of t,y,b,v, but not those of r,u,n,c.)
     '''
     return [(x-1, y), (x, y-1), (x+1, y-1), (x+1, y), (x, y+1), (x-1, y+1)]
 
 def get_aligned_adjacent_coords(x, y):
     '''
-    returns the nine clockwise adjacent coordinates on a keypad, where each row is vertically aligned.
+    returns the nine clockwise adjacent coordinates on a keypad, where each row is vert aligned.
     '''
     return [(x-1, y), (x-1, y-1), (x, y-1), (x+1, y-1), (x+1, y), (x+1, y+1), (x, y+1), (x-1, y+1)]
 
@@ -55,11 +56,12 @@ def build_graph(layout_str, slanted):
     position_table = {} # maps from tuple (x,y) -> characters at that position.
     tokens = layout_str.split()
     token_size = len(tokens[0])
-    x_unit = token_size + 1 # x position unit length is token length plus 1 for the following whitespace.
+    x_unit = token_size + 1 # x position unit len is token len plus 1 for the following whitespace.
     adjacency_func = get_slanted_adjacent_coords if slanted else get_aligned_adjacent_coords
-    assert all(len(token) == token_size for token in tokens), 'token length mismatch:\n ' + layout_str
+    assert all(len(token) == token_size for token in tokens), 'token len mismatch:\n ' + layout_str
     for y, line in enumerate(layout_str.split('\n')):
-        slant = y - 1 if slanted else 0 # the way i illustrated keys above, each qwerty row is indented one space in from the last
+        # the way I illustrated keys above, each qwerty row is indented one space in from the last
+        slant = y - 1 if slanted else 0
         for token in line.split():
             x, remainder = divmod(line.index(token) - slant, x_unit)
             assert remainder == 0, 'unexpected x offset for %s in:\n%s' % (token, layout_str)
@@ -70,8 +72,10 @@ def build_graph(layout_str, slanted):
         for char in chars:
             adjacency_graph[char] = []
             for coord in adjacency_func(x, y):
-                # position in the list indicates direction (for qwerty, 0 is left, 1 is top, 2 is top right, ...)
-                # for edge chars like 1 or m, insert None as a placeholder when needed so that each character in the graph has a same-length adjacency list.
+                # position in the list indicates direction
+                # (for qwerty, 0 is left, 1 is top, 2 is top right, ...)
+                # for edge chars like 1 or m, insert None as a placeholder when needed
+                # so that each character in the graph has a same-length adjacency list.
                 adjacency_graph[char].append(position_table.get(coord, None))
     return adjacency_graph
 
@@ -83,7 +87,7 @@ if __name__ == '__main__':
                                  ('dvorak', (dvorak, True)),
                                  ('keypad', (keypad, False)),
                                  ('mac_keypad', (mac_keypad, False))]:
-            graph = build_graph(*args)            
+            graph = build_graph(*args)
             lines.append('%s: %s' % (graph_name, simplejson.dumps(graph, sort_keys=True)))
         f.write(',\n    '.join(lines))
         f.write('\n};\n')

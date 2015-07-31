@@ -1,4 +1,4 @@
-Matching = 
+Matching =
   empty: (obj) -> (k for k of obj).length == 0
   extend: (lst, lst2) -> lst.push.apply lst, lst2
   translate: (string, chr_map) -> (chr_map[chr] or chr for chr in string.split('')).join('')
@@ -184,9 +184,9 @@ Matching =
               found = true
               found_direction = cur_direction
               if adj.indexOf(cur_char) == 1
-                # index 1 in the adjacency means the key is shifted, 
+                # index 1 in the adjacency means the key is shifted,
                 # 0 means unshifted: A vs a, % vs 5, etc.
-                # for example, 'q' is adjacent to the entry '2@'. 
+                # for example, 'q' is adjacent to the entry '2@'.
                 # @ is shifted w/ index 1, 2 is unshifted.
                 shifted_count += 1
               if last_direction != found_direction
@@ -253,7 +253,7 @@ Matching =
       seq_name = null
       seq_direction = null # 1 for ascending seq abcd, -1 for dcba
       for seq_candidate_name, seq_candidate of @SEQUENCES
-        [i_n, j_n] = (seq_candidate.indexOf(chr) for chr in [password.charAt(i), password.charAt(j)])
+        [i_n, j_n] = (seq_candidate.indexOf(chr) for chr in [password.charAt(i),password.charAt(j)])
         if i_n > -1 and j_n > -1
           direction = j_n - i_n
           if direction in [1, -1]
@@ -268,7 +268,7 @@ Matching =
           if cur_n - prev_n == seq_direction
             j += 1
           else
-            if j - i > 2 # don't consider length 1 or 2 chains. TODO revisit. 
+            if j - i > 2 # don't consider length 1 or 2 chains. TODO revisit.
               result.push
                 pattern: 'sequence'
                 i: i

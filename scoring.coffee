@@ -23,14 +23,17 @@ Scoring =
   minimum_entropy_match_sequence: (password, matches) ->
     bruteforce_cardinality = @calc_bruteforce_cardinality password # e.g. 26 for lowercase
     up_to_k = []      # minimum entropy up to k.
-    backpointers = [] # for the optimal sequence of matches up to k, holds the final match (match.j == k). null means the sequence ends w/ a brute-force character.
+    # for the optimal seq of matches up to k, backpointers holds the final match (match.j == k).
+    # null means the sequence ends w/ a brute-force character.
+    backpointers = []
     for k in [0...password.length]
-      # starting scenario to try and beat: adding a brute-force character to the minimum entropy sequence at k-1.
+      # starting scenario to try and beat:
+      # adding a brute-force character to the minimum entropy sequence at k-1.
       up_to_k[k] = (up_to_k[k-1] or 0) + @lg bruteforce_cardinality
       backpointers[k] = null
       for match in matches when match.j == k
         [i, j] = [match.i, match.j]
-        # see if best entropy up to i-1 + entropy of this match is less than the current minimum at j.
+        # see if best entropy up to i-1 + entropy of this match is less than current minimum at j.
         candidate_entropy = (up_to_k[i-1] or 0) + @calc_entropy(match)
         if candidate_entropy < up_to_k[j]
           up_to_k[j] = candidate_entropy
@@ -49,7 +52,8 @@ Scoring =
     match_sequence.reverse()
 
     # fill in the blanks between pattern matches with bruteforce "matches"
-    # that way the match sequence fully covers the password: match1.j == match2.i - 1 for every adjacent match1, match2.
+    # that way the match sequence fully covers the password:
+    # match1.j == match2.i - 1 for every adjacent match1, match2.
     make_bruteforce_match = (i, j) =>
       pattern: 'bruteforce'
       i: i
@@ -99,7 +103,7 @@ Scoring =
   # adjust for your site accordingly if you use another hash function, possibly by
   # several orders of magnitude!
 
-  entropy_to_crack_time: (entropy) -> 
+  entropy_to_crack_time: (entropy) ->
     .5 * Math.pow(2, entropy) * @SECONDS_PER_GUESS # .5 for average vs total
 
   crack_time_to_score: (seconds) ->
@@ -206,8 +210,9 @@ Scoring =
     # allcaps and end-capitalized are common enough too, underestimate as 1 extra bit to be safe.
     for regex in [@START_UPPER, @END_UPPER, @ALL_UPPER]
       return 1 if word.match regex
-    # otherwise calculate the number of ways to capitalize U+L uppercase+lowercase letters with U uppercase letters or less.
-    # or, if there's more uppercase than lower (for e.g. PASSwORD), the number of ways to lowercase U+L letters with L lowercase letters or less.
+    # otherwise calculate the number of ways to capitalize U+L uppercase+lowercase letters
+    # with U uppercase letters or less. or, if there's more uppercase than lower (for eg. PASSwORD),
+    # the number of ways to lowercase U+L letters with L lowercase letters or less.
     U = (chr for chr in word.split('') when chr.match /[A-Z]/).length
     L = (chr for chr in word.split('') when chr.match /[a-z]/).length
     possibilities = 0
@@ -218,8 +223,8 @@ Scoring =
     return 0 if not match.l33t
     possibilities = 0
     for subbed, unsubbed of match.sub
-      S = (chr for chr in match.token.split('') when chr == subbed).length   # number of subbed characters.
-      U = (chr for chr in match.token.split('') when chr == unsubbed).length # number of unsubbed characters.
+      S = (chr for chr in match.token.split('') when chr == subbed).length   # num of subbed chars
+      U = (chr for chr in match.token.split('') when chr == unsubbed).length # num of unsubbed chars
       possibilities += @nCk(U + S, i) for i in [0..Math.min(U, S)]
     # corner: return 1 bit for single-letter subs, like 4pple -> apple, instead of 0.
     @lg(possibilities) or 1

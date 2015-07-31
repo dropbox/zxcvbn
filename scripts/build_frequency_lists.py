@@ -12,8 +12,8 @@ SLEEP_TIME = 20 # seconds
 
 def get_ranked_english():
     '''
-    wikitionary has a list of ~40k English words, ranked by frequency of occurance in TV and movie transcripts.
-    more details at:
+    wikitionary has a list of ~40k English words, ranked by frequency of occurance in TV
+    and movie transcripts. more details at:
     http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/TV/2006/explanation
 
     the list is separated into pages of 1000 or 2000 terms each.
@@ -82,12 +82,13 @@ def parse_wiki_terms(doc):
             term = term.replace('</a>', '')
             term = term[term.index('>')+1:].lower()
             results.append(term)
-    assert len(results) in [1000, 2000, 1284] # early docs have 1k entries, later have 2k, last doc has 1284
+    assert len(results) in [1000, 2000, 1284] # early docs have 1k entries, later 2k, last 1284
     return results
 
 def get_ranked_census_names():
     '''
-    takes name lists from the the 2000 us census, prepares as a json array in order of frequency (most common names first).
+    takes name lists from the the 2000 us census, prepares as a json array in order of frequency
+    (most common names first).
 
     more info:
     http://www.census.gov/genealogy/www/data/2000surnames/index.html
@@ -98,7 +99,8 @@ def get_ranked_census_names():
     http://www.census.gov/genealogy/names/dist.female.first
     '''
     FILE_TMPL = '../data/us_census_2000_%s.txt'
-    SURNAME_CUTOFF_PERCENTILE = 85 # ie7 can't handle huge lists. cut surname list off at a certain percentile.
+    # ie7 can't handle huge lists. cut surname list off at a certain percentile.
+    SURNAME_CUTOFF_PERCENTILE = 85
     lists = []
     for list_name in ['surnames', 'male_first', 'female_first']:
         path = FILE_TMPL % list_name
