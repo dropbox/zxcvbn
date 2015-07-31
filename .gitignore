@@ -1,7 +1,10 @@
-*~
 *.js
 !zxcvbn.js
 !zxcvbn-async.js
 !zxcvbn-async-bower.js
 test/index_dev.html
 node_modules
+*~
+*.swp
+*.swo
+tmux-*.log
