@@ -82,7 +82,8 @@ Init = do ->
     'mac_keypad': AdjacencyGraphs.mac_keypad
 
   KEYBOARD_AVERAGE_DEGREE: calc_average_degree(AdjacencyGraphs.qwerty)
-  KEYPAD_AVERAGE_DEGREE:   calc_average_degree(AdjacencyGraphs.keypad) # slightly different for keypad/mac keypad, but close enough
+  # slightly different for keypad/mac keypad, but close enough
+  KEYPAD_AVERAGE_DEGREE:   calc_average_degree(AdjacencyGraphs.keypad)
 
   KEYBOARD_STARTING_POSITIONS: (k for k,v of AdjacencyGraphs.qwerty).length
   KEYPAD_STARTING_POSITIONS:   (k for k,v of AdjacencyGraphs.keypad).length
