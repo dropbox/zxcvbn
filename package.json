@@ -8,7 +8,7 @@
     "url": "git://github.com/dropbox/zxcvbn.git"
   },
   "scripts": {
-    "build": "browserify --standalone zxcvbn -t coffeeify --extension='.coffee' main.coffee | uglifyjs -o zxcvbn.js"
+    "build": "browserify --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify main.coffee -o zxcvbn.js"
   },
   "keywords": [
     "realistic",
@@ -23,10 +23,10 @@
   "author": "Dan Wheeler",
   "license": "MIT",
   "devDependencies": {
-    "mocha": "^2.2.5",
     "browserify": "^11.0.1",
-    "watchify": "^3.3.1",
     "coffeeify": "^1.1.0",
-    "uglifyjs": "^2.4.10"
+    "mocha": "^2.2.5",
+    "uglifyify": "^3.0.1",
+    "watchify": "^3.3.1"
   }
 }
