@@ -1,3 +1,21 @@
+AdjacencyGraphs = require('./adjacency_graphs')
+
+# on qwerty, 'g' has degree 6, being adjacent to 'ftyhbv'. '\' has degree 1.
+# this calculates the average over all keys.
+calc_average_degree = (graph) ->
+  average = 0
+  for key, neighbors of graph
+    average += (n for n in neighbors when n).length
+  average /= (k for k,v of graph).length
+  average
+
+KEYBOARD_AVERAGE_DEGREE = calc_average_degree(AdjacencyGraphs.qwerty)
+# slightly different for keypad/mac keypad, but close enough
+KEYPAD_AVERAGE_DEGREE = calc_average_degree(AdjacencyGraphs.keypad)
+
+KEYBOARD_STARTING_POSITIONS = (k for k,v of AdjacencyGraphs.qwerty).length
+KEYPAD_STARTING_POSITIONS = (k for k,v of AdjacencyGraphs.keypad).length
+
 Scoring =
   nCk: (n, k) ->
     # http://blog.plover.com/math/choose.html
@@ -167,11 +185,11 @@ Scoring =
 
   spatial_entropy: (match) ->
     if match.graph in ['qwerty', 'dvorak']
-      s = Init.KEYBOARD_STARTING_POSITIONS
-      d = Init.KEYBOARD_AVERAGE_DEGREE
+      s = KEYBOARD_STARTING_POSITIONS
+      d = KEYBOARD_AVERAGE_DEGREE
     else
-      s = Init.KEYPAD_STARTING_POSITIONS
-      d = Init.KEYPAD_AVERAGE_DEGREE
+      s = KEYPAD_STARTING_POSITIONS
+      d = KEYPAD_AVERAGE_DEGREE
     possibilities = 0
     L = match.token.length
     t = match.turns
@@ -274,3 +292,5 @@ Scoring =
       "#{1 + Math.ceil(seconds / year)} years"
     else
       'centuries'
+
+module.exports = Scoring

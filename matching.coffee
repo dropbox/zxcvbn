@@ -1,3 +1,32 @@
+FrequencyLists = require('./frequency_lists')
+AdjacencyGraphs = require('./adjacency_graphs')
+
+build_ranked_dict = (ordered_list) ->
+  result = {}
+  i = 1 # rank starts at 1, not 0
+  for word in ordered_list
+    result[word] = i
+    i += 1
+  result
+
+RANKED_DICTIONARIES =
+  passwords:    build_ranked_dict FrequencyLists.passwords
+  english:      build_ranked_dict FrequencyLists.english
+  surnames:     build_ranked_dict FrequencyLists.surnames
+  male_names:   build_ranked_dict FrequencyLists.male_names
+  female_names: build_ranked_dict FrequencyLists.female_names
+
+GRAPHS =
+  qwerty:     AdjacencyGraphs.qwerty
+  dvorak:     AdjacencyGraphs.dvorak
+  keypad:     AdjacencyGraphs.keypad
+  mac_keypad: AdjacencyGraphs.mac_keypad
+
+SEQUENCES =
+  lower: 'abcdefghijklmnopqrstuvwxyz'
+  upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  digits: '01234567890'
+
 Matching =
   empty: (obj) -> (k for k of obj).length == 0
   extend: (lst, lst2) -> lst.push.apply lst, lst2
@@ -7,8 +36,18 @@ Matching =
   # omnimatch -- combine everything ----------------------------------------------
   # ------------------------------------------------------------------------------
 
-  omnimatch: (password, matchers) ->
+  omnimatch: (password) ->
     matches = []
+    matchers = [
+      @dictionary_match
+      @l33t_match
+      @digits_match
+      @year_match
+      @date_match
+      @repeat_match
+      @sequence_match
+      @spatial_match
+    ]
     for matcher in matchers
       @extend matches, matcher.call(this, password)
     matches.sort (match1, match2) ->
@@ -18,38 +57,28 @@ Matching =
   # dictionary match (common passwords, english, last names, etc) ----------------
   #-------------------------------------------------------------------------------
 
-  dictionary_match: (password, ranked_dict) ->
+  dictionary_match: (password) ->
     result = []
     len = password.length
     password_lower = password.toLowerCase()
-    for i in [0...len]
-      for j in [i...len]
-        if password_lower[i..j] of ranked_dict
-          word = password_lower[i..j]
-          rank = ranked_dict[word]
-          result.push(
-            pattern: 'dictionary'
-            i: i
-            j: j
-            token: password[i..j]
-            matched_word: word
-            rank: rank
-          )
+    for dictionary_name, ranked_dict of RANKED_DICTIONARIES
+      for i in [0...len]
+        for j in [i...len]
+          if password_lower[i..j] of ranked_dict
+            word = password_lower[i..j]
+            rank = ranked_dict[word]
+            result.push
+              pattern: 'dictionary'
+              i: i
+              j: j
+              token: password[i..j]
+              matched_word: word
+              rank: rank
+              dictionary_name: dictionary_name
     result
 
-  build_ranked_dict: (unranked_list) ->
-    result = {}
-    i = 1 # rank starts at 1, not 0
-    for word in unranked_list
-      result[word] = i
-      i += 1
-    result
-
-  build_dict_matcher: (dict_name, ranked_dict) ->
-    (password) =>
-      matches = @dictionary_match(password, ranked_dict)
-      match.dictionary_name = dict_name for match in matches
-      matches
+  set_user_input_dictionary: (ordered_list) ->
+    RANKED_DICTIONARIES['user_inputs'] = build_ranked_dict ordered_list.slice()
 
   #-------------------------------------------------------------------------------
   # dictionary match with common l33t substitutions ------------------------------
@@ -135,20 +164,19 @@ Matching =
     matches = []
     for sub in @enumerate_l33t_subs @relevant_l33t_subtable password
       break if @empty sub # corner case: password has no relevant subs.
-      for matcher in Init.DICTIONARY_MATCHERS
-        subbed_password = @translate password, sub
-        for match in matcher(subbed_password)
-          token = password[match.i..match.j]
-          if token.toLowerCase() == match.matched_word
-            continue # only return the matches that contain an actual substitution
-          match_sub = {} # subset of mappings in sub that are in use for this match
-          for subbed_chr, chr of sub when token.indexOf(subbed_chr) != -1
-            match_sub[subbed_chr] = chr
-          match.l33t = true
-          match.token = token
-          match.sub = match_sub
-          match.sub_display = ("#{k} -> #{v}" for k,v of match_sub).join(', ')
-          matches.push match
+      subbed_password = @translate password, sub
+      for match in @dictionary_match(subbed_password)
+        token = password[match.i..match.j]
+        if token.toLowerCase() == match.matched_word
+          continue # only return the matches that contain an actual substitution
+        match_sub = {} # subset of mappings in sub that are in use for this match
+        for subbed_chr, chr of sub when token.indexOf(subbed_chr) != -1
+          match_sub[subbed_chr] = chr
+        match.l33t = true
+        match.token = token
+        match.sub = match_sub
+        match.sub_display = ("#{k} -> #{v}" for k,v of match_sub).join(', ')
+        matches.push match
     matches
 
   # ------------------------------------------------------------------------------
@@ -157,7 +185,7 @@ Matching =
 
   spatial_match: (password) ->
     matches = []
-    for graph_name, graph of Init.GRAPHS
+    for graph_name, graph of GRAPHS
       @extend matches, @spatial_match_helper(password, graph, graph_name)
     matches
 
@@ -239,11 +267,6 @@ Matching =
       i = j
     result
 
-  SEQUENCES:
-    lower: 'abcdefghijklmnopqrstuvwxyz'
-    upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    digits: '01234567890'
-
   sequence_match: (password) ->
     result = []
     i = 0
@@ -252,7 +275,7 @@ Matching =
       seq = null # either lower, upper, or digits
       seq_name = null
       seq_direction = null # 1 for ascending seq abcd, -1 for dcba
-      for seq_candidate_name, seq_candidate of @SEQUENCES
+      for seq_candidate_name, seq_candidate of SEQUENCES
         [i_n, j_n] = (seq_candidate.indexOf(chr) for chr in [password.charAt(i),password.charAt(j)])
         if i_n > -1 and j_n > -1
           direction = j_n - i_n
@@ -444,3 +467,5 @@ Matching =
     unless 1900 <= year <= 2019
       return [false, []]
     [true, [day, month, year]]
+
+module.exports = Matching
