@@ -1,26 +1,36 @@
 {
     "name": "zxcvbn",
+    "description": "realistic password strength estimation",
     "main": [
-        "zxcvbn.js",
-        "zxcvbn-async-bower.js"
+        "lib/zxcvbn.js",
+        "lib/zxcvbn-async-loader.js"
+    ],
+    "keywords": [
+      "password",
+      "passphrase",
+      "strength",
+      "quality",
+      "estimation",
+      "estimate",
+      "meter",
+      "pattern",
+      "matcher",
+      "security",
+      "authentication",
+      "cracking",
+      "scoring",
+      "entropy",
+      "bruteforce",
+      "zxcvbn"
     ],
     "ignore": [
-        ".gitignore",
-        ".npmignore",
-        "adjacency_graphs.js",
-        "async.coffee",
-        "bower.json",
-        "compile_and_minify.sh",
+        "/.*",
+        "*.json",
+        "node_modules",
         "data",
-        "frequency_lists.js",
-        "index.js",
-        "init.coffee",
-        "matching.coffee",
-        "package.json",
-        "scoring.coffee",
-        "scripts",
-        "test",
-        "tools",
-        "zxcvbn-async.js"
+        "data-scripts",
+        "demo",
+        "src",
+        "test"
         ]
 }

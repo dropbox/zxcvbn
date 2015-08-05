@@ -8,18 +8,26 @@
     "url": "git://github.com/dropbox/zxcvbn.git"
   },
   "scripts": {
-    "build": "browserify --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify main.coffee -o zxcvbn.js",
-    "watch": "watchify -v --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify main.coffee -o zxcvbn.js"
+    "build": "browserify --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee -o lib/zxcvbn.js",
+    "watch": "watchify -v --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee -o lib/zxcvbn.js"
   },
   "keywords": [
-    "realistic",
     "password",
+    "passphrase",
     "strength",
+    "quality",
     "estimation",
     "estimate",
     "meter",
-    "validate",
-    "validation"
+    "pattern",
+    "matcher",
+    "security",
+    "authentication",
+    "cracking",
+    "scoring",
+    "entropy",
+    "bruteforce",
+    "zxcvbn"
   ],
   "author": "Dan Wheeler",
   "license": "MIT",
