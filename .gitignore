@@ -1,8 +1,8 @@
 *.js
-!zxcvbn.js
-!zxcvbn-async.js
-!zxcvbn-async-bower.js
-test/index_dev.html
+!zxcvbn*.js
+!demo/jquery.js
+!demo/require.js
+!demo/mustache.js
 node_modules
 *~
 *.swp

@@ -189,7 +189,7 @@ props_tmpl = '''
 </div>
 '''
 
-window.zxcvbn_load_hook = ->
+requirejs ['../lib/zxcvbn'], (zxcvbn) ->
   $ ->
     results_lst = []
     for password in test_passwords.split('\n') when password
