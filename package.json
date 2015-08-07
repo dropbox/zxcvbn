@@ -2,7 +2,7 @@
   "name": "zxcvbn",
   "version": "2.0.2",
   "description": "realistic password strength estimation",
-  "main": "zxcvbn.js",
+  "main": "lib/zxcvbn.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/dropbox/zxcvbn.git"
@@ -26,8 +26,7 @@
     "cracking",
     "scoring",
     "entropy",
-    "bruteforce",
-    "zxcvbn"
+    "bruteforce"
   ],
   "author": "Dan Wheeler",
   "license": "MIT",
