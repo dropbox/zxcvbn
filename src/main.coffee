@@ -1,5 +1,5 @@
-Matching = require('./matching')
-Scoring = require('./scoring')
+matching = require('./matching')
+scoring = require('./scoring')
 
 time = -> (new Date()).getTime()
 
@@ -10,9 +10,9 @@ zxcvbn = (password, user_inputs = []) ->
   for arg in user_inputs
     if typeof arg in ["string", "number", "boolean"]
       sanitized_inputs.push arg.toString().toLowerCase()
-  Matching.set_user_input_dictionary sanitized_inputs
-  matches = Matching.omnimatch password
-  result = Scoring.minimum_entropy_match_sequence password, matches
+  matching.set_user_input_dictionary sanitized_inputs
+  matches = matching.omnimatch password
+  result = scoring.minimum_entropy_match_sequence password, matches
   result.calc_time = time() - start
   result
 

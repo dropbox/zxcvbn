@@ -1,5 +1,5 @@
-FrequencyLists = require('./frequency_lists')
-AdjacencyGraphs = require('./adjacency_graphs')
+frequency_lists = require('./frequency_lists')
+adjacency_graphs = require('./adjacency_graphs')
 
 build_ranked_dict = (ordered_list) ->
   result = {}
@@ -10,24 +10,24 @@ build_ranked_dict = (ordered_list) ->
   result
 
 RANKED_DICTIONARIES =
-  passwords:    build_ranked_dict FrequencyLists.passwords
-  english:      build_ranked_dict FrequencyLists.english
-  surnames:     build_ranked_dict FrequencyLists.surnames
-  male_names:   build_ranked_dict FrequencyLists.male_names
-  female_names: build_ranked_dict FrequencyLists.female_names
+  passwords:    build_ranked_dict frequency_lists.passwords
+  english:      build_ranked_dict frequency_lists.english
+  surnames:     build_ranked_dict frequency_lists.surnames
+  male_names:   build_ranked_dict frequency_lists.male_names
+  female_names: build_ranked_dict frequency_lists.female_names
 
 GRAPHS =
-  qwerty:     AdjacencyGraphs.qwerty
-  dvorak:     AdjacencyGraphs.dvorak
-  keypad:     AdjacencyGraphs.keypad
-  mac_keypad: AdjacencyGraphs.mac_keypad
+  qwerty:     adjacency_graphs.qwerty
+  dvorak:     adjacency_graphs.dvorak
+  keypad:     adjacency_graphs.keypad
+  mac_keypad: adjacency_graphs.mac_keypad
 
 SEQUENCES =
   lower: 'abcdefghijklmnopqrstuvwxyz'
   upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
   digits: '01234567890'
 
-Matching =
+matching =
   empty: (obj) -> (k for k of obj).length == 0
   extend: (lst, lst2) -> lst.push.apply lst, lst2
   translate: (string, chr_map) -> (chr_map[chr] or chr for chr in string.split('')).join('')
@@ -468,4 +468,4 @@ Matching =
       return [false, []]
     [true, [day, month, year]]
 
-module.exports = Matching
+module.exports = matching

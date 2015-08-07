@@ -1,4 +1,4 @@
-AdjacencyGraphs = require('./adjacency_graphs')
+adjacency_graphs = require('./adjacency_graphs')
 
 # on qwerty, 'g' has degree 6, being adjacent to 'ftyhbv'. '\' has degree 1.
 # this calculates the average over all keys.
@@ -9,14 +9,14 @@ calc_average_degree = (graph) ->
   average /= (k for k,v of graph).length
   average
 
-KEYBOARD_AVERAGE_DEGREE = calc_average_degree(AdjacencyGraphs.qwerty)
+KEYBOARD_AVERAGE_DEGREE = calc_average_degree(adjacency_graphs.qwerty)
 # slightly different for keypad/mac keypad, but close enough
-KEYPAD_AVERAGE_DEGREE = calc_average_degree(AdjacencyGraphs.keypad)
+KEYPAD_AVERAGE_DEGREE = calc_average_degree(adjacency_graphs.keypad)
 
-KEYBOARD_STARTING_POSITIONS = (k for k,v of AdjacencyGraphs.qwerty).length
-KEYPAD_STARTING_POSITIONS = (k for k,v of AdjacencyGraphs.keypad).length
+KEYBOARD_STARTING_POSITIONS = (k for k,v of adjacency_graphs.qwerty).length
+KEYPAD_STARTING_POSITIONS = (k for k,v of adjacency_graphs.keypad).length
 
-Scoring =
+scoring =
   nCk: (n, k) ->
     # http://blog.plover.com/math/choose.html
     return 0 if k > n
@@ -293,4 +293,4 @@ Scoring =
     else
       'centuries'
 
-module.exports = Scoring
+module.exports = scoring
