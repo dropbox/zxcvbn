@@ -7,13 +7,13 @@ _/\/\/\/\/\__/\/\__/\/\____/\/\/\/\______/\______/\/\/\/\____/\/\__/\/\_
 ________________________________________________________________________
 ```
 
-Named after a crappy password, zxcvbn is a password strength estimator inspired by password crackers. Through pattern matching and conservative entropy calculations, it recognizes 10k common passwords, common names and surnames according to US census data, popular English words, and other common patterns like dates, repeats (`aaa`), sequences (`abcd`), keyboard patterns (`qwertyuiop`), and l33t speak.
+zxcvbn is a password strength estimator inspired by password crackers. Through pattern matching and conservative entropy calculations, it recognizes and weighs 10k common passwords, common names and surnames according to US census data, popular English words, and other common patterns like dates, repeats (`aaa`), sequences (`abcd`), keyboard patterns (`qwertyuiop`), and l33t speak.
 
-zxcvbn is an algorithm to to be used in place of a password policy — it is more secure, flexible, and usable when sites require a minimal complexity score instead of (for example) the dreaded "passwords must contain three of {lower, upper, numbers, symbols}".
+Consider using zxcvbn as an algorithmic alternative to password policy — it is more secure, flexible, and usable when sites require a minimal complexity score in place of annoying rules like "passwords must contain three of {lower, upper, numbers, symbols}".
 
-* __More secure__: policies often fail both ways, allowing weak passwords (`P@ssword1`) and disallowing strong passwords (`incorrectmulevoltaicclip`).
-* __More flexible__: zxcvbn allows many password styles to flourish so long as it detects sufficient complexity. Passphrases are rated highly given enough uncommon words. Keyboard patterns are either terrible or great depending on length and number of shifts and turns. Capitalization adds more complexity when it's unpRedIctable. Neither crackers nor zxcvbn are fooled by `'@'` for `'a'` or `'0'` for `'o'`.
-* __More usable__: Offloading a list of password rules onto users is bad usability. Understanding and satisfying said policy can be time-consuming and frustrating, leading to passwords that are [harder to remember](https://xkcd.com/936/). Use zxcvbn to build a simple, rule-free interface that gives instant feedback.
+* __More secure__: policies often fail both ways, allowing weak passwords (`P@ssword1`) and disallowing strong passwords (`incorrectdonkeyvoltaicclip`).
+* __More flexible__: zxcvbn allows many password styles to flourish so long as it detects sufficient complexity — passphrases are rated highly given enough uncommon words, keyboard patterns are either terrible or great depending on length and number of turns, and capitalization adds more complexity when it's unpredictABLe. Neither crackers nor zxcvbn are fooled by `'@'` for `'a'` or `'0'` for `'o'`.
+* __More usable__: Dumping a list of password rules onto users hurts usability. Understanding and satisfying said rules can be time-consuming and frustrating, leading to passwords that are [harder to remember](https://xkcd.com/936/). Use zxcvbn instead to build simple, rule-free interfaces that give instant feedback.
 
 At Dropbox we use zxcvbn on our [signup page](https://www.dropbox.com/register) and change/reset password flows. zxcvbn is designed for node and the browser, but we use our [python port](https://github.com/dropbox/python-zxcvbn) inside the Dropbox desktop client, [Objective C port](https://github.com/dropbox/zxcvbn-ios) in our iOS app, and Java port (not yet open sourced) on Android.
 
@@ -128,7 +128,7 @@ zxcvbn operates below human perception of delay for most input: ~5-20ms for ~25 
 
 Then try one of these alternatives:
 
-1. Put your `<script src="zxcvbn.js">` tag at the end of your html, just before the closing </body> tag. This insures your page loads and renders before the browser fetches and loads `zxcvbn.js`. The downside with this approach is `zxcvbn()` becomes available later than had it been included in `<head>` — not an issue on most signup pages where users are filling in other fields first.
+1. Put your `<script src="zxcvbn.js">` tag at the end of your html, just before the closing `</body>` tag. This insures your page loads and renders before the browser fetches and loads `zxcvbn.js`. The downside with this approach is `zxcvbn()` becomes available later than had it been included in `<head>` — not an issue on most signup pages where users are filling out other fields first.
 
 2. If you're using requirejs, try loading `zxcvbn.js` separately from your main bundle. Something to watch out for: if `zxcvbn.js` is required inside a keyboard handler waiting for user input, the entire script might be loaded only after the user presses their first key, creating nasty latency. Avoid this by calling your handler once upon page load, independent of user input, such that the `requirejs()` call runs earlier.
 
@@ -166,12 +166,14 @@ Then try one of these alternatives:
 
 Bug reports and pull requests welcome!
 
-zxcvbn is built with CoffeeScript, browserify, and uglifyjs. CoffeeScript source lives in `src`, which gets compiled, bundled and minified in `lib/zxcvbn.js`.
+zxcvbn is built with CoffeeScript, browserify, and uglify-js. CoffeeScript source lives in `src`, which gets compiled, bundled and minified into `lib/zxcvbn.js`.
 
 ``` shell
 npm run build    # builds lib/zxcvbn.js
 npm run watch    # same, but quickly rebuilds as changes are made in src.
 ```
+
+For debugging, both `build` and `watch` output an external source map `lib/zxcvbn.js.map` that points back to the CoffeeScript source. 
 
 Two source files, `adjacency_graphs.coffee` and `frequency_lists.coffee`, are generated by python scripts in `data-scripts` that read raw data from the `data` directory.
 

@@ -8,8 +8,8 @@
     "url": "git://github.com/dropbox/zxcvbn.git"
   },
   "scripts": {
-    "build": "browserify --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee -o lib/zxcvbn.js",
-    "watch": "watchify -v --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee -o lib/zxcvbn.js"
+    "build": "browserify --debug  --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee |   exorcist lib/zxcvbn.js.map >| lib/zxcvbn.js",
+    "watch": "watchify --debug -v --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee -o 'exorcist lib/zxcvbn.js.map >| lib/zxcvbn.js'"
   },
   "keywords": [
     "password",
@@ -35,6 +35,7 @@
     "coffeeify": "^1.1.0",
     "mocha": "^2.2.5",
     "uglifyify": "^3.0.1",
+    "exorcist": "^0.4.0",
     "watchify": "^3.3.1"
   }
 }
