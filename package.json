@@ -2,14 +2,15 @@
   "name": "zxcvbn",
   "version": "3.1.0",
   "description": "realistic password strength estimation",
-  "main": "lib/zxcvbn.js",
+  "main": "lib/main.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/dropbox/zxcvbn.git"
   },
   "scripts": {
-    "build": "browserify --debug  --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee |   exorcist lib/zxcvbn.js.map >| lib/zxcvbn.js",
-    "watch": "watchify --debug -v --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee -o 'exorcist lib/zxcvbn.js.map >| lib/zxcvbn.js'"
+    "prepublish": "coffee -o lib --compile --bare --map src/*.coffee",
+    "build": "browserify --debug  --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee |   exorcist dist/zxcvbn.js.map >| dist/zxcvbn.js",
+    "watch": "watchify --debug -v --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee -o 'exorcist dist/zxcvbn.js.map >| dist/zxcvbn.js'"
   },
   "keywords": [
     "password",
