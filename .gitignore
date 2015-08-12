@@ -4,6 +4,7 @@
 !demo/require.js
 !demo/mustache.js
 node_modules
+lib
 *~
 *.swp
 *.swo
