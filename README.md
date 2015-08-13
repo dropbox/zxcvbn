@@ -76,7 +76,16 @@ requirejs(["relpath/to/zxcvbn"], function (zxcvbn) {
 
 ## Browserify / Webpack
 
-If you're using `npm` and have `require('zxcvbn')` somewhere in your code, browserify and webpack should just work. But we recommend against bundling zxcvbn via tools like browserify and webpack, for three reasons:
+If you're using `npm` and have `require('zxcvbn')` somewhere in your code, browserify and webpack should just work.
+
+``` shell
+$ npm install zxcvbn
+$ echo "console.log(require('zxcvbn'))" > mymodule.js
+$ browserify mymodule.js > browserify_bundle.js
+$ webpack mymodule.js webpack_bundle.js
+```
+
+But we recommend against bundling zxcvbn via tools like browserify and webpack, for three reasons:
 
 * Minified and gzipped, zxcvbn is still several hundred kilobytes. (Significantly grows bundle size.)
 * Most sites will only need zxcvbn on a few pages (registration, password reset).
@@ -87,7 +96,10 @@ See the [performance](#perf) section below for tips on loading zxcvbn stand-alon
 Tangentially, if you want to build your own standalone, consider tweaking the browserify pipeline used to generate `dist/zxcvbn.js`:
 
 ``` shell
-browserify --debug --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee | exorcist dist/zxcvbn.js.map >| dist/zxcvbn.js
+$ browserify --debug --standalone zxcvbn \
+    -t coffeeify --extension='.coffee' \
+    -t uglifyify \
+    src/main.coffee | exorcist dist/zxcvbn.js.map >| dist/zxcvbn.js
 ```
 
 * `--debug` adds an inline source map to the bundle. `exorcist` pulls it out into `dist/zxcvbn.js.map`.
