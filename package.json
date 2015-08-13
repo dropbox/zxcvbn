@@ -33,6 +33,7 @@
   "license": "MIT",
   "devDependencies": {
     "browserify": "^11.0.1",
+    "coffee-script": "^1.9.3",
     "coffeeify": "^1.1.0",
     "mocha": "^2.2.5",
     "uglifyify": "^3.0.1",
