@@ -3,7 +3,6 @@ import os
 import time
 import codecs
 import urllib
-import simplejson
 import urllib2
 
 from pprint import pprint
@@ -147,7 +146,10 @@ def filter_ascii(lst):
     return [word for word in lst if all(ord(c) < 128 for c in word)]
 
 def to_kv(lst, lst_name):
-    return '%s: %s' % (lst_name, simplejson.dumps(lst))
+    for word in lst:
+        assert ',' not in word and '"' not in word, "hax, switch to csv if this starts failing"
+    val = '"%s".split(",")' % ','.join(lst)
+    return '%s: %s' % (lst_name, val)
 
 def main():
     english = get_ranked_english()
@@ -174,7 +176,7 @@ def main():
         f.write('frequency_lists = \n  ')
 
         lines = []
-        for lst_name in 'passwords male_names female_names surnames english'.split():
+        for lst_name in 'male_names female_names surnames passwords english'.split():
             lst = lsts[lst_name]
             lines.append(to_kv(lst, lst_name))
 
@@ -191,7 +193,7 @@ def main():
     print
 
 if __name__ == '__main__':
-    if os.path.basename(os.getcwd()) != 'scripts':
-        print 'run this from the scripts directory'
+    if os.path.basename(os.getcwd()) != 'data-scripts':
+        print 'run this from the data-scripts directory'
         exit(1)
     main()
