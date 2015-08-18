@@ -25,12 +25,13 @@ GRAPHS =
 SEQUENCES =
   lower: 'abcdefghijklmnopqrstuvwxyz'
   upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-  digits: '01234567890'
+  digits: '0123456789'
 
 matching =
   empty: (obj) -> (k for k of obj).length == 0
   extend: (lst, lst2) -> lst.push.apply lst, lst2
   translate: (string, chr_map) -> (chr_map[chr] or chr for chr in string.split('')).join('')
+  mod: (n, m) -> ((n % m) + m) % m # mod impl that works for negative numbers
 
   # ------------------------------------------------------------------------------
   # omnimatch -- combine everything ----------------------------------------------
@@ -268,40 +269,35 @@ matching =
     result
 
   sequence_match: (password) ->
+    min_sequence_length = 3 # TODO allow 2-char sequences?
     result = []
-    i = 0
-    while i < password.length
-      j = i + 1
-      seq = null # either lower, upper, or digits
-      seq_name = null
-      seq_direction = null # 1 for ascending seq abcd, -1 for dcba
-      for seq_candidate_name, seq_candidate of SEQUENCES
-        [i_n, j_n] = (seq_candidate.indexOf(chr) for chr in [password.charAt(i),password.charAt(j)])
-        if i_n > -1 and j_n > -1
-          direction = j_n - i_n
-          if direction in [1, -1]
-            seq = seq_candidate
-            seq_name = seq_candidate_name
-            seq_direction = direction
-            break
-      if seq
-        loop
-          [prev_char, cur_char] = password[j-1..j]
-          [prev_n, cur_n] = (seq_candidate.indexOf(chr) for chr in [prev_char, cur_char])
-          if cur_n - prev_n == seq_direction
+    for sequence_name, sequence of SEQUENCES
+      for direction in [1, -1]
+        i = 0
+        while i < password.length
+          unless password[i] in sequence
+            i += 1
+            continue
+          j = i + 1
+          sequence_position = sequence.indexOf password[i]
+          while j < password.length
+            # mod by sequence length to allow sequences to wrap around: xyzabc
+            next_sequence_position = @mod sequence_position + direction, sequence.length
+            unless sequence.indexOf(password[j]) == next_sequence_position
+              break
             j += 1
-          else
-            if j - i > 2 # don't consider length 1 or 2 chains. TODO revisit.
-              result.push
-                pattern: 'sequence'
-                i: i
-                j: j-1
-                token: password[i...j]
-                sequence_name: seq_name
-                sequence_space: seq.length
-                ascending: seq_direction  == 1
-            break
-      i = j
+            sequence_position = next_sequence_position
+          j -= 1
+          if j - i + 1 >= min_sequence_length
+            result.push
+              pattern: 'sequence'
+              i: i
+              j: j
+              token: password[i..j]
+              sequence_name: sequence_name
+              sequence_space: sequence.length
+              ascending: direction == 1
+          i = j + 1
     result
 
   #-------------------------------------------------------------------------------
