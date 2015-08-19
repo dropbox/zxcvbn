@@ -17,6 +17,31 @@ genpws = (pattern, prefixes, suffixes) ->
       result.push [prefix + pattern + suffix, i, j]
   result
 
+check_matches = (t, matches, pattern_names, patterns, ijs, props) ->
+  if typeof pattern_names is "string"
+    # shortcut: if checking for a list of the same type of patterns,
+    # allow passing a string 'pat' instead of array ['pat', 'pat', ...]
+    pattern_names = (pattern_names for i in [0...patterns.length])
+
+  is_equal_len_args = pattern_names.length == patterns.length == ijs.length
+  for prop, lst of props
+    # props is structured as: keys that points to list of values
+    is_equal_len_args = is_equal_len_args and (lst.length == patterns.length)
+  throw 'unequal argument lists to check_matches' unless is_equal_len_args
+
+  t.equal matches.length, patterns.length
+  for k in [0...patterns.length]
+    match = matches[k]
+    pattern_name = pattern_names[k]
+    pattern = patterns[k]
+    [i, j] = ijs[k]
+    t.equal match.pattern, pattern_name
+    t.equal match.i, i
+    t.equal match.j, j
+    t.equal match.token, pattern
+    for prop_name, prop_list of props
+      t.equal match[prop_name], prop_list[k]
+
 test 'matching utils', (t) ->
   t.ok matching.empty []
   t.notOk matching.empty [1]
@@ -48,7 +73,6 @@ test 'matching utils', (t) ->
   t.equal matching.translate('', chr_map), ''
   t.equal matching.translate('', {}), ''
   t.equal matching.translate('abc', {}), 'abc'
-  t.end()
 
   t.equal matching.mod(0, 1), 0
   t.equal matching.mod(5, 5), 0
@@ -56,10 +80,28 @@ test 'matching utils', (t) ->
   t.equal matching.mod(-5, 5), 0
   t.equal matching.mod(6, 5), 1
 
+  t.deepEqual matching.sorted([]), []
+  [m1, m2, m3, m4, m5, m6] = [
+    {i: 5, j: 5}
+    {i: 6, j: 7}
+    {i: 2, j: 5}
+    {i: 0, j: 0}
+    {i: 2, j: 3}
+    {i: 0, j: 3}
+  ]
+  t.deepEqual matching.sorted([m1, m2, m3, m4, m5, m6]), [m4, m6, m5, m3, m1, m2]
+  t.end()
+
 test 'sequence matching', (t) ->
   t.deepEqual matching.sequence_match(''), []
   t.deepEqual matching.sequence_match('a'), []
   t.deepEqual matching.sequence_match('1'), []
+  matches = matching.sequence_match('abcbabc')
+  check_matches t, matches, 'sequence', ['abc', 'cba', 'abc'], [[0, 2], [2, 4], [4, 6]],
+    ascending: [true, false, true]
+  t.equal matching.sequence_match('xyzabc').length, 1
+  t.equal matching.sequence_match('cbazyx').length, 1
+  t.equal matching.sequence_match('ab').length, 0
   prefixes = ['!', '22', 'ttt']
   suffixes = ['!', '22', 'ttt']
   for [pattern, name, is_ascending] in [
@@ -82,16 +124,29 @@ test 'sequence matching', (t) ->
     ]
     for [password, i, j] in genpws pattern, prefixes, suffixes
       matches = matching.sequence_match password
-      t.equal matches.length, 1
-      match = matches[0]
-      t.equal match.pattern, 'sequence'
-      t.equal match.i, i
-      t.equal match.j, j
-      t.equal match.token, pattern
-      t.equal match.sequence_name, name
-      t.equal match.ascending, is_ascending
-  t.equal matching.sequence_match('abcba').length, 2
-  t.equal matching.sequence_match('xyzabc').length, 1
-  t.equal matching.sequence_match('ab').length, 0
+      check_matches t, matches, 'sequence', [pattern], [[i, j]],
+        sequence_name: [name]
+        ascending: [is_ascending]
   t.end()
 
+test 'repeat matching', (t) ->
+  t.deepEqual matching.repeat_match(''), []
+  t.deepEqual matching.repeat_match('#'), []
+  t.deepEqual matching.repeat_match('##'), []
+  prefixes = ['@', 'y4@']
+  suffixes = ['u', 'u%7']
+  for length in [3, 12]
+    for chr in ['a', 'Z', '4', '&']
+      pattern = Array(length + 1).join(chr)
+      for [password, i, j] in genpws pattern, prefixes, suffixes
+        matches = matching.repeat_match password
+        check_matches t, matches, 'repeat', [pattern], [[i, j]],
+          repeated_char: [chr]
+  matches = matching.repeat_match('BBB1111aaaaa@@@@@@')
+  patterns = ['BBB','1111','aaaaa','@@@@@@']
+  check_matches t, matches, 'repeat', patterns, [[0, 2],[3, 6],[7, 11],[12, 17]],
+    repeated_char: ['B', '1', 'a', '@']
+  matches = matching.repeat_match('2818BBBbzsdf1111@*&@!aaaaaEUDA@@@@@@1729')
+  check_matches t, matches, 'repeat', patterns, [[4, 6],[12, 15],[21, 25],[30, 35]],
+    repeated_char: ['B', '1', 'a', '@']
+  t.end()
