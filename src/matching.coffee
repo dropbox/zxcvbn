@@ -32,6 +32,9 @@ matching =
   extend: (lst, lst2) -> lst.push.apply lst, lst2
   translate: (string, chr_map) -> (chr_map[chr] or chr for chr in string.split('')).join('')
   mod: (n, m) -> ((n % m) + m) % m # mod impl that works for negative numbers
+  sorted: (matches) ->
+    matches.sort (m1, m2) ->
+      (m1.i - m2.i) or (m1.j - m2.j)
 
   # ------------------------------------------------------------------------------
   # omnimatch -- combine everything ----------------------------------------------
@@ -51,15 +54,14 @@ matching =
     ]
     for matcher in matchers
       @extend matches, matcher.call(this, password)
-    matches.sort (match1, match2) ->
-      (match1.i - match2.i) or (match1.j - match2.j)
+    @sorted matches
 
   #-------------------------------------------------------------------------------
   # dictionary match (common passwords, english, last names, etc) ----------------
   #-------------------------------------------------------------------------------
 
   dictionary_match: (password) ->
-    result = []
+    matches = []
     len = password.length
     password_lower = password.toLowerCase()
     for dictionary_name, ranked_dict of RANKED_DICTIONARIES
@@ -68,7 +70,7 @@ matching =
           if password_lower[i..j] of ranked_dict
             word = password_lower[i..j]
             rank = ranked_dict[word]
-            result.push
+            matches.push
               pattern: 'dictionary'
               i: i
               j: j
@@ -76,7 +78,7 @@ matching =
               matched_word: word
               rank: rank
               dictionary_name: dictionary_name
-    result
+    @sorted matches
 
   set_user_input_dictionary: (ordered_list) ->
     RANKED_DICTIONARIES['user_inputs'] = build_ranked_dict ordered_list.slice()
@@ -178,7 +180,7 @@ matching =
         match.sub = match_sub
         match.sub_display = ("#{k} -> #{v}" for k,v of match_sub).join(', ')
         matches.push match
-    matches
+    @sorted matches
 
   # ------------------------------------------------------------------------------
   # spatial match (qwerty/dvorak/keypad) -----------------------------------------
@@ -188,10 +190,10 @@ matching =
     matches = []
     for graph_name, graph of GRAPHS
       @extend matches, @spatial_match_helper(password, graph, graph_name)
-    matches
+    @sorted matches
 
   spatial_match_helper: (password, graph, graph_name) ->
-    result = []
+    matches = []
     i = 0
     while i < password.length - 1
       j = i + 1
@@ -230,7 +232,7 @@ matching =
         # otherwise push the pattern discovered so far, if any...
         else
           if j - i > 2 # don't consider length 1 or 2 chains.
-            result.push
+            matches.push
               pattern: 'spatial'
               i: i
               j: j-1
@@ -241,14 +243,15 @@ matching =
           # ...and then start a new search for the rest of the password.
           i = j
           break
-    result
+    matches
 
   #-------------------------------------------------------------------------------
   # repeats (aaa) and sequences (abcdef) -----------------------------------------
   #-------------------------------------------------------------------------------
 
   repeat_match: (password) ->
-    result = []
+    min_repeat_length = 3 # TODO allow 2-char repeats?
+    matches = []
     i = 0
     while i < password.length
       j = i + 1
@@ -257,20 +260,21 @@ matching =
         if password.charAt(j-1) == password.charAt(j)
           j += 1
         else
-          if j - i > 2 # don't consider length 1 or 2 chains.
-            result.push
+          j -= 1
+          if j - i + 1 >= min_repeat_length
+            matches.push
               pattern: 'repeat'
               i: i
-              j: j-1
-              token: password[i...j]
+              j: j
+              token: password[i..j]
               repeated_char: password.charAt(i)
           break
-      i = j
-    result
+      i = j + 1
+    @sorted matches
 
   sequence_match: (password) ->
     min_sequence_length = 3 # TODO allow 2-char sequences?
-    result = []
+    matches = []
     for sequence_name, sequence of SEQUENCES
       for direction in [1, -1]
         i = 0
@@ -289,7 +293,7 @@ matching =
             sequence_position = next_sequence_position
           j -= 1
           if j - i + 1 >= min_sequence_length
-            result.push
+            matches.push
               pattern: 'sequence'
               i: i
               j: j
@@ -298,7 +302,7 @@ matching =
               sequence_space: sequence.length
               ascending: direction == 1
           i = j + 1
-    result
+    @sorted matches
 
   #-------------------------------------------------------------------------------
   # digits, years, dates ---------------------------------------------------------
@@ -315,7 +319,7 @@ matching =
       match.j = match.index + match[0].length - 1
       matches.push match
       password = password.replace match[0], @repeat(' ', match[0].length)
-    matches
+    @sorted matches
 
   digits_rx: /\d{3,}/
   digits_match: (password) ->
