@@ -107,8 +107,6 @@ $ browserify --debug --standalone zxcvbn \
 * `-t coffeeify --extension='.coffee'` compiles `.coffee` to `.js` before bundling. This is convenient as it allows `.js` modules to import from `.coffee` modules and vice-versa. Instead of this transform, one could also compile everything to `.js` first (`npm run prepublish`) and point `browserify` to `lib` instead of `src`.
 * `-t uglifyify` minifies the bundle through UglifyJS, maintaining proper source mapping.
 
-Note that it is not advisable to "rebrowserify" or webpack `dist/zxcvbn.js`; make sure to bundle from `lib/*` (complied js), or, alternately `src/*` (coffee) using a transform/loader.
-
 ## Manual installation
 
 Download [zxcvbn.js](https://raw.githubusercontent.com/dropbox/zxcvbn/master/lib/zxcvbn.js).
