@@ -60,11 +60,12 @@ matching =
   # dictionary match (common passwords, english, last names, etc) ----------------
   #-------------------------------------------------------------------------------
 
-  dictionary_match: (password) ->
+  dictionary_match: (password, _ranked_dictionaries = RANKED_DICTIONARIES) ->
+    # _ranked_dictionaries variable is for unit testing purposes
     matches = []
     len = password.length
     password_lower = password.toLowerCase()
-    for dictionary_name, ranked_dict of RANKED_DICTIONARIES
+    for dictionary_name, ranked_dict of _ranked_dictionaries
       for i in [0...len]
         for j in [i...len]
           if password_lower[i..j] of ranked_dict

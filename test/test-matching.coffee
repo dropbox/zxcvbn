@@ -75,7 +75,10 @@ test 'matching utils', (t) ->
   t.equal matching.translate('abc', {}), 'abc'
 
   t.equal matching.mod(0, 1), 0
+  t.equal matching.mod(1, 1), 0
+  t.equal matching.mod(-1, 1), 0
   t.equal matching.mod(5, 5), 0
+  t.equal matching.mod(3, 5), 3
   t.equal matching.mod(-1, 5), 4
   t.equal matching.mod(-5, 5), 0
   t.equal matching.mod(6, 5), 1
@@ -92,11 +95,65 @@ test 'matching utils', (t) ->
   t.deepEqual matching.sorted([m1, m2, m3, m4, m5, m6]), [m4, m6, m5, m3, m1, m2]
   t.end()
 
+test 'dictionary matching', (t) ->
+  test_dicts =
+    d1:
+      motherboard: 1
+      mother: 2
+      board: 3
+      abcd: 4
+      cdef: 5
+    d2:
+      'z': 1
+      '8': 2
+      '99': 3
+      '$': 4
+      'asdf1234&*': 5
+  dm = (pw) -> matching.dictionary_match pw, test_dicts
+  matches = dm 'motherboard'
+  patterns = ['mother', 'motherboard', 'board']
+  check_matches t, matches, 'dictionary', patterns, [[0,5], [0,10], [6,10]],
+    matched_word: ['mother', 'motherboard', 'board']
+    rank: [2, 1, 3]
+    dictionary_name: ['d1', 'd1', 'd1']
+  matches = dm 'abcdef'
+  patterns = ['abcd', 'cdef']
+  check_matches t, matches, 'dictionary', patterns, [[0,3], [2,5]],
+    matched_word: ['abcd', 'cdef']
+    rank: [4, 5]
+    dictionary_name: ['d1', 'd1']
+  matches = dm 'boardz'
+  patterns = ['board', 'z']
+  check_matches t, matches, 'dictionary', patterns, [[0,4], [5,5]],
+    matched_word: ['board', 'z']
+    rank: [3, 1]
+    dictionary_name: ['d1', 'd2']
+  prefixes = ['q', '%%']
+  suffixes = ['%', 'qq']
+  for name, dict of test_dicts
+    for word, rank of dict
+      continue if word is 'motherboard'
+      for [password, i, j] in genpws word, prefixes, suffixes
+        matches = dm password
+        check_matches t, matches, 'dictionary', [word], [[i,j]],
+          matched_word: [word]
+          rank: [rank]
+          dictionary_name: [name]
+  # test embedded dictionaries
+  matches = matching.dictionary_match 'rosebud'
+  patterns = ['ros', 'rose', 'rosebud', 'bud']
+  ijs = [[0,2], [0,3], [0,6], [4,6]]
+  check_matches t, matches, 'dictionary', patterns, ijs,
+    matched_word: patterns
+    rank: [13085, 65, 245, 786]
+    dictionary_name: ['surnames', 'female_names', 'passwords', 'male_names']
+  t.end()
+
 test 'sequence matching', (t) ->
   t.deepEqual matching.sequence_match(''), []
   t.deepEqual matching.sequence_match('a'), []
   t.deepEqual matching.sequence_match('1'), []
-  matches = matching.sequence_match('abcbabc')
+  matches = matching.sequence_match 'abcbabc'
   check_matches t, matches, 'sequence', ['abc', 'cba', 'abc'], [[0, 2], [2, 4], [4, 6]],
     ascending: [true, false, true]
   t.equal matching.sequence_match('xyzabc').length, 1
@@ -142,11 +199,11 @@ test 'repeat matching', (t) ->
         matches = matching.repeat_match password
         check_matches t, matches, 'repeat', [pattern], [[i, j]],
           repeated_char: [chr]
-  matches = matching.repeat_match('BBB1111aaaaa@@@@@@')
+  matches = matching.repeat_match 'BBB1111aaaaa@@@@@@'
   patterns = ['BBB','1111','aaaaa','@@@@@@']
   check_matches t, matches, 'repeat', patterns, [[0, 2],[3, 6],[7, 11],[12, 17]],
     repeated_char: ['B', '1', 'a', '@']
-  matches = matching.repeat_match('2818BBBbzsdf1111@*&@!aaaaaEUDA@@@@@@1729')
+  matches = matching.repeat_match '2818BBBbzsdf1111@*&@!aaaaaEUDA@@@@@@1729'
   check_matches t, matches, 'repeat', patterns, [[4, 6],[12, 15],[21, 25],[30, 35]],
     repeated_char: ['B', '1', 'a', '@']
   t.end()
