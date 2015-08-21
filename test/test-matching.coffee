@@ -1,6 +1,7 @@
 test = require 'tape'
 matching = require '../src/matching'
 
+
 # takes a pattern and list of prefixes/suffixes
 # returns a bunch of variants of that pattern embedded
 # with each possible prefix/suffix combination, including no prefix/suffix
@@ -16,6 +17,7 @@ genpws = (pattern, prefixes, suffixes) ->
       [i, j] = [prefix.length, prefix.length + pattern.length - 1]
       result.push [prefix + pattern + suffix, i, j]
   result
+
 
 check_matches = (t, matches, pattern_names, patterns, ijs, props) ->
   if typeof pattern_names is "string"
@@ -40,16 +42,20 @@ check_matches = (t, matches, pattern_names, patterns, ijs, props) ->
     t.equal match.j, j
     t.equal match.token, pattern
     for prop_name, prop_list of props
-      t.equal match[prop_name], prop_list[k]
+      t.deepEqual match[prop_name], prop_list[k]
+
 
 test 'matching utils', (t) ->
   t.ok matching.empty []
-  t.notOk matching.empty [1]
-  t.notOk matching.empty [1, 2]
-  t.notOk matching.empty [[]]
   t.ok matching.empty {}
-  t.notOk matching.empty {a: 1}
-  t.notOk matching.empty {0: {}}
+  for obj in [
+    [1]
+    [1, 2]
+    [[]]
+    {a: 1}
+    {0: {}}
+    ]
+    t.notOk matching.empty obj
 
   lst = []
   matching.extend lst, []
@@ -64,24 +70,30 @@ test 'matching utils', (t) ->
   t.deepEqual lst2, [2]
 
   chr_map = {a: 'A', b: 'B'}
-  t.equal matching.translate('a', chr_map), 'A'
-  t.equal matching.translate('c', chr_map), 'c'
-  t.equal matching.translate('ab', chr_map), 'AB'
-  t.equal matching.translate('abc', chr_map), 'ABc'
-  t.equal matching.translate('aa', chr_map), 'AA'
-  t.equal matching.translate('abab', chr_map), 'ABAB'
-  t.equal matching.translate('', chr_map), ''
-  t.equal matching.translate('', {}), ''
-  t.equal matching.translate('abc', {}), 'abc'
+  for [string, map, result] in [
+    ['a',    chr_map, 'A']
+    ['c',    chr_map, 'c']
+    ['ab',   chr_map, 'AB']
+    ['abc',  chr_map, 'ABc']
+    ['aa',   chr_map, 'AA']
+    ['abab', chr_map, 'ABAB']
+    ['',     chr_map, '']
+    ['',     {},      '']
+    ['abc',  {},      'abc']
+    ]
+    t.equal matching.translate(string, map), result
 
-  t.equal matching.mod(0, 1), 0
-  t.equal matching.mod(1, 1), 0
-  t.equal matching.mod(-1, 1), 0
-  t.equal matching.mod(5, 5), 0
-  t.equal matching.mod(3, 5), 3
-  t.equal matching.mod(-1, 5), 4
-  t.equal matching.mod(-5, 5), 0
-  t.equal matching.mod(6, 5), 1
+  for [[dividend, divisor], remainder] in [
+    [[ 0, 1],  0]
+    [[ 1, 1],  0]
+    [[-1, 1],  0]
+    [[ 5, 5],  0]
+    [[ 3, 5],  3]
+    [[-1, 5],  4]
+    [[-5, 5],  0]
+    [[ 6, 5],  1]
+    ]
+    t.equal matching.mod(dividend, divisor), remainder
 
   t.deepEqual matching.sorted([]), []
   [m1, m2, m3, m4, m5, m6] = [
@@ -95,7 +107,9 @@ test 'matching utils', (t) ->
   t.deepEqual matching.sorted([m1, m2, m3, m4, m5, m6]), [m4, m6, m5, m3, m1, m2]
   t.end()
 
+
 test 'dictionary matching', (t) ->
+  dm = (pw) -> matching.dictionary_match pw, test_dicts
   test_dicts =
     d1:
       motherboard: 1
@@ -109,37 +123,41 @@ test 'dictionary matching', (t) ->
       '99': 3
       '$': 4
       'asdf1234&*': 5
-  dm = (pw) -> matching.dictionary_match pw, test_dicts
+
   matches = dm 'motherboard'
   patterns = ['mother', 'motherboard', 'board']
   check_matches t, matches, 'dictionary', patterns, [[0,5], [0,10], [6,10]],
     matched_word: ['mother', 'motherboard', 'board']
     rank: [2, 1, 3]
     dictionary_name: ['d1', 'd1', 'd1']
+
   matches = dm 'abcdef'
   patterns = ['abcd', 'cdef']
   check_matches t, matches, 'dictionary', patterns, [[0,3], [2,5]],
     matched_word: ['abcd', 'cdef']
     rank: [4, 5]
     dictionary_name: ['d1', 'd1']
-  matches = dm 'boardz'
-  patterns = ['board', 'z']
+
+  matches = dm 'BoaRdZ'
+  patterns = ['BoaRd', 'Z']
   check_matches t, matches, 'dictionary', patterns, [[0,4], [5,5]],
     matched_word: ['board', 'z']
     rank: [3, 1]
     dictionary_name: ['d1', 'd2']
+
   prefixes = ['q', '%%']
   suffixes = ['%', 'qq']
   for name, dict of test_dicts
     for word, rank of dict
-      continue if word is 'motherboard'
+      continue if word is 'motherboard' # skip words that contain others
       for [password, i, j] in genpws word, prefixes, suffixes
         matches = dm password
         check_matches t, matches, 'dictionary', [word], [[i,j]],
           matched_word: [word]
           rank: [rank]
           dictionary_name: [name]
-  # test embedded dictionaries
+
+  # test the default dictionaries
   matches = matching.dictionary_match 'rosebud'
   patterns = ['ros', 'rose', 'rosebud', 'bud']
   ijs = [[0,2], [0,3], [0,6], [4,6]]
@@ -149,16 +167,88 @@ test 'dictionary matching', (t) ->
     dictionary_name: ['surnames', 'female_names', 'passwords', 'male_names']
   t.end()
 
+
+test 'l33t matching', (t) ->
+  test_table =
+    a: ['4', '@']
+    c: ['(', '{', '[', '<']
+    g: ['6', '9']
+    o: ['0']
+
+  for [pw, expected] in [
+    [ '', {} ]
+    [ 'abcdefgo123578!#$&*)]}>', {} ]
+    [ 'a',     {} ]
+    [ '4',     {'a': ['4']} ]
+    [ '4@',    {'a': ['4','@']} ]
+    [ '4({60', {'a': ['4'], 'c': ['(','{'], 'g': ['6'], 'o': ['0']} ]
+    ]
+    t.deepEquals matching.relevant_l33t_subtable(pw, test_table), expected
+
+  for [table, subs] in [
+    [ {},                        [{}] ]
+    [ {a: ['@']},                [{'@': 'a'}] ]
+    [ {a: ['@','4']},            [{'@': 'a'}, {'4': 'a'}] ]
+    [ {a: ['@','4'], c: ['(']},  [{'@': 'a', '(': 'c' }, {'4': 'a', '(': 'c'}] ]
+    ]
+    t.deepEquals matching.enumerate_l33t_subs(table), subs
+
+  lm = (pw) -> matching.l33t_match pw, dicts, test_table
+  dicts =
+    words:
+      aac: 1
+      password: 3
+      paassword: 4
+      asdf0: 5
+    words2:
+      cgo: 1
+
+  t.deepEquals lm(''), []
+  t.deepEquals lm('password'), [] # l33t doesn't pick up pure dictionary matches
+  for [password, pattern, word, dictionary_name, rank, ij, sub] in [
+    [ 'p4ssword',    'p4ssword', 'password', 'words',  3, [0,7],  {'4': 'a'} ]
+    [ 'p@ssw0rd',    'p@ssw0rd', 'password', 'words',  3, [0,7],  {'@': 'a', '0': 'o'} ]
+    [ 'aSdfO{G0asDfO', '{G0',    'cgo',      'words2', 1, [5, 7], {'{': 'c', '0': 'o'} ]
+    ]
+    check_matches t, lm(password), 'dictionary', [pattern], [ij],
+      l33t: [true]
+      sub: [sub]
+      matched_word: [word]
+      rank: [rank]
+      dictionary_name: [dictionary_name]
+
+  matches = lm '@a(go{G0'
+  check_matches t, matches, 'dictionary', ['@a(', '(go', '{G0'], [[0,2], [2,4], [5,7]],
+    l33t: [true, true, true]
+    sub: [{'@': 'a', '(': 'c'}, {'(': 'c'}, {'{': 'c', '0': 'o'}]
+    matched_word: ['aac', 'cgo', 'cgo']
+    rank: [1, 1, 1]
+    dictionary_name: ['words', 'words2', 'words2']
+
+  # known issue: don't match when different substitutions are needed for same letter
+  t.deepEqual lm('p4@ssword'), []
+
+  # known issue: subsets of substitutions aren't tried.
+  # for long inputs, trying every subset of every possible substitution could quickly get large,
+  # but there might be a performant way to fix.
+  # (so in this example: {'4': a, '0': 'o'} is detected as a possible sub,
+  # but the subset {'4': 'a'} isn't tried, missing the match for asdf0.)
+  # TODO: consider partially fixing by trying all subsets of size 1 and maybe 2
+  t.deepEqual lm('4sdf0'), []
+  t.end()
+
+
 test 'sequence matching', (t) ->
-  t.deepEqual matching.sequence_match(''), []
-  t.deepEqual matching.sequence_match('a'), []
-  t.deepEqual matching.sequence_match('1'), []
+  for password in ['', 'a', '1', 'ab']
+    t.deepEqual matching.sequence_match(password), []
+
   matches = matching.sequence_match 'abcbabc'
   check_matches t, matches, 'sequence', ['abc', 'cba', 'abc'], [[0, 2], [2, 4], [4, 6]],
     ascending: [true, false, true]
+
   t.equal matching.sequence_match('xyzabc').length, 1
   t.equal matching.sequence_match('cbazyx').length, 1
-  t.equal matching.sequence_match('ab').length, 0
+
   prefixes = ['!', '22', 'ttt']
   suffixes = ['!', '22', 'ttt']
   for [pattern, name, is_ascending] in [
@@ -186,10 +276,11 @@ test 'sequence matching', (t) ->
         ascending: [is_ascending]
   t.end()
 
+
 test 'repeat matching', (t) ->
-  t.deepEqual matching.repeat_match(''), []
-  t.deepEqual matching.repeat_match('#'), []
-  t.deepEqual matching.repeat_match('##'), []
+  for password in ['', '#', '##']
+    t.deepEqual matching.repeat_match(password), []
+
   prefixes = ['@', 'y4@']
   suffixes = ['u', 'u%7']
   for length in [3, 12]
@@ -199,10 +290,12 @@ test 'repeat matching', (t) ->
         matches = matching.repeat_match password
         check_matches t, matches, 'repeat', [pattern], [[i, j]],
           repeated_char: [chr]
+
   matches = matching.repeat_match 'BBB1111aaaaa@@@@@@'
   patterns = ['BBB','1111','aaaaa','@@@@@@']
   check_matches t, matches, 'repeat', patterns, [[0, 2],[3, 6],[7, 11],[12, 17]],
     repeated_char: ['B', '1', 'a', '@']
+
   matches = matching.repeat_match '2818BBBbzsdf1111@*&@!aaaaaEUDA@@@@@@1729'
   check_matches t, matches, 'repeat', patterns, [[4, 6],[12, 15],[21, 25],[30, 35]],
     repeated_char: ['B', '1', 'a', '@']

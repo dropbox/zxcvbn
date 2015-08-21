@@ -27,6 +27,20 @@ SEQUENCES =
   upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
   digits: '0123456789'
 
+L33T_TABLE =
+  a: ['4', '@']
+  b: ['8']
+  c: ['(', '{', '[', '<']
+  e: ['3']
+  g: ['6', '9']
+  i: ['1', '!', '|']
+  l: ['1', '|', '7']
+  o: ['0']
+  s: ['$', '5']
+  t: ['+', '7']
+  x: ['%']
+  z: ['2']
+
 matching =
   empty: (obj) -> (k for k of obj).length == 0
   extend: (lst, lst2) -> lst.push.apply lst, lst2
@@ -88,31 +102,17 @@ matching =
   # dictionary match with common l33t substitutions ------------------------------
   #-------------------------------------------------------------------------------
 
-  l33t_table:
-    a: ['4', '@']
-    b: ['8']
-    c: ['(', '{', '[', '<']
-    e: ['3']
-    g: ['6', '9']
-    i: ['1', '!', '|']
-    l: ['1', '|', '7']
-    o: ['0']
-    s: ['$', '5']
-    t: ['+', '7']
-    x: ['%']
-    z: ['2']
-
   # makes a pruned copy of l33t_table that only includes password's possible substitutions
-  relevant_l33t_subtable: (password) ->
+  relevant_l33t_subtable: (password, table) ->
     password_chars = {}
     for chr in password.split('')
       password_chars[chr] = true
-    filtered = {}
-    for letter, subs of @l33t_table
+    subtable = {}
+    for letter, subs of table
       relevant_subs = (sub for sub in subs when sub of password_chars)
       if relevant_subs.length > 0
-        filtered[letter] = relevant_subs
-    filtered
+        subtable[letter] = relevant_subs
+    subtable
 
   # returns the list of possible 1337 replacement dictionaries for a given password
   enumerate_l33t_subs: (table) ->
@@ -164,12 +164,12 @@ matching =
       sub_dicts.push sub_dict
     sub_dicts
 
-  l33t_match: (password) ->
+  l33t_match: (password, _ranked_dictionaries = RANKED_DICTIONARIES, _l33t_table = L33T_TABLE) ->
     matches = []
-    for sub in @enumerate_l33t_subs @relevant_l33t_subtable password
+    for sub in @enumerate_l33t_subs @relevant_l33t_subtable(password, _l33t_table)
       break if @empty sub # corner case: password has no relevant subs.
       subbed_password = @translate password, sub
-      for match in @dictionary_match(subbed_password)
+      for match in @dictionary_match(subbed_password, _ranked_dictionaries)
         token = password[match.i..match.j]
         if token.toLowerCase() == match.matched_word
           continue # only return the matches that contain an actual substitution
