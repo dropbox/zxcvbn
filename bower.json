@@ -1,7 +1,7 @@
 {
     "name": "zxcvbn",
     "description": "realistic password strength estimation",
-    "main": "lib/zxcvbn.js",
+    "main": "dist/zxcvbn.js",
     "keywords": [
         "password",
         "passphrase",
@@ -26,6 +26,7 @@
         "data",
         "data-scripts",
         "demo",
+        "lib",
         "src",
         "test"
         ]
