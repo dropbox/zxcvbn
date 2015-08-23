@@ -111,7 +111,7 @@ Note that it is not advisable to "rebrowserify" or webpack `dist/zxcvbn.js`; mak
 
 ## Manual installation
 
-Download [zxcvbn.js](https://raw.githubusercontent.com/dropbox/zxcvbn/master/lib/zxcvbn.js).
+Download [zxcvbn.js](https://raw.githubusercontent.com/dropbox/zxcvbn/master/dist/zxcvbn.js).
 
 Add to your .html:
 
