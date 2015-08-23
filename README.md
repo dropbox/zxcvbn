@@ -109,7 +109,7 @@ $ browserify --debug --standalone zxcvbn \
 
 ## Manual installation
 
-Download [zxcvbn.js](https://raw.githubusercontent.com/dropbox/zxcvbn/master/lib/zxcvbn.js).
+Download [zxcvbn.js](https://raw.githubusercontent.com/dropbox/zxcvbn/master/dist/zxcvbn.js).
 
 Add to your .html:
 
