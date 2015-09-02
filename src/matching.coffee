@@ -47,6 +47,7 @@ matching =
   translate: (string, chr_map) -> (chr_map[chr] or chr for chr in string.split('')).join('')
   mod: (n, m) -> ((n % m) + m) % m # mod impl that works for negative numbers
   sorted: (matches) ->
+    # sort on i primary, j secondary
     matches.sort (m1, m2) ->
       (m1.i - m2.i) or (m1.j - m2.j)
 
@@ -341,132 +342,201 @@ matching =
       j: j
       token: password[i..j]
 
+  MAX_YEAR: 2050
+  MIN_YEAR: 1000
+  DATE_SPLITS:
+    4:[
+      [1, 2] # 1 1 91
+      [2, 3] # 91 1 1
+      ]
+    5:[
+      [1, 3] # 1 11 91
+      [2, 3] # 11 1 91
+      ]
+    6:[
+      [1, 2] # 1 1 1991
+      [2, 4] # 11 11 91
+      [4, 5] # 1991 1 1
+      ]
+    7:[
+      [1, 3] # 1 11 1991
+      [2, 3] # 11 1 1991
+      [4, 5] # 1991 1 11
+      [4, 6] # 1991 11 1
+      ]
+    8:[
+      [2, 4] # 11 11 1991
+      [4, 6] # 1991 11 11
+      ]
+
   date_match: (password) ->
-    # match dates with separators 1/1/1911 and dates without 111997
-    @date_without_sep_match(password).concat @date_sep_match(password)
-
-  date_without_sep_match: (password) ->
-    date_matches = []
-    for digit_match in @findall password, /\d{4,8}/ # 1197 is length-4, 01011997 is length 8
-      [i, j] = [digit_match.i, digit_match.j]
-      token = password[i..j]
-      end = token.length
-      candidates_round_1 = [] # parse year alternatives
-      if token.length <= 6
-        candidates_round_1.push # 2-digit year prefix
-          daymonth: token[2..]
-          year: token[0..1]
-          i: i
-          j: j
-        candidates_round_1.push # 2-digit year suffix
-          daymonth: token[0...end-2]
-          year: token[end-2..]
-          i: i
-          j: j
-      if token.length >= 6
-        candidates_round_1.push # 4-digit year prefix
-          daymonth: token[4..]
-          year: token[0..3]
-          i: i
-          j: j
-        candidates_round_1.push # 4-digit year suffix
-          daymonth: token[0...end-4]
-          year: token[end-4..]
-          i: i
-          j: j
-      candidates_round_2 = [] # parse day/month alternatives
-      for candidate in candidates_round_1
-        switch candidate.daymonth.length
-          when 2 # ex. 1 1 97
-            candidates_round_2.push
-              day: candidate.daymonth[0]
-              month: candidate.daymonth[1]
-              year: candidate.year
-              i: candidate.i
-              j: candidate.j
-          when 3 # ex. 11 1 97 or 1 11 97
-            candidates_round_2.push
-              day: candidate.daymonth[0..1]
-              month: candidate.daymonth[2]
-              year: candidate.year
-              i: candidate.i
-              j: candidate.j
-            candidates_round_2.push
-              day: candidate.daymonth[0]
-              month: candidate.daymonth[1..2]
-              year: candidate.year
-              i: candidate.i
-              j: candidate.j
-          when 4 # ex. 11 11 97
-            candidates_round_2.push
-              day: candidate.daymonth[0..1]
-              month: candidate.daymonth[2..3]
-              year: candidate.year
-              i: candidate.i
-              j: candidate.j
-      # final loop: reject invalid dates
-      for candidate in candidates_round_2
-        day = parseInt(candidate.day)
-        month = parseInt(candidate.month)
-        year = parseInt(candidate.year)
-        [valid, [day, month, year]] = @check_date day, month, year
-        continue unless valid
-        date_matches.push
-          pattern: 'date'
-          i: candidate.i
-          j: candidate.j
-          token: password[i..j]
-          separator: ''
-          day: day
-          month: month
-          year: year
-    date_matches
-
-  date_rx_year_suffix: ///
-    ( \d{1,2} )                         # day or month
-    ( \s | - | / | \\ | _ | \. )        # separator
-    ( \d{1,2} )                         # month or day
-    \2                                  # same separator
-    ( 19\d{2} | 200\d | 201\d | \d{2} ) # year
-  ///
-
-  date_rx_year_prefix: ///
-    ( 19\d{2} | 200\d | 201\d | \d{2} ) # year
-    ( \s | - | / | \\ | _ | \. )        # separator
-    ( \d{1,2} )                         # day or month
-    \2                                  # same separator
-    ( \d{1,2} )                         # month or day
-  ///
-
-  date_sep_match: (password) ->
+    # a "date" is recognized as:
+    #   any 3-tuple that starts or ends with a 2- or 4-digit year,
+    #   with 2 or 0 separator chars (1.1.91 or 1191),
+    #   maybe zero-padded (01-01-91 vs 1-1-91),
+    #   a month between 1 and 12,
+    #   a day between 1 and 31.
+    #
+    # note: this isn't true date parsing in that "feb 31st" is allowed,
+    # doesn't check for leap years, etc. not necessary to give a ballpark entropy estimate!
+    #
+    # recipe:
+    # start with regexes to find maybe-dates, then attempt to match the integers
+    # into month-day-year to filter the maybe-dates into dates.
+    # finally, remove matches that are substrings of other matches.
+    #
+    # note: instead of using a lazy or greedy regex to find many dates over the full string,
+    # match ^$ regexes against every substring of the password -- less performant but leads
+    # to every possible date match.
     matches = []
-    for match in @findall password, @date_rx_year_suffix
-      [match.day, match.month, match.year] = (parseInt(match[k]) for k in [1,3,4])
-      match.sep = match[2]
-      matches.push match
-    for match in @findall password, @date_rx_year_prefix
-      [match.day, match.month, match.year] = (parseInt(match[k]) for k in [4,3,1])
-      match.sep = match[2]
-      matches.push match
-    for match in matches
-      [valid, [day, month, year]] = @check_date match.day, match.month, match.year
-      continue unless valid
-      pattern: 'date'
-      i: match.i
-      j: match.j
-      token: password[match.i..match.j]
-      separator: match.sep
-      day: day
-      month: month
-      year: year
+    maybe_date_no_separator = /^\d{4,8}$/
+    maybe_date_with_separator = ///
+      ^
+      ( \d{1,4} )    # day, month, year
+      ( [\s/\\_.-] ) # separator
+      ( \d{1,2} )    # day, month
+      \2             # same separator
+      ( \d{1,4} )    # day, month, year
+      $
+    ///
 
-  check_date: (day, month, year) ->
-    if 12 <= month <= 31 and day <= 12 # tolerate both day-month and month-day order
-      [day, month] = [month, day]
-    if day > 31 or month > 12
-      return [false, []]
-    unless 1900 <= year <= 2019
-      return [false, []]
-    [true, [day, month, year]]
+    # dates without separators are between length 4 '1191' and 8 '11111991'
+    for i in [0..password.length - 4]
+      for j in [i + 3..i + 7]
+        break if j >= password.length
+        token = password[i..j]
+        if maybe_date_no_separator.exec token
+          candidates = []
+          for [k,l] in @DATE_SPLITS[token.length]
+            dmy = @map_ints_to_dmy [
+              parseInt token[0...k]
+              parseInt token[k...l]
+              parseInt token[l...]
+            ]
+            candidates.push dmy if dmy?
+          continue unless candidates.length > 0
+          # at this point: different possible dmy mappings for the same i,j substring.
+          # match the candidate date that has a year closest to 2000.
+          # ie, considering '111504', prefer 11-15-04 to 1-1-1504
+          # (interpreting '04' as 2004)
+          best_candidate = candidates[0]
+          min_distance = Math.abs candidates[0].year - 2000
+          for candidate in candidates[1..]
+            distance = Math.abs candidate.year - 2000
+            if distance < min_distance
+              [best_candidate, min_distance] = [candidate, distance]
+          matches.push
+            pattern: 'date'
+            token: token
+            i: i
+            j: j
+            separator: ''
+            year: best_candidate.year
+            month: best_candidate.month
+            day: best_candidate.day
+
+    # dates with separators are between length 6 '1/1/91' and 10 '11/11/1991'
+    for i in [0..password.length - 6]
+      for j in [i + 5..i + 9]
+        break if j >= password.length
+        token = password[i..j]
+        rx_match = maybe_date_with_separator.exec token
+        if rx_match
+          dmy = @map_ints_to_dmy [
+            parseInt rx_match[1]
+            parseInt rx_match[3]
+            parseInt rx_match[4]
+          ]
+          continue unless dmy?
+          matches.push
+            pattern: 'date'
+            token: token
+            i: i
+            j: j
+            separator: rx_match[2]
+            year: dmy.year
+            month: dmy.month
+            day: dmy.day
+
+    # matches now contains all valid date strings in a way that is tricky to capture
+    # with regexes only. while thorough, it will contain some unintuitive noise:
+    #
+    # '2015_06_04', in addition to matching 2015_06_04, will also contain
+    # 5(!) other date matches: 15_06_04, 5_06_04, ..., even 2015 (matched as 5/1/2020)
+    #
+    # to reduce noise, remove date matches that are strict substrings of others
+    filtered_matches = []
+    for match in matches
+      is_submatch = false
+      for other_match in matches
+        continue if match is other_match
+        is_submatch = true if other_match.i <= match.i and other_match.j >= match.j
+      filtered_matches.push match unless is_submatch
+
+    @sorted filtered_matches
+
+  map_ints_to_dmy: (ints) ->
+    # given a 3-tuple, discard if:
+    #   middle int is over 31 (for all dmy formats, years are never allowed in the middle)
+    #   middle int is zero
+    #   any int is over the max allowable year
+    #   any int is over two digits but under the min allowable year
+    #   2 ints are over 31, the max allowable day
+    #   2 ints are zero
+    #   all ints are over 12, the max allowable month
+    return if ints[1] > 31 or ints[1] <= 0
+    over_12 = 0
+    over_31 = 0
+    under_1 = 0
+    for int in ints
+      return if 99 < int < @MIN_YEAR or int > @MAX_YEAR
+      over_31 += 1 if int > 31
+      over_12 += 1 if int > 12
+      under_1 += 1 if int <= 0
+    return if over_31 >= 2 or over_12 == 3 or under_1 >= 2
+
+    # first look for a four digit year: yyyy + daymonth or daymonth + yyyy
+    possible_year_splits = [
+      [ints[2], ints[0..1]] # year last
+      [ints[0], ints[1..2]] # year first
+    ]
+    for [y, rest] in possible_year_splits
+      if @MIN_YEAR <= y <= @MAX_YEAR
+        dm = @map_ints_to_dm rest
+        if dm?
+          return {
+            year: y
+            month: dm.month
+            day: dm.day
+          }
+        else
+          # for a candidate that includes a four-digit year,
+          # when the remaining ints don't match to a day and month,
+          # it is not a date.
+          return
+
+    # given no four-digit year, two digit years are the most flexible int to match, so
+    # try to parse a day-month out of ints[0..1] or ints[1..0]
+    for [y, rest] in possible_year_splits
+      dm = @map_ints_to_dm rest
+      if dm?
+        if y > 50
+          y = y + 1900 # 87 -> 1987
+        else
+          y = y + 2000 # 15 -> 2015
+        return {
+          year: y
+          month: dm.month
+          day: dm.day
+        }
+
+  map_ints_to_dm: (ints) ->
+    for [d, m] in [ints, ints.slice().reverse()]
+      if 1 <= d <= 31 and 1 <= m <= 12
+        return {
+          day: d
+          month: m
+        }
+
 
 module.exports = matching

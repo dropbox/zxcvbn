@@ -1,7 +1,6 @@
 test = require 'tape'
 matching = require '../src/matching'
 
-
 # takes a pattern and list of prefixes/suffixes
 # returns a bunch of variants of that pattern embedded
 # with each possible prefix/suffix combination, including no prefix/suffix
@@ -38,8 +37,7 @@ check_matches = (t, matches, pattern_names, patterns, ijs, props) ->
     pattern = patterns[k]
     [i, j] = ijs[k]
     t.equal match.pattern, pattern_name
-    t.equal match.i, i
-    t.equal match.j, j
+    t.deepEqual [match.i, match.j], [i, j]
     t.equal match.token, pattern
     for prop_name, prop_list of props
       t.deepEqual match[prop_name], prop_list[k]
@@ -299,4 +297,38 @@ test 'repeat matching', (t) ->
   matches = matching.repeat_match '2818BBBbzsdf1111@*&@!aaaaaEUDA@@@@@@1729'
   check_matches t, matches, 'repeat', patterns, [[4, 6],[12, 15],[21, 25],[30, 35]],
     repeated_char: ['B', '1', 'a', '@']
+  t.end()
+
+test 'date matching', (t) ->
+  tested_pws = {} # don't test the same pw twice
+  for [day, month, year] in [
+    [1,  1,  1999]
+    [22, 11, 1551]
+    [11, 8,  2000]
+    [9,  12, 2005]
+    [4,  6,  2015]
+    ]
+    for order in ['m,d,y', 'd,m,y', 'y,m,d', 'y,d,m']
+      for separator in ['', ' ', '-', '/', '\\', '_', '.']
+        for test_two_digit_years in [true, false]
+          for test_zero_padding in [true, false]
+            y = year.toString()
+            if test_two_digit_years
+              y = y[2..]
+            m = month.toString()
+            d = day.toString()
+            if test_zero_padding
+              m = '0' + m if m.length is 1
+              d = '0' + d if d.length is 1
+            pattern = order
+              .replace 'y', y
+              .replace 'm', m
+              .replace 'd', d
+              .replace /,/g, separator
+            continue if pattern of tested_pws
+            tested_pws[pattern] = true
+            matches = matching.date_match pattern
+            check_matches t, matches, 'date', [pattern], [[0, pattern.length - 1]],
+              separator: [separator]
+
   t.end()
