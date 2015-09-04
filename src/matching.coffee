@@ -42,12 +42,13 @@ L33T_TABLE =
   z: ['2']
 
 REGEXEN =
-  english_uppers: /[A-Z]{2,}/g
-  english_lowers: /[a-z]{2,}/g
-  alphanumeric:   /[a-zA-Z0-9]{2,}/g
-  digits:         /\d{2,}/g
-  symbols:        /[\W_]{2,}/g # includes non-latin unicode chars
-  recent_year:    /19\d\d|200\d|201\d/g
+  alpha_lower:  /[A-Z]{2,}/g
+  alpha_upper:  /[a-z]{2,}/g
+  alpha:        /[a-zA-Z]{2,}/g
+  alphanumeric: /[a-zA-Z0-9]{2,}/g
+  digits:       /\d{2,}/g
+  symbols:      /[\W_]{2,}/g # includes non-latin unicode chars
+  recent_year:  /19\d\d|200\d|201\d/g
 
 DATE_MAX_YEAR = 2050
 DATE_MIN_YEAR = 1000
@@ -222,12 +223,13 @@ matching =
   # spatial match (qwerty/dvorak/keypad) -----------------------------------------
   # ------------------------------------------------------------------------------
 
-  spatial_match: (password) ->
+  spatial_match: (password, _graphs = GRAPHS) ->
     matches = []
-    for graph_name, graph of GRAPHS
+    for graph_name, graph of _graphs
       @extend matches, @spatial_match_helper(password, graph, graph_name)
     @sorted matches
 
+  SHIFTED_RX: /[~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>?]/
   spatial_match_helper: (password, graph, graph_name) ->
     matches = []
     i = 0
@@ -235,7 +237,11 @@ matching =
       j = i + 1
       last_direction = null
       turns = 0
-      shifted_count = 0
+      if graph_name in ['qwerty', 'dvorak'] and @SHIFTED_RX.exec(password.charAt(i))
+        # initial character is shifted
+        shifted_count = 1
+      else
+        shifted_count = 0
       loop
         prev_char = password.charAt(j-1)
         found = false
@@ -315,15 +321,15 @@ matching =
       for direction in [1, -1]
         i = 0
         while i < password.length
-          unless password[i] in sequence
+          unless password.charAt(i) in sequence
             i += 1
             continue
           j = i + 1
-          sequence_position = sequence.indexOf password[i]
+          sequence_position = sequence.indexOf password.charAt(i)
           while j < password.length
             # mod by sequence length to allow sequences to wrap around: xyzabc
             next_sequence_position = @mod sequence_position + direction, sequence.length
-            unless sequence.indexOf(password[j]) == next_sequence_position
+            unless sequence.indexOf(password.charAt(j)) == next_sequence_position
               break
             j += 1
             sequence_position = next_sequence_position

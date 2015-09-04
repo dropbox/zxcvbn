@@ -1,5 +1,6 @@
 test = require 'tape'
 matching = require '../src/matching'
+adjacency_graphs = require '../src/adjacency_graphs'
 
 # takes a pattern and list of prefixes/suffixes
 # returns a bunch of variants of that pattern embedded
@@ -234,6 +235,44 @@ test 'l33t matching', (t) ->
   t.deepEqual lm('4sdf0'), []
   t.end()
 
+
+test 'spatial matching', (t) ->
+  for password in ['', '/', 'a', 'qw', '*/']
+    t.deepEqual matching.spatial_match(password), []
+
+  # for testing, make a subgraph that contains a single keyboard
+  _graphs = qwerty: adjacency_graphs.qwerty
+  pattern = '6tfGHJ'
+  matches = matching.spatial_match "rz!#{pattern}%z", _graphs
+  check_matches t, matches, 'spatial', [pattern], [[3, 3 + pattern.length - 1]],
+    graph: ['qwerty']
+    turns: [2]
+    shifted_count: [3]
+
+  for [pattern, keyboard, turns, shifts] in [
+    [ '12345',        'qwerty',     1, 0 ]
+    [ '@WSX',         'qwerty',     1, 4 ]
+    [ '6tfGHJ',       'qwerty',     2, 3 ]
+    [ 'hGFd',         'qwerty',     1, 2 ]
+    [ '/;p09876yhn',  'qwerty',     3, 0 ]
+    [ 'Xdr%',         'qwerty',     1, 2 ]
+    [ '159-',         'keypad',     1, 0 ]
+    [ '*84',          'keypad',     1, 0 ]
+    [ '/8520',        'keypad',     1, 0 ]
+    [ '369',          'keypad',     1, 0 ]
+    [ '/963.',        'mac_keypad', 1, 0 ]
+    [ '*-632.0214',   'mac_keypad', 9, 0 ]
+    [ 'aoEP%yIxkjq:', 'dvorak',     4, 5 ]
+    [ ';qoaOQ:Aoq;a', 'dvorak',    11, 4 ]
+    ]
+    _graphs = {}
+    _graphs[keyboard] = adjacency_graphs[keyboard]
+    matches = matching.spatial_match pattern, _graphs
+    check_matches t, matches, 'spatial', [pattern], [[0, pattern.length - 1]],
+      graph: [keyboard]
+      turns: [turns]
+      shifted_count: [shifts]
+  t.end()
 
 test 'sequence matching', (t) ->
   for password in ['', 'a', '1', 'ab']
