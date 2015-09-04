@@ -138,13 +138,12 @@ scoring =
   calc_entropy: (match) ->
     return match.entropy if match.entropy? # a match's entropy doesn't change. cache it.
     entropy_func = switch match.pattern
+      when 'dictionary' then @dictionary_entropy
+      when 'spatial'    then @spatial_entropy
       when 'repeat'     then @repeat_entropy
       when 'sequence'   then @sequence_entropy
-      when 'digits'     then @digits_entropy
-      when 'year'       then @year_entropy
+      when 'regex'      then @regex_entropy
       when 'date'       then @date_entropy
-      when 'spatial'    then @spatial_entropy
-      when 'dictionary' then @dictionary_entropy
     match.entropy = entropy_func.call this, match
 
   repeat_entropy: (match) ->
@@ -166,21 +165,29 @@ scoring =
       base_entropy += 1 # extra bit for descending instead of ascending
     base_entropy + @lg match.token.length
 
-  digits_entropy: (match) -> @lg Math.pow(10, match.token.length)
-
-  NUM_YEARS: 119 # years match against 1900 - 2019
-  NUM_MONTHS: 12
-  NUM_DAYS: 31
-
-  year_entropy: (match) -> @lg @NUM_YEARS
+  regex_entropy: (match) ->
+    char_class_bases =
+      alpha_lower:  26
+      alpha_upper:  26
+      alpha:        52
+      alphanumeric: 62
+      digits:       10
+      symbols:      33
+    if match.regex_name of char_class_bases
+      @lg Math.pow(char_class_bases[match.regex_name], match.token.length)
+    else switch match.regex_name
+      when 'recent_year'
+        # conservative estimate of year space: num years from 2000
+        year_space = parseInt(match.rx_match) - 2000
+        @lg Math.abs year_space
 
   date_entropy: (match) ->
-    if match.year < 100
-      entropy = @lg @NUM_DAYS * @NUM_MONTHS * 100 # two-digit year
-    else
-      entropy = @lg @NUM_DAYS * @NUM_MONTHS * @NUM_YEARS # four-digit year
-    if match.separator
-      entropy += 2 # add two bits for separator selection [/,-,.,etc]
+    # base entropy: lg of year distance from 2000
+    entropy = @lg Math.abs(match.year - 2000)
+    # add one bit for four-digit years
+    entropy += 1 if match.has_full_year
+    # add two bits for separator selection (one of ~4 choices)
+    entropy += 2 if match.separator
     entropy
 
   spatial_entropy: (match) ->
