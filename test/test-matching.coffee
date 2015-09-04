@@ -17,7 +17,6 @@ genpws = (pattern, prefixes, suffixes) ->
       result.push [prefix + pattern + suffix, i, j]
   result
 
-
 check_matches = (t, matches, pattern_names, patterns, ijs, props) ->
   if typeof pattern_names is "string"
     # shortcut: if checking for a list of the same type of patterns,
@@ -299,6 +298,7 @@ test 'repeat matching', (t) ->
     repeated_char: ['B', '1', 'a', '@']
   t.end()
 
+
 test 'date matching', (t) ->
   tested_pws = {} # don't test the same pw twice
   for [day, month, year] in [
@@ -327,8 +327,35 @@ test 'date matching', (t) ->
               .replace /,/g, separator
             continue if pattern of tested_pws
             tested_pws[pattern] = true
-            matches = matching.date_match pattern
-            check_matches t, matches, 'date', [pattern], [[0, pattern.length - 1]],
-              separator: [separator]
-
+            prefixes = ['a', 'ab']
+            suffixes = ['!', '@!']
+            for [password, i, j] in genpws pattern, prefixes, suffixes
+              matches = matching.date_match password
+              props = separator: [separator]
+              if not test_two_digit_years or parseInt(y) > 31
+                # skip year checks where year has multiple mappings
+                expected_year = if test_two_digit_years
+                  matching.two_to_four_digit_year(year % 100)
+                else
+                  year
+                props.year = [expected_year]
+              if not test_two_digit_years and day > 12
+                # similar: such cases will have unambiguous day mappings
+                props.day = [day]
+                props.month = [month]
+              check_matches t, matches, 'date', [pattern], [[i, j]], props
+  # overlapping dates
+  matches = matching.date_match '12/20/1991.12.20'
+  check_matches t, matches, 'date', ['12/20/1991', '1991.12.20'], [[0, 9], [6,15]],
+    separator: ['/', '.']
+    year: [1991, 1991]
+    month: [12, 12]
+    day: [20, 20]
+  # adjacent but non-ambiguous digits
+  matches = matching.date_match '912/20/919'
+  check_matches t, matches, 'date', ['12/20/91'], [[1, 8]],
+    separator: ['/']
+    year: [1991]
+    month: [12]
+    day: [20]
   t.end()
