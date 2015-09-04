@@ -41,6 +41,41 @@ L33T_TABLE =
   x: ['%']
   z: ['2']
 
+REGEXEN =
+  english_uppers: /[A-Z]{2,}/g
+  english_lowers: /[a-z]{2,}/g
+  alphanumeric:   /[a-zA-Z0-9]{2,}/g
+  digits:         /\d{2,}/g
+  symbols:        /[\W_]{2,}/g # includes non-latin unicode chars
+  recent_year:    /19\d\d|200\d|201\d/g
+
+DATE_MAX_YEAR = 2050
+DATE_MIN_YEAR = 1000
+DATE_SPLITS =
+  4:[      # for length-4 strings, eg 1191 or 9111, two ways to split:
+    [1, 2] # 1 1 91 (2nd split starts at index 1, 3rd at index 2)
+    [2, 3] # 91 1 1
+    ]
+  5:[
+    [1, 3] # 1 11 91
+    [2, 3] # 11 1 91
+    ]
+  6:[
+    [1, 2] # 1 1 1991
+    [2, 4] # 11 11 91
+    [4, 5] # 1991 1 1
+    ]
+  7:[
+    [1, 3] # 1 11 1991
+    [2, 3] # 11 1 1991
+    [4, 5] # 1991 1 11
+    [4, 6] # 1991 11 1
+    ]
+  8:[
+    [2, 4] # 11 11 1991
+    [4, 6] # 1991 11 11
+    ]
+
 matching =
   empty: (obj) -> (k for k of obj).length == 0
   extend: (lst, lst2) -> lst.push.apply lst, lst2
@@ -60,12 +95,11 @@ matching =
     matchers = [
       @dictionary_match
       @l33t_match
-      @digits_match
-      @year_match
-      @date_match
+      @spatial_match
       @repeat_match
       @sequence_match
-      @spatial_match
+      @regex_match
+      @date_match
     ]
     for matcher in matchers
       @extend matches, matcher.call(this, password)
@@ -307,67 +341,27 @@ matching =
     @sorted matches
 
   #-------------------------------------------------------------------------------
-  # digits, years, dates ---------------------------------------------------------
+  # regex matching ---------------------------------------------------------------
   #-------------------------------------------------------------------------------
 
-  repeat: (chr, n) -> (chr for i in [1..n]).join('')
-
-  findall: (password, rx) ->
+  regex_match: (password, _regexen = REGEXEN) ->
     matches = []
-    loop
-      match = password.match rx
-      break if not match
-      match.i = match.index
-      match.j = match.index + match[0].length - 1
-      matches.push match
-      password = password.replace match[0], @repeat(' ', match[0].length)
+    for name, regex of _regexen
+      regex.lastIndex = 0 # keeps regex_match stateless
+      while rx_match = regex.exec password
+        token = rx_match[0]
+        matches.push
+          pattern: 'regex'
+          token: token
+          i: rx_match.index
+          j: rx_match.index + rx_match[0].length - 1
+          regex_name: name
+          regex_match: rx_match
     @sorted matches
 
-  digits_rx: /\d{3,}/
-  digits_match: (password) ->
-    for match in @findall password, @digits_rx
-      [i, j] = [match.i, match.j]
-      pattern: 'digits'
-      i: i
-      j: j
-      token: password[i..j]
-
-  # 4-digit years only. 2-digit years have the same entropy as 2-digit brute force.
-  year_rx: /19\d\d|200\d|201\d/
-  year_match: (password) ->
-    for match in @findall password, @year_rx
-      [i, j] = [match.i, match.j]
-      pattern: 'year'
-      i: i
-      j: j
-      token: password[i..j]
-
-  MAX_YEAR: 2050
-  MIN_YEAR: 1000
-  DATE_SPLITS:
-    4:[
-      [1, 2] # 1 1 91
-      [2, 3] # 91 1 1
-      ]
-    5:[
-      [1, 3] # 1 11 91
-      [2, 3] # 11 1 91
-      ]
-    6:[
-      [1, 2] # 1 1 1991
-      [2, 4] # 11 11 91
-      [4, 5] # 1991 1 1
-      ]
-    7:[
-      [1, 3] # 1 11 1991
-      [2, 3] # 11 1 1991
-      [4, 5] # 1991 1 11
-      [4, 6] # 1991 11 1
-      ]
-    8:[
-      [2, 4] # 11 11 1991
-      [4, 6] # 1991 11 11
-      ]
+  #-------------------------------------------------------------------------------
+  # date matching ----------------------------------------------------------------
+  #-------------------------------------------------------------------------------
 
   date_match: (password) ->
     # a "date" is recognized as:
@@ -378,15 +372,15 @@ matching =
     #   a day between 1 and 31.
     #
     # note: this isn't true date parsing in that "feb 31st" is allowed,
-    # doesn't check for leap years, etc. not necessary to give a ballpark entropy estimate!
+    # this doesn't check for leap years, etc.
     #
     # recipe:
-    # start with regexes to find maybe-dates, then attempt to match the integers
-    # into month-day-year to filter the maybe-dates into dates.
-    # finally, remove matches that are substrings of other matches.
+    # start with regex to find maybe-dates, then attempt to map the integers
+    # onto month-day-year to filter the maybe-dates into dates.
+    # finally, remove matches that are substrings of other matches to reduce noise.
     #
     # note: instead of using a lazy or greedy regex to find many dates over the full string,
-    # match ^$ regexes against every substring of the password -- less performant but leads
+    # this uses a ^...$ regex against every substring of the password -- less performant but leads
     # to every possible date match.
     matches = []
     maybe_date_no_separator = /^\d{4,8}$/
@@ -405,35 +399,35 @@ matching =
       for j in [i + 3..i + 7]
         break if j >= password.length
         token = password[i..j]
-        if maybe_date_no_separator.exec token
-          candidates = []
-          for [k,l] in @DATE_SPLITS[token.length]
-            dmy = @map_ints_to_dmy [
-              parseInt token[0...k]
-              parseInt token[k...l]
-              parseInt token[l...]
-            ]
-            candidates.push dmy if dmy?
-          continue unless candidates.length > 0
-          # at this point: different possible dmy mappings for the same i,j substring.
-          # match the candidate date that has a year closest to 2000.
-          # ie, considering '111504', prefer 11-15-04 to 1-1-1504
-          # (interpreting '04' as 2004)
-          best_candidate = candidates[0]
-          min_distance = Math.abs candidates[0].year - 2000
-          for candidate in candidates[1..]
-            distance = Math.abs candidate.year - 2000
-            if distance < min_distance
-              [best_candidate, min_distance] = [candidate, distance]
-          matches.push
-            pattern: 'date'
-            token: token
-            i: i
-            j: j
-            separator: ''
-            year: best_candidate.year
-            month: best_candidate.month
-            day: best_candidate.day
+        continue unless maybe_date_no_separator.exec token
+        candidates = []
+        for [k,l] in DATE_SPLITS[token.length]
+          dmy = @map_ints_to_dmy [
+            parseInt token[0...k]
+            parseInt token[k...l]
+            parseInt token[l...]
+          ]
+          candidates.push dmy if dmy?
+        continue unless candidates.length > 0
+        # at this point: different possible dmy mappings for the same i,j substring.
+        # match the candidate date that has a year closest to 2000.
+        # ie, considering '111504', prefer 11-15-04 to 1-1-1504
+        # (interpreting '04' as 2004)
+        best_candidate = candidates[0]
+        min_distance = Math.abs candidates[0].year - 2000
+        for candidate in candidates[1..]
+          distance = Math.abs candidate.year - 2000
+          if distance < min_distance
+            [best_candidate, min_distance] = [candidate, distance]
+        matches.push
+          pattern: 'date'
+          token: token
+          i: i
+          j: j
+          separator: ''
+          year: best_candidate.year
+          month: best_candidate.month
+          day: best_candidate.day
 
     # dates with separators are between length 6 '1/1/91' and 10 '11/11/1991'
     for i in [0..password.length - 6]
@@ -441,22 +435,22 @@ matching =
         break if j >= password.length
         token = password[i..j]
         rx_match = maybe_date_with_separator.exec token
-        if rx_match
-          dmy = @map_ints_to_dmy [
-            parseInt rx_match[1]
-            parseInt rx_match[3]
-            parseInt rx_match[4]
-          ]
-          continue unless dmy?
-          matches.push
-            pattern: 'date'
-            token: token
-            i: i
-            j: j
-            separator: rx_match[2]
-            year: dmy.year
-            month: dmy.month
-            day: dmy.day
+        continue unless rx_match?
+        dmy = @map_ints_to_dmy [
+          parseInt rx_match[1]
+          parseInt rx_match[3]
+          parseInt rx_match[4]
+        ]
+        continue unless dmy?
+        matches.push
+          pattern: 'date'
+          token: token
+          i: i
+          j: j
+          separator: rx_match[2]
+          year: dmy.year
+          month: dmy.month
+          day: dmy.day
 
     # matches now contains all valid date strings in a way that is tricky to capture
     # with regexes only. while thorough, it will contain some unintuitive noise:
@@ -470,9 +464,10 @@ matching =
       is_submatch = false
       for other_match in matches
         continue if match is other_match
-        is_submatch = true if other_match.i <= match.i and other_match.j >= match.j
+        if other_match.i <= match.i and other_match.j >= match.j
+          is_submatch = true
+          break
       filtered_matches.push match unless is_submatch
-
     @sorted filtered_matches
 
   map_ints_to_dmy: (ints) ->
@@ -489,7 +484,7 @@ matching =
     over_31 = 0
     under_1 = 0
     for int in ints
-      return if 99 < int < @MIN_YEAR or int > @MAX_YEAR
+      return if 99 < int < DATE_MIN_YEAR or int > DATE_MAX_YEAR
       over_31 += 1 if int > 31
       over_12 += 1 if int > 12
       under_1 += 1 if int <= 0
@@ -501,7 +496,7 @@ matching =
       [ints[0], ints[1..2]] # year first
     ]
     for [y, rest] in possible_year_splits
-      if @MIN_YEAR <= y <= @MAX_YEAR
+      if DATE_MIN_YEAR <= y <= DATE_MAX_YEAR
         dm = @map_ints_to_dm rest
         if dm?
           return {
@@ -520,10 +515,7 @@ matching =
     for [y, rest] in possible_year_splits
       dm = @map_ints_to_dm rest
       if dm?
-        if y > 50
-          y = y + 1900 # 87 -> 1987
-        else
-          y = y + 2000 # 15 -> 2015
+        y = @two_to_four_digit_year y
         return {
           year: y
           month: dm.month
@@ -537,6 +529,14 @@ matching =
           day: d
           month: m
         }
+
+  two_to_four_digit_year: (year) ->
+    if year > 99
+      year
+    else if year > 50
+      year + 1900 # 87 -> 1987
+    else
+      year + 2000 # 15 -> 2015
 
 
 module.exports = matching
