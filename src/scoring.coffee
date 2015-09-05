@@ -257,7 +257,10 @@ scoring =
   # utilities --------------------------------------------------------------------
 
   calc_bruteforce_cardinality: (password) ->
-    [lower, upper, digits, symbols, unicode] = [false, false, false, false, false]
+    [lower, upper, digits, symbols, latin1_symbols, latin1_letters] = (
+      false for i in [0...6]
+    )
+    unicode_codepoints = []
     for chr in password.split('')
       ord = chr.charCodeAt(0)
       if 0x30 <= ord <= 0x39
@@ -268,14 +271,34 @@ scoring =
         lower = true
       else if ord <= 0x7f
         symbols = true
-      else
-        unicode = true
+      else if 0x80 <= ord <= 0xBF
+        latin1_symbols = true
+      else if 0xC0 <= ord <= 0xFF
+        latin1_letters = true
+      else if ord > 0xFF
+        unicode_codepoints.push ord
     c = 0
     c += 10 if digits
     c += 26 if upper
     c += 26 if lower
     c += 33 if symbols
-    c += 100 if unicode
+    c += 64 if latin1_symbols
+    c += 64 if latin1_letters
+    if unicode_codepoints.length
+      min_cp = max_cp = unicode_codepoints[0]
+      for cp in unicode_codepoints[1..]
+        min_cp = cp if cp < min_cp
+        max_cp = cp if cp > max_cp
+      # if the range between unicode codepoints is small,
+      # assume one extra alphabet is in use (eg cyrillic, korean) and add a ballpark +40
+      #
+      # if the range is large, be very conservative and add +100 instead of the range.
+      # (codepoint distance between chinese chars can be many thousand, for example,
+      # but that cardinality boost won't be justified if the characters are common.)
+      range = max_cp - min_cp + 1
+      range = 40 if range < 40
+      range = 100 if range > 100
+      c += range
     c
 
   display_time: (seconds) ->
