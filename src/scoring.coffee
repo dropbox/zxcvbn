@@ -182,8 +182,8 @@ scoring =
         @lg Math.abs year_space
 
   date_entropy: (match) ->
-    # base entropy: lg of year distance from 2000
-    entropy = @lg Math.abs(match.year - 2000)
+    # base entropy: lg of (year distance from 2000 * num_days * num_years)
+    entropy = @lg(Math.abs(match.year - 2000) * 31 * 12)
     # add one bit for four-digit years
     entropy += 1 if match.has_full_year
     # add two bits for separator selection (one of ~4 choices)
