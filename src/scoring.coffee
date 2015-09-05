@@ -177,8 +177,10 @@ scoring =
       @lg Math.pow(char_class_bases[match.regex_name], match.token.length)
     else switch match.regex_name
       when 'recent_year'
-        # conservative estimate of year space: num years from 2000
-        year_space = parseInt(match.rx_match) - 2000
+        # conservative estimate of year space: num years from 2000.
+        # if year is close to 2000, estimate a year space of 20
+        year_space = parseInt(match.regex_match[0]) - 2000
+        year_space = Math.max year_space, 20
         @lg Math.abs year_space
 
   date_entropy: (match) ->
