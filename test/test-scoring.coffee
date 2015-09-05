@@ -36,11 +36,11 @@ test 'lg', (t) ->
     t.equal lg(n), result, "lg(#{n}) == #{result}"
   n = 17
   p = 4
-  approx_equal t, lg(n * p), lg(n) + lg(p), "logarithm product rule"
-  approx_equal t, lg(n / p), lg(n) - lg(p), "logarithm quotient rule"
-  approx_equal t, lg(10), 1 / Math.log10(2), "logarithm base switch rule"
-  approx_equal t, lg(Math.pow(n, p)), p * lg(n), "logarithm power rule"
-  approx_equal t, lg(n), Math.log(n) / Math.log(2), "logarithm base change rule"
+  approx_equal t, lg(n * p), lg(n) + lg(p), "product rule"
+  approx_equal t, lg(n / p), lg(n) - lg(p), "quotient rule"
+  approx_equal t, lg(10), 1 / Math.log10(2), "base switch rule"
+  approx_equal t, lg(Math.pow(n, p)), p * lg(n), "power rule"
+  approx_equal t, lg(n), Math.log(n) / Math.log(2), "base change rule"
   t.end()
 
 test 'minimum entropy search', (t) ->
@@ -116,3 +116,49 @@ test 'minimum entropy search', (t) ->
   t.deepEqual result.match_sequence, [m1, m2]
 
   t.end()
+
+test 'entropy to crack time', (t) ->
+  times = [e0, e1, e2, e3] = (scoring.entropy_to_crack_time(n) for n in [0,1,7,60])
+  t.ok e0 < e1 < e2 < e3, "monotonically increasing"
+  t.ok e > 0, "always positive" for e in times
+  t.end()
+
+test 'crack time to score', (t) ->
+  for [seconds, score] in [
+    [0,  0]
+    [10, 0]
+    [Math.pow(10, 9), 4]
+    ]
+    msg = "crack time of #{seconds} seconds has score of #{score}"
+    t.equal scoring.crack_time_to_score(seconds), score, msg
+  t.end()
+
+test 'bruteforce cardinality', (t) ->
+  for [str, cardinality] in [
+    # beginning / middle / end of lowers range
+    ['a', 26]
+    ['h', 26]
+    ['z', 26]
+    # sample from each other character group
+    ['Q', 26]
+    ['0', 10]
+    ['9', 10]
+    ['$', 33]
+    ['£', 64]
+    ['å', 64]
+    # unicode
+    ['α', 40]
+    ['αβ', 40]
+    ['Ϫα', 58]
+    ['好', 40]
+    ['信息论', 100]
+    # combinations
+    ['a$', 59]
+    ['aQ£', 116]
+    ['9Z9Z', 36]
+    ['«信息论»', 164]
+    ]
+    msg = "cardinality of #{str} is #{cardinality}"
+    t.equal scoring.calc_bruteforce_cardinality(str), cardinality, msg
+  t.end()
+
