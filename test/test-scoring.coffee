@@ -106,50 +106,6 @@ test 'display time', (t) ->
     t.equal scoring.display_time(seconds), display, msg
   t.end()
 
-test 'extra uppercase entropy', (t) ->
-  for [word, extra_entropy] in [
-    [ '', 0 ]
-    [ 'a', 0 ]
-    [ 'A', 1 ]
-    [ 'abcdef', 0 ]
-    [ 'Abcdef', 1 ]
-    [ 'abcdeF', 1 ]
-    [ 'ABCDEF', 1 ]
-    [ 'aBcdef', lg(nCk(6,1)) ]
-    [ 'aBcDef', lg(nCk(6,1) + nCk(6,2)) ]
-    [ 'ABCDEf', lg(nCk(6,1)) ]
-    [ 'aBCDEf', lg(nCk(6,1) + nCk(6,2)) ]
-    [ 'ABCdef', lg(nCk(6,1) + nCk(6,2) + nCk(6,3)) ]
-    ]
-    msg = "extra uppercase entropy of #{word} is #{extra_entropy}"
-    t.equal scoring.extra_uppercase_entropy(token: word), extra_entropy, msg
-  t.end()
-
-test 'extra l33t entropy', (t) ->
-  match = l33t: false
-  t.equal scoring.extra_l33t_entropy(match), 0, "0 extra entropy for non-l33t matches"
-  for [word, extra_entropy, sub] in [
-    [ '',  0, {} ]
-    [ 'a', 0, {} ]
-    [ '4', 1, {'4': 'a'} ]
-    [ '4pple', 1, {'4': 'a'} ]
-    [ 'abcet', 0, {} ]
-    [ '4bcet', 1, {'4': 'a'} ]
-    [ 'a8cet', 1, {'8': 'b'} ]
-    [ 'abce+', 1, {'+': 't'} ]
-    [ '48cet', 2, {'4': 'a', '8': 'b'} ]
-    [ 'a4a4aa',  lg(nCk(6, 2) + nCk(6, 1)), {'4': 'a'} ]
-    [ '4a4a44',  lg(nCk(6, 2) + nCk(6, 1)), {'4': 'a'} ]
-    [ 'a44att+', lg(nCk(4, 2) + nCk(4, 1)) + lg(nCk(3, 1)), {'4': 'a', '+': 't'} ]
-    ]
-    match =
-      token: word
-      sub: sub
-    match.l33t = not matching.empty(sub)
-    msg = "extra l33t entropy of #{word} is #{extra_entropy}"
-    t.equal scoring.extra_l33t_entropy(match), extra_entropy, msg
-  t.end()
-
 test 'minimum entropy search', (t) ->
   m = (i, j, entropy) ->
     i: i
@@ -308,4 +264,86 @@ test 'date entropy', (t) ->
   msg = "recent years assume MIN_YEAR_SPACE."
   msg += " extra entropy is added for separators and a 4-digit year."
   t.equal scoring.date_entropy(match), lg(12 * 31 * scoring.MIN_YEAR_SPACE) + 2 + 1, msg
+  t.end()
+
+test 'dictionary_entropy', (t) ->
+  match =
+    token: 'aaaaa'
+    rank: 32
+  msg = "base entropy is the lg of the rank"
+  t.equal scoring.dictionary_entropy(match), lg(32), msg
+
+  match =
+    token: 'AAAaaa'
+    rank: 32
+  msg = "extra entropy is added for capitalization"
+  t.equal scoring.dictionary_entropy(match), lg(32) + scoring.extra_uppercase_entropy(match), msg
+
+  match =
+    token: 'aaa@@@'
+    rank: 32
+    l33t: true
+    sub: {'@': 'a'}
+  msg = "extra entropy is added for common l33t substitutions"
+  t.equal scoring.dictionary_entropy(match), lg(32) + scoring.extra_l33t_entropy(match), msg
+
+  match =
+    token: 'AaA@@@'
+    rank: 32
+    l33t: true
+    sub: {'@': 'a'}
+  msg = "extra entropy is added for both capitalization and common l33t substitutions"
+  expected = lg(32) + scoring.extra_l33t_entropy(match) + scoring.extra_uppercase_entropy(match)
+  t.equal scoring.dictionary_entropy(match), expected, msg
+  t.end()
+
+test 'extra uppercase entropy', (t) ->
+  for [word, extra_entropy] in [
+    [ '', 0 ]
+    [ 'a', 0 ]
+    [ 'A', 1 ]
+    [ 'abcdef', 0 ]
+    [ 'Abcdef', 1 ]
+    [ 'abcdeF', 1 ]
+    [ 'ABCDEF', 1 ]
+    [ 'aBcdef', lg(nCk(6,1)) ]
+    [ 'aBcDef', lg(nCk(6,1) + nCk(6,2)) ]
+    [ 'ABCDEf', lg(nCk(6,1)) ]
+    [ 'aBCDEf', lg(nCk(6,1) + nCk(6,2)) ]
+    [ 'ABCdef', lg(nCk(6,1) + nCk(6,2) + nCk(6,3)) ]
+    ]
+    msg = "extra uppercase entropy of #{word} is #{extra_entropy}"
+    t.equal scoring.extra_uppercase_entropy(token: word), extra_entropy, msg
+  t.end()
+
+test 'extra l33t entropy', (t) ->
+  match = l33t: false
+  t.equal scoring.extra_l33t_entropy(match), 0, "0 extra entropy for non-l33t matches"
+  for [word, extra_entropy, sub] in [
+    [ '',  0, {} ]
+    [ 'a', 0, {} ]
+    [ '4', 1, {'4': 'a'} ]
+    [ '4pple', 1, {'4': 'a'} ]
+    [ 'abcet', 0, {} ]
+    [ '4bcet', 1, {'4': 'a'} ]
+    [ 'a8cet', 1, {'8': 'b'} ]
+    [ 'abce+', 1, {'+': 't'} ]
+    [ '48cet', 2, {'4': 'a', '8': 'b'} ]
+    [ 'a4a4aa',  lg(nCk(6, 2) + nCk(6, 1)), {'4': 'a'} ]
+    [ '4a4a44',  lg(nCk(6, 2) + nCk(6, 1)), {'4': 'a'} ]
+    [ 'a44att+', lg(nCk(4, 2) + nCk(4, 1)) + lg(nCk(3, 1)), {'4': 'a', '+': 't'} ]
+    ]
+    match =
+      token: word
+      sub: sub
+      l33t: not matching.empty(sub)
+    msg = "extra l33t entropy of #{word} is #{extra_entropy}"
+    t.equal scoring.extra_l33t_entropy(match), extra_entropy, msg
+  match =
+    token: 'Aa44aA'
+    l33t: true
+    sub: {'4': 'a'}
+  extra_entropy = lg(nCk(6, 2) + nCk(6, 1))
+  msg = "capitalization doesn't affect extra l33t entropy calc"
+  t.equal scoring.extra_l33t_entropy(match), extra_entropy, msg
   t.end()
