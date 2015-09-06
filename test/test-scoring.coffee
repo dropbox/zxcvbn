@@ -266,6 +266,53 @@ test 'date entropy', (t) ->
   t.equal scoring.date_entropy(match), lg(12 * 31 * scoring.MIN_YEAR_SPACE) + 2 + 1, msg
   t.end()
 
+test 'spatial entropy', (t) ->
+  match =
+    token: 'zxcvbn'
+    graph: 'qwerty'
+    turns: 1
+    shifted_count: 0
+  base_entropy = lg(
+    scoring.KEYBOARD_STARTING_POSITIONS *
+    scoring.KEYBOARD_AVERAGE_DEGREE *
+    # - 1 term because: not counting spatial patterns of length 1
+    # eg for length==6, multiplier is 5 for needing to try len2,len3,..,len6
+    (match.token.length - 1)
+    )
+  msg = "with no turns or shifts, entropy is lg(starts * degree * (len-1))"
+  t.equal scoring.spatial_entropy(match), base_entropy, msg
+
+  match.entropy = null
+  match.token = 'ZxCvbn'
+  match.shifted_count = 2
+  shifted_entropy = base_entropy + lg(nCk(6, 2) + nCk(6, 1))
+  msg = "entropy is added for shifted keys, similar to capitals in dictionary matching"
+  t.equal scoring.spatial_entropy(match), shifted_entropy, msg
+
+  match.entropy = null
+  match.token = 'ZXCVBN'
+  match.shifted_count = 6
+  shifted_entropy = base_entropy + 1
+  msg = "when everything is shifted, only 1 bit is added"
+  t.equal scoring.spatial_entropy(match), shifted_entropy, msg
+
+  match =
+    token: 'zxcft6yh'
+    graph: 'qwerty'
+    turns: 3
+    shifted_count: 0
+  possibilities = 0
+  L = match.token.length
+  s = scoring.KEYBOARD_STARTING_POSITIONS
+  d = scoring.KEYBOARD_AVERAGE_DEGREE
+  for i in [2..L]
+    for j in [1..Math.min(match.turns, i-1)]
+      possibilities += nCk(i-1, j-1) * s * Math.pow(d, j)
+  entropy = lg possibilities
+  msg = "spatial entropy accounts for turn positions, directions and starting keys"
+  t.equal scoring.spatial_entropy(match), entropy, msg
+  t.end()
+
 test 'dictionary_entropy', (t) ->
   match =
     token: 'aaaaa'

@@ -9,13 +9,6 @@ calc_average_degree = (graph) ->
   average /= (k for k,v of graph).length
   average
 
-KEYBOARD_AVERAGE_DEGREE = calc_average_degree(adjacency_graphs.qwerty)
-# slightly different for keypad/mac keypad, but close enough
-KEYPAD_AVERAGE_DEGREE = calc_average_degree(adjacency_graphs.keypad)
-
-KEYBOARD_STARTING_POSITIONS = (k for k,v of adjacency_graphs.qwerty).length
-KEYPAD_STARTING_POSITIONS = (k for k,v of adjacency_graphs.keypad).length
-
 scoring =
   nCk: (n, k) ->
     # http://blog.plover.com/math/choose.html
@@ -195,13 +188,20 @@ scoring =
     entropy += 2 if match.separator
     entropy
 
+  KEYBOARD_AVERAGE_DEGREE: calc_average_degree(adjacency_graphs.qwerty)
+  # slightly different for keypad/mac keypad, but close enough
+  KEYPAD_AVERAGE_DEGREE: calc_average_degree(adjacency_graphs.keypad)
+
+  KEYBOARD_STARTING_POSITIONS: (k for k,v of adjacency_graphs.qwerty).length
+  KEYPAD_STARTING_POSITIONS: (k for k,v of adjacency_graphs.keypad).length
+
   spatial_entropy: (match) ->
     if match.graph in ['qwerty', 'dvorak']
-      s = KEYBOARD_STARTING_POSITIONS
-      d = KEYBOARD_AVERAGE_DEGREE
+      s = @KEYBOARD_STARTING_POSITIONS
+      d = @KEYBOARD_AVERAGE_DEGREE
     else
-      s = KEYPAD_STARTING_POSITIONS
-      d = KEYPAD_AVERAGE_DEGREE
+      s = @KEYPAD_STARTING_POSITIONS
+      d = @KEYPAD_AVERAGE_DEGREE
     possibilities = 0
     L = match.token.length
     t = match.turns
@@ -212,13 +212,16 @@ scoring =
         possibilities += @nCk(i - 1, j - 1) * s * Math.pow(d, j)
     entropy = @lg possibilities
     # add extra entropy for shifted keys. (% instead of 5, A instead of a.)
-    # math is similar to extra entropy from uppercase letters in dictionary matches.
+    # math is similar to extra entropy of l33t substitutions in dictionary matches.
     if match.shifted_count
       S = match.shifted_count
       U = match.token.length - match.shifted_count # unshifted count
-      possibilities = 0
-      possibilities += @nCk(S + U, i) for i in [0..Math.min(S, U)]
-      entropy += @lg possibilities
+      if U == 0
+        entropy += 1
+      else
+        possibilities = 0
+        possibilities += @nCk(S + U, i) for i in [1..Math.min(S, U)]
+        entropy += @lg possibilities
     entropy
 
   dictionary_entropy: (match) ->
