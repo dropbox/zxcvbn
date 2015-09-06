@@ -1,13 +1,15 @@
 test = require 'tape'
 scoring = require '../src/scoring'
+matching = require '../src/matching'
 
+lg = scoring.lg
+nCk = scoring.nCk
 EPSILON = 1e-10 # truncate to 10th decimal place
 truncate_float = (float) -> Math.round(float / EPSILON) * EPSILON
 approx_equal = (t, actual, expected, msg) ->
   t.equal truncate_float(actual), truncate_float(expected), msg
 
 test 'nCk', (t) ->
-  nCk = scoring.nCk
   for [n, k, result] in [
     [ 0,  0, 1 ]
     [ 1,  0, 1 ]
@@ -26,7 +28,6 @@ test 'nCk', (t) ->
   t.end()
 
 test 'lg', (t) ->
-  lg = scoring.lg
   for [n, result] in [
     [ 1,  0 ]
     [ 2,  1 ]
@@ -41,6 +42,112 @@ test 'lg', (t) ->
   approx_equal t, lg(10), 1 / Math.log10(2), "base switch rule"
   approx_equal t, lg(Math.pow(n, p)), p * lg(n), "power rule"
   approx_equal t, lg(n), Math.log(n) / Math.log(2), "base change rule"
+  t.end()
+
+test 'entropy to crack time', (t) ->
+  times = [e0, e1, e2, e3] = (scoring.entropy_to_crack_time(n) for n in [0,1,7,60])
+  t.ok e0 < e1 < e2 < e3, "monotonically increasing"
+  t.ok e > 0, "always positive" for e in times
+  t.end()
+
+test 'crack time to score', (t) ->
+  for [seconds, score] in [
+    [0,  0]
+    [10, 0]
+    [Math.pow(10, 9), 4]
+    ]
+    msg = "crack time of #{seconds} seconds has score of #{score}"
+    t.equal scoring.crack_time_to_score(seconds), score, msg
+  t.end()
+
+test 'bruteforce cardinality', (t) ->
+  for [str, cardinality] in [
+    # beginning / middle / end of lowers range
+    [ 'a', 26 ]
+    [ 'h', 26 ]
+    [ 'z', 26 ]
+    # sample from each other character group
+    [ 'Q', 26 ]
+    [ '0', 10 ]
+    [ '9', 10 ]
+    [ '$', 33 ]
+    [ '£', 64 ]
+    [ 'å', 64 ]
+    # unicode
+    [ 'α', 40 ]
+    [ 'αβ', 40 ]
+    [ 'Ϫα', 58 ]
+    [ '好', 40 ]
+    [ '信息论', 100 ]
+    # combinations
+    [ 'a$', 59 ]
+    [ 'aQ£', 116 ]
+    [ '9Z9Z', 36 ]
+    [ '«信息论»', 164 ]
+    ]
+    msg = "cardinality of #{str} is #{cardinality}"
+    t.equal scoring.calc_bruteforce_cardinality(str), cardinality, msg
+  t.end()
+
+test 'display time', (t) ->
+  for [seconds, display] in [
+    [ 0, '0 seconds' ]
+    [ 1, '1 second' ]
+    [ 32, '32 seconds' ]
+    [ 60, '1 minute' ]
+    [ 121, '2 minutes' ]
+    [ 3600, '1 hour' ]
+    [ 2  * 3600 * 24 + 5, '2 days' ]
+    [ 1  * 3600 * 24 * 31 + 4000, '1 month' ]
+    [ 99 * 3600 * 24 * 31 * 12, '99 years' ]
+    [ Math.pow(10, 10), 'centuries' ]
+    ]
+    msg = "#{seconds} seconds has a display time of #{display}"
+    t.equal scoring.display_time(seconds), display, msg
+  t.end()
+
+test 'extra uppercase entropy', (t) ->
+  for [word, extra_entropy] in [
+    [ '', 0 ]
+    [ 'a', 0 ]
+    [ 'A', 1 ]
+    [ 'abcdef', 0 ]
+    [ 'Abcdef', 1 ]
+    [ 'abcdeF', 1 ]
+    [ 'ABCDEF', 1 ]
+    [ 'aBcdef', lg(nCk(6,1)) ]
+    [ 'aBcDef', lg(nCk(6,1) + nCk(6,2)) ]
+    [ 'ABCDEf', lg(nCk(6,1)) ]
+    [ 'aBCDEf', lg(nCk(6,1) + nCk(6,2)) ]
+    [ 'ABCdef', lg(nCk(6,1) + nCk(6,2) + nCk(6,3)) ]
+    ]
+    msg = "extra uppercase entropy of #{word} is #{extra_entropy}"
+    t.equal scoring.extra_uppercase_entropy(token: word), extra_entropy, msg
+  t.end()
+
+test 'extra l33t entropy', (t) ->
+  match = l33t: false
+  t.equal scoring.extra_l33t_entropy(match), 0, "0 extra entropy for non-l33t matches"
+  for [word, extra_entropy, sub] in [
+    [ '',  0, {} ]
+    [ 'a', 0, {} ]
+    [ '4', 1, {'4': 'a'} ]
+    [ '4pple', 1, {'4': 'a'} ]
+    [ 'abcet', 0, {} ]
+    [ '4bcet', 1, {'4': 'a'} ]
+    [ 'a8cet', 1, {'8': 'b'} ]
+    [ 'abce+', 1, {'+': 't'} ]
+    [ '48cet', 2, {'4': 'a', '8': 'b'} ]
+    [ 'a4a4aa',  lg(nCk(6, 2) + nCk(6, 1)), {'4': 'a'} ]
+    [ '4a4a44',  lg(nCk(6, 2) + nCk(6, 1)), {'4': 'a'} ]
+    [ 'a44att+', lg(nCk(4, 2) + nCk(4, 1)) + lg(nCk(3, 1)), {'4': 'a', '+': 't'} ]
+    ]
+    match =
+      token: word
+      sub: sub
+    match.l33t = not matching.empty(sub)
+    msg = "extra l33t entropy of #{word} is #{extra_entropy}"
+    t.equal scoring.extra_l33t_entropy(match), extra_entropy, msg
   t.end()
 
 test 'minimum entropy search', (t) ->
@@ -58,7 +165,7 @@ test 'minimum entropy search', (t) ->
   t.equal m0.pattern, 'bruteforce'
   t.equal m0.token, password
   t.equal m0.cardinality, cardinality
-  expected = Math.round scoring.lg(Math.pow(cardinality, password.length))
+  expected = Math.round lg(Math.pow(cardinality, password.length))
   t.equal Math.round(result.entropy), expected
   t.equal Math.round(m0.entropy), expected
   t.deepEqual [m0.i, m0.j], [0, 9]
@@ -114,51 +221,91 @@ test 'minimum entropy search', (t) ->
   result = scoring.minimum_entropy_match_sequence password, matches
   t.equal result.entropy, 2
   t.deepEqual result.match_sequence, [m1, m2]
-
   t.end()
 
-test 'entropy to crack time', (t) ->
-  times = [e0, e1, e2, e3] = (scoring.entropy_to_crack_time(n) for n in [0,1,7,60])
-  t.ok e0 < e1 < e2 < e3, "monotonically increasing"
-  t.ok e > 0, "always positive" for e in times
+test 'calc_entropy', (t) ->
+  match =
+    entropy: 1
+  t.equal scoring.calc_entropy(match), 1, "calc_entropy returns cached entropy when available"
+  match =
+    pattern: 'date'
+    year: 1977
+    month: 7
+    day: 14
+  msg = "calc_entropy delegates based on pattern"
+  t.equal scoring.calc_entropy(match), scoring.date_entropy(match), msg
   t.end()
 
-test 'crack time to score', (t) ->
-  for [seconds, score] in [
-    [0,  0]
-    [10, 0]
-    [Math.pow(10, 9), 4]
+test 'repeat entropy', (t) ->
+  for [token, entropy] in [
+    [ 'aa',   lg(26 * 2) ]
+    [ '999',  lg(10 * 3) ]
+    [ '$$$$', lg(33 * 4) ]
     ]
-    msg = "crack time of #{seconds} seconds has score of #{score}"
-    t.equal scoring.crack_time_to_score(seconds), score, msg
+    match = token: token
+    msg = "the repeat pattern '#{token}' has entropy of #{entropy}"
+    t.equal scoring.repeat_entropy(match), entropy, msg
   t.end()
 
-test 'bruteforce cardinality', (t) ->
-  for [str, cardinality] in [
-    # beginning / middle / end of lowers range
-    ['a', 26]
-    ['h', 26]
-    ['z', 26]
-    # sample from each other character group
-    ['Q', 26]
-    ['0', 10]
-    ['9', 10]
-    ['$', 33]
-    ['£', 64]
-    ['å', 64]
-    # unicode
-    ['α', 40]
-    ['αβ', 40]
-    ['Ϫα', 58]
-    ['好', 40]
-    ['信息论', 100]
-    # combinations
-    ['a$', 59]
-    ['aQ£', 116]
-    ['9Z9Z', 36]
-    ['«信息论»', 164]
+test 'sequence entropy', (t) ->
+  for [token, ascending, entropy] in [
+    [ 'ab',   true,  lg(26) + lg(2) ]
+    [ 'XYZ',  true,  lg(26) + 1 + lg(3) ]
+    [ '4567', true,  lg(10) + lg(4) ]
+    [ '7654', false, lg(10) + lg(4) + 1 ]
+    [ 'ZYX',  false, lg(26) + 1 + lg(3) + 1 ]
     ]
-    msg = "cardinality of #{str} is #{cardinality}"
-    t.equal scoring.calc_bruteforce_cardinality(str), cardinality, msg
+    match =
+      token: token
+      ascending: ascending
+    msg = "the sequence pattern '#{token}' has entropy of #{entropy}"
   t.end()
 
+test 'regex entropy', (t) ->
+  match =
+    token: 'aizocdk'
+    regex_name: 'alpha_lower'
+    regex_match: ['aizocdk']
+  t.equal scoring.regex_entropy(match), lg(Math.pow(26, 7))
+
+  match =
+    token: 'ag7C8'
+    regex_name: 'alphanumeric'
+    regex_match: ['ag7C8']
+  t.equal scoring.regex_entropy(match), lg(Math.pow(2 * 26 + 10, 5))
+
+  match =
+    token: '1972'
+    regex_name: 'recent_year'
+    regex_match: ['1972']
+  t.equal scoring.regex_entropy(match), lg(scoring.REFERENCE_YEAR - 1972)
+
+  match =
+    token: '1992'
+    regex_name: 'recent_year'
+    regex_match: ['1992']
+  t.equal scoring.regex_entropy(match), lg(scoring.MIN_YEAR_SPACE)
+  t.end()
+
+test 'date entropy', (t) ->
+  match =
+    token: '1123'
+    separator: ''
+    has_full_year: false
+    year: 1923
+    month: 1
+    day: 1
+  msg = "entropy for #{match.token} is lg days * months * distance_from_ref_year"
+  t.equal scoring.date_entropy(match), lg(12 * 31 * (scoring.REFERENCE_YEAR - match.year)), msg
+
+  match =
+    token: '1/1/2010'
+    separator: '/'
+    has_full_year: true
+    year: 2010
+    month: 1
+    day: 1
+  msg = "recent years assume MIN_YEAR_SPACE."
+  msg += " extra entropy is added for separators and a 4-digit year."
+  t.equal scoring.date_entropy(match), lg(12 * 31 * scoring.MIN_YEAR_SPACE) + 2 + 1, msg
+  t.end()

@@ -165,6 +165,8 @@ scoring =
       base_entropy += 1 # extra bit for descending instead of ascending
     base_entropy + @lg match.token.length
 
+  MIN_YEAR_SPACE: 20
+  REFERENCE_YEAR: 2000
   regex_entropy: (match) ->
     char_class_bases =
       alpha_lower:  26
@@ -177,15 +179,16 @@ scoring =
       @lg Math.pow(char_class_bases[match.regex_name], match.token.length)
     else switch match.regex_name
       when 'recent_year'
-        # conservative estimate of year space: num years from 2000.
-        # if year is close to 2000, estimate a year space of 20
-        year_space = parseInt(match.regex_match[0]) - 2000
-        year_space = Math.max year_space, 20
-        @lg Math.abs year_space
+        # conservative estimate of year space: num years from REFERENCE_YEAR.
+        # if year is close to REFERENCE_YEAR, estimate a year space of MIN_YEAR_SPACE.
+        year_space = Math.abs parseInt(match.regex_match[0]) - @REFERENCE_YEAR
+        year_space = Math.max year_space, @MIN_YEAR_SPACE
+        @lg year_space
 
   date_entropy: (match) ->
-    # base entropy: lg of (year distance from 2000 * num_days * num_years)
-    entropy = @lg(Math.abs(match.year - 2000) * 31 * 12)
+    # base entropy: lg of (year distance from REFERENCE_YEAR * num_days * num_years)
+    year_space = Math.max(Math.abs(match.year - @REFERENCE_YEAR), @MIN_YEAR_SPACE)
+    entropy = @lg(year_space * 31 * 12)
     # add one bit for four-digit years
     entropy += 1 if match.has_full_year
     # add two bits for separator selection (one of ~4 choices)
@@ -243,18 +246,28 @@ scoring =
     U = (chr for chr in word.split('') when chr.match /[A-Z]/).length
     L = (chr for chr in word.split('') when chr.match /[a-z]/).length
     possibilities = 0
-    possibilities += @nCk(U + L, i) for i in [0..Math.min(U, L)]
+    possibilities += @nCk(U + L, i) for i in [1..Math.min(U, L)]
     @lg possibilities
 
   extra_l33t_entropy: (match) ->
     return 0 if not match.l33t
-    possibilities = 0
+    extra_entropy = 0
     for subbed, unsubbed of match.sub
       S = (chr for chr in match.token.split('') when chr == subbed).length   # num of subbed chars
       U = (chr for chr in match.token.split('') when chr == unsubbed).length # num of unsubbed chars
-      possibilities += @nCk(U + S, i) for i in [0..Math.min(U, S)]
-    # corner: return 1 bit for single-letter subs, like 4pple -> apple, instead of 0.
-    @lg(possibilities) or 1
+      if S == 0 or U == 0
+        # for this sub, password is either fully subbed (444) or fully unsubbed (aaa)
+        # treat that as doubling the space (attacker needs to try fully subbed chars in addition to
+        # unsubbed.)
+        extra_entropy += 1
+      else
+        # this case is similar to capitalization:
+        # with aa44a, U = 3, S = 2, attacker needs to try unsubbed + one sub + two subs
+        p = Math.min(U, S)
+        possibilities = 0
+        possibilities += @nCk(U + S, i) for i in [1..p]
+        extra_entropy += @lg possibilities
+    extra_entropy
 
   # utilities --------------------------------------------------------------------
 
@@ -310,19 +323,27 @@ scoring =
     month = day * 31
     year = month * 12
     century = year * 100
-    if seconds < minute
-      'instant'
+    [display_num, display_str] = if seconds < minute
+      [seconds, "#{seconds} second"]
     else if seconds < hour
-      "#{1 + Math.ceil(seconds / minute)} minutes"
+      base = Math.round seconds / minute
+      [base, "#{base} minute"]
     else if seconds < day
-      "#{1 + Math.ceil(seconds / hour)} hours"
+      base = Math.round seconds / hour
+      [base, "#{base} hour"]
     else if seconds < month
-      "#{1 + Math.ceil(seconds / day)} days"
+      base = Math.round seconds / day
+      [base, "#{base} day"]
     else if seconds < year
-      "#{1 + Math.ceil(seconds / month)} months"
+      base = Math.round seconds / month
+      [base, "#{base} month"]
     else if seconds < century
-      "#{1 + Math.ceil(seconds / year)} years"
+      base = Math.round seconds / year
+      [base, "#{base} year"]
     else
-      'centuries'
+      [null, 'centuries']
+    display_str += 's' if display_num? and display_num != 1
+    display_str
+
 
 module.exports = scoring
