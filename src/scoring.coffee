@@ -253,8 +253,10 @@ scoring =
     return 0 if not match.l33t
     extra_entropy = 0
     for subbed, unsubbed of match.sub
-      S = (chr for chr in match.token.split('') when chr == subbed).length   # num of subbed chars
-      U = (chr for chr in match.token.split('') when chr == unsubbed).length # num of unsubbed chars
+      # lower-case match.token before calculating: capitalization shouldn't affect l33t calc.
+      chrs = match.token.toLowerCase().split('')
+      S = (chr for chr in chrs when chr == subbed).length   # num of subbed chars
+      U = (chr for chr in chrs when chr == unsubbed).length # num of unsubbed chars
       if S == 0 or U == 0
         # for this sub, password is either fully subbed (444) or fully unsubbed (aaa)
         # treat that as doubling the space (attacker needs to try fully subbed chars in addition to
