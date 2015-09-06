@@ -189,7 +189,7 @@ props_tmpl = '''
 </div>
 '''
 
-requirejs ['../lib/zxcvbn'], (zxcvbn) ->
+requirejs ['../dist/zxcvbn'], (zxcvbn) ->
   $ ->
     results_lst = []
     for password in test_passwords.split('\n') when password
