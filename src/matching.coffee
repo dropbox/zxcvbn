@@ -1,5 +1,6 @@
 frequency_lists = require('./frequency_lists')
 adjacency_graphs = require('./adjacency_graphs')
+scoring = require('./scoring')
 
 build_ranked_dict = (ordered_list) ->
   result = {}
@@ -416,13 +417,16 @@ matching =
           candidates.push dmy if dmy?
         continue unless candidates.length > 0
         # at this point: different possible dmy mappings for the same i,j substring.
-        # match the candidate date that has a year closest to 2000.
+        # match the candidate date that has smallest entropy: a year closest to 2000.
+        # (scoring.REFERENCE_YEAR).
+        #
         # ie, considering '111504', prefer 11-15-04 to 1-1-1504
         # (interpreting '04' as 2004)
         best_candidate = candidates[0]
-        min_distance = Math.abs candidates[0].year - 2000
+        metric = (candidate) -> Math.abs candidate.year - scoring.REFERENCE_YEAR
+        min_distance = metric candidates[0]
         for candidate in candidates[1..]
-          distance = Math.abs candidate.year - 2000
+          distance = metric candidate
           if distance < min_distance
             [best_candidate, min_distance] = [candidate, distance]
         matches.push
@@ -540,9 +544,10 @@ matching =
     if year > 99
       year
     else if year > 50
-      year + 1900 # 87 -> 1987
+      # 87 -> 1987
+      year + scoring.REFERENCE_YEAR - 100
     else
-      year + 2000 # 15 -> 2015
-
+      # 15 -> 2015
+      year + scoring.REFERENCE_YEAR
 
 module.exports = matching
