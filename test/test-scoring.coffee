@@ -215,6 +215,7 @@ test 'sequence entropy', (t) ->
       token: token
       ascending: ascending
     msg = "the sequence pattern '#{token}' has entropy of #{entropy}"
+    t.equal scoring.sequence_entropy(match), scoring.sequence_entropy(match), msg
   t.end()
 
 test 'regex entropy', (t) ->
