@@ -145,15 +145,22 @@ test 'dictionary matching', (t) ->
 
   prefixes = ['q', '%%']
   suffixes = ['%', 'qq']
+  word = 'asdf1234&*'
+  for [password, i, j] in genpws word, prefixes, suffixes
+    matches = dm password
+    check_matches t, matches, 'dictionary', [word], [[i,j]],
+      matched_word: [word]
+      rank: [5]
+      dictionary_name: ['d2']
+
   for name, dict of test_dicts
     for word, rank of dict
       continue if word is 'motherboard' # skip words that contain others
-      for [password, i, j] in genpws word, prefixes, suffixes
-        matches = dm password
-        check_matches t, matches, 'dictionary', [word], [[i,j]],
-          matched_word: [word]
-          rank: [rank]
-          dictionary_name: [name]
+      matches = dm word
+      check_matches t, matches, 'dictionary', [word], [[0, word.length - 1]],
+        matched_word: [word]
+        rank: [rank]
+        dictionary_name: [name]
 
   # test the default dictionaries
   matches = matching.dictionary_match 'rosebud'
@@ -274,6 +281,7 @@ test 'spatial matching', (t) ->
       shifted_count: [shifts]
   t.end()
 
+
 test 'sequence matching', (t) ->
   for password in ['', 'a', '1', 'ab']
     t.deepEqual matching.sequence_match(password), []
@@ -285,8 +293,15 @@ test 'sequence matching', (t) ->
   t.equal matching.sequence_match('xyzabc').length, 1
   t.equal matching.sequence_match('cbazyx').length, 1
 
-  prefixes = ['!', '22', 'ttt']
-  suffixes = ['!', '22', 'ttt']
+  prefixes = ['!', '22']
+  suffixes = ['!', '22']
+  pattern = 'jihg'
+  for [password, i, j] in genpws pattern, prefixes, suffixes
+    matches = matching.sequence_match password
+    check_matches t, matches, 'sequence', [pattern], [[i, j]],
+      sequence_name: ['lower']
+      ascending: [false]
+
   for [pattern, name, is_ascending] in [
     ['ABC',   'upper',  true]
     ['CBA',   'upper',  false]
@@ -296,7 +311,6 @@ test 'sequence matching', (t) ->
     ['ZYX',   'upper',  false]
     ['abcd',  'lower',  true]
     ['dcba',  'lower',  false]
-    ['ghij',  'lower',  true]
     ['jihg',  'lower',  false]
     ['wxyz',  'lower',  true]
     ['zyxw',  'lower',  false]
@@ -305,11 +319,10 @@ test 'sequence matching', (t) ->
     ['67890', 'digits', true]
     ['09876', 'digits', false]
     ]
-    for [password, i, j] in genpws pattern, prefixes, suffixes
-      matches = matching.sequence_match password
-      check_matches t, matches, 'sequence', [pattern], [[i, j]],
-        sequence_name: [name]
-        ascending: [is_ascending]
+    matches = matching.sequence_match pattern
+    check_matches t, matches, 'sequence', [pattern], [[0, pattern.length - 1]],
+      sequence_name: [name]
+      ascending: [is_ascending]
   t.end()
 
 
@@ -319,13 +332,18 @@ test 'repeat matching', (t) ->
 
   prefixes = ['@', 'y4@']
   suffixes = ['u', 'u%7']
+  pattern = '&&&&&'
+  for [password, i, j] in genpws pattern, prefixes, suffixes
+    matches = matching.repeat_match password
+    check_matches t, matches, 'repeat', [pattern], [[i, j]],
+      repeated_char: ['&']
+
   for length in [3, 12]
     for chr in ['a', 'Z', '4', '&']
       pattern = Array(length + 1).join(chr)
-      for [password, i, j] in genpws pattern, prefixes, suffixes
-        matches = matching.repeat_match password
-        check_matches t, matches, 'repeat', [pattern], [[i, j]],
-          repeated_char: [chr]
+      matches = matching.repeat_match pattern
+      check_matches t, matches, 'repeat', [pattern], [[0, pattern.length - 1]],
+        repeated_char: [chr]
 
   matches = matching.repeat_match 'BBB1111aaaaa@@@@@@'
   patterns = ['BBB','1111','aaaaa','@@@@@@']
@@ -339,50 +357,74 @@ test 'repeat matching', (t) ->
 
 
 test 'date matching', (t) ->
-  tested_pws = {} # don't test the same pw twice
+  for sep in ['', ' ', '-', '/', '\\', '_', '.']
+    password = "13#{sep}2#{sep}1921"
+    matches = matching.date_match password
+    check_matches t, matches, 'date', [password], [[0, password.length - 1]],
+      separator: [sep]
+      year: [1921]
+      month: [2]
+      day: [13]
+
+  for order in ['mdy', 'dmy', 'ymd', 'ydm']
+    [d,m,y] = [8,8,88]
+    password = order
+      .replace 'y', y
+      .replace 'm', m
+      .replace 'd', d
+    matches = matching.date_match password
+    check_matches t, matches, 'date', [password], [[0, password.length - 1]],
+      separator: ['']
+      year: [1988]
+      month: [8]
+      day: [8]
+
+  # picks dates close to REFERENCE_YEAR
+  password = '111504'
+  matches = matching.date_match password
+  check_matches t, matches, 'date', [password], [[0, password.length - 1]],
+    separator: ['']
+    year: [2004] # picks '04' -> 2004 as year, not '1504'
+    month: [11]
+    day: [15]
+
   for [day, month, year] in [
     [1,  1,  1999]
-    [22, 11, 1551]
     [11, 8,  2000]
     [9,  12, 2005]
-    [4,  6,  2015]
+    [22, 11, 1551]
     ]
-    for order in ['m,d,y', 'd,m,y', 'y,m,d', 'y,d,m']
-      for separator in ['', ' ', '-', '/', '\\', '_', '.']
-        for test_two_digit_years in [true, false]
-          for test_zero_padding in [true, false]
-            y = year.toString()
-            if test_two_digit_years
-              y = y[2..]
-            m = month.toString()
-            d = day.toString()
-            if test_zero_padding
-              m = '0' + m if m.length is 1
-              d = '0' + d if d.length is 1
-            pattern = order
-              .replace 'y', y
-              .replace 'm', m
-              .replace 'd', d
-              .replace /,/g, separator
-            continue if pattern of tested_pws
-            tested_pws[pattern] = true
-            prefixes = ['a', 'ab']
-            suffixes = ['!', '@!']
-            for [password, i, j] in genpws pattern, prefixes, suffixes
-              matches = matching.date_match password
-              props = separator: [separator]
-              if not test_two_digit_years or parseInt(y) > 31
-                # skip year checks where year has multiple mappings
-                expected_year = if test_two_digit_years
-                  matching.two_to_four_digit_year(year % 100)
-                else
-                  year
-                props.year = [expected_year]
-              if not test_two_digit_years and day > 12
-                # similar: such cases will have unambiguous day mappings
-                props.day = [day]
-                props.month = [month]
-              check_matches t, matches, 'date', [pattern], [[i, j]], props
+    password = "#{year}#{month}#{day}"
+    matches = matching.date_match password
+    check_matches t, matches, 'date', [password], [[0, password.length - 1]],
+      separator: ['']
+      year: [year]
+    password = "#{year}.#{month}.#{day}"
+    matches = matching.date_match password
+    check_matches t, matches, 'date', [password], [[0, password.length - 1]],
+      separator: ['.']
+      year: [year]
+
+  # test zero padding
+  password = "02/02/02"
+  matches = matching.date_match password
+  check_matches t, matches, 'date', [password], [[0, password.length - 1]],
+    separator: ['/']
+    year: [2002]
+    month: [2]
+    day: [2]
+
+  # prefix / suffix
+  prefixes = ['a', 'ab']
+  suffixes = ['!']
+  pattern = '1/1/91'
+  for [password, i, j] in genpws pattern, prefixes, suffixes
+    matches = matching.date_match password
+    check_matches t, matches, 'date', [pattern], [[i, j]],
+      year: [1991]
+      month: [1]
+      day: [1]
+
   # overlapping dates
   matches = matching.date_match '12/20/1991.12.20'
   check_matches t, matches, 'date', ['12/20/1991', '1991.12.20'], [[0, 9], [6,15]],
@@ -390,6 +432,7 @@ test 'date matching', (t) ->
     year: [1991, 1991]
     month: [12, 12]
     day: [20, 20]
+
   # adjacent but non-ambiguous digits
   matches = matching.date_match '912/20/919'
   check_matches t, matches, 'date', ['12/20/91'], [[1, 8]],
