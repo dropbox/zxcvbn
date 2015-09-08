@@ -479,3 +479,21 @@ test 'date matching', (t) ->
     month: [12]
     day: [20]
   t.end()
+
+
+test 'omnimatch', (t) ->
+  t.deepEquals matching.omnimatch(''), [], "doesn't match ''"
+  password = 'r0sebudmaelstrom11/20/91aaaa'
+  matches = matching.omnimatch password
+  for [pattern_name, [i, j]] in [
+    [ 'dictionary',  [0, 6] ]
+    [ 'dictionary',  [7, 15] ]
+    [ 'date',        [16, 23] ]
+    [ 'repeat',      [24, 27] ]
+    ]
+    included = false
+    for match in matches
+      included = true if match.i == i and match.j == j and match.pattern == pattern_name
+    msg = "for #{password}, matches a #{pattern_name} pattern at [#{i}, #{j}]"
+    t.ok included, msg
+  t.end()

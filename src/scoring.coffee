@@ -130,14 +130,14 @@ scoring =
 
   calc_entropy: (match) ->
     return match.entropy if match.entropy? # a match's entropy doesn't change. cache it.
-    entropy_func = switch match.pattern
-      when 'dictionary' then @dictionary_entropy
-      when 'spatial'    then @spatial_entropy
-      when 'repeat'     then @repeat_entropy
-      when 'sequence'   then @sequence_entropy
-      when 'regex'      then @regex_entropy
-      when 'date'       then @date_entropy
-    match.entropy = entropy_func.call this, match
+    entropy_functions =
+      dictionary: @dictionary_entropy
+      spatial:    @spatial_entropy
+      repeat:     @repeat_entropy
+      sequence:   @sequence_entropy
+      regex:      @regex_entropy
+      date:       @date_entropy
+    match.entropy = entropy_functions[match.pattern].call this, match
 
   repeat_entropy: (match) ->
     cardinality = @calc_bruteforce_cardinality match.token
