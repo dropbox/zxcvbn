@@ -114,69 +114,70 @@ test 'minimum entropy search', (t) ->
   password = '0123456789'
   cardinality = 10 # |digits| == 10
 
-  # empty match sequence: result should be one bruteforce match
+  msg = (s) -> "returns one bruteforce match given an empty match sequence: #{s}"
   result = scoring.minimum_entropy_match_sequence password, []
-  t.equal result.match_sequence.length, 1
+  t.equal result.match_sequence.length, 1, msg("result.length == 1")
   m0 = result.match_sequence[0]
-  t.equal m0.pattern, 'bruteforce'
-  t.equal m0.token, password
-  t.equal m0.cardinality, cardinality
+  t.equal m0.pattern, 'bruteforce', msg("match.pattern == 'bruteforce'")
+  t.equal m0.token, password, msg("match.token == #{password}")
+  t.equal m0.cardinality, cardinality, msg("match.cardinality == #{cardinality}")
   expected = Math.round lg(Math.pow(cardinality, password.length))
-  t.equal Math.round(result.entropy), expected
-  t.equal Math.round(m0.entropy), expected
-  t.deepEqual [m0.i, m0.j], [0, 9]
+  t.equal Math.round(result.entropy), expected, msg("total entropy == #{expected}")
+  t.equal Math.round(m0.entropy), expected, msg("match entropy == #{expected}")
+  t.deepEqual [m0.i, m0.j], [0, 9], msg("[i, j] == [#{m0.i}, #{m0.j}]")
 
-  # match that doesn't fully cover password: result should be match + bruteforce
-  #  -- match at the start
+  msg = (s) -> "returns match + bruteforce when match covers a prefix of password: #{s}"
   matches = [m0] = [m(0, 5, 1)]
   result = scoring.minimum_entropy_match_sequence password, matches
-  t.equal result.match_sequence.length, 2
-  t.equal result.match_sequence[0], m0
+  t.equal result.match_sequence.length, 2, msg("result.match.sequence.length == 2")
+  t.equal result.match_sequence[0], m0, msg("first match is the provided match object")
   m1 = result.match_sequence[1]
-  t.equal m1.pattern, 'bruteforce'
-  t.deepEqual [m1.i, m1.j], [6, 9]
-  #  -- match at the end
+  t.equal m1.pattern, 'bruteforce', msg("second match is bruteforce")
+  t.deepEqual [m1.i, m1.j], [6, 9], msg("second match covers full suffix after first match")
+
+  msg = (s) -> "returns bruteforce + match when match covers a suffix: #{s}"
   matches = [m1] = [m(3, 9, 1)]
   result = scoring.minimum_entropy_match_sequence password, matches
-  t.equal result.match_sequence.length, 2
-  t.equal result.match_sequence[1], m1
+  t.equal result.match_sequence.length, 2, msg("result.match.sequence.length == 2")
   m0 = result.match_sequence[0]
-  t.equal m0.pattern, 'bruteforce'
-  t.deepEqual [m0.i, m0.j], [0, 2]
-  #  -- match in the middle: bruteforce + match + bruteforce
+  t.equal m0.pattern, 'bruteforce', msg("first match is bruteforce")
+  t.deepEqual [m0.i, m0.j], [0, 2], msg("first match covers full prefix before second match")
+  t.equal result.match_sequence[1], m1, msg("second match is the provided match object")
+
+  msg = (s) -> "returns bruteforce + match + bruteforce when match covers an infix: #{s}"
   matches = [m1] = [m(1, 8, 1)]
   result = scoring.minimum_entropy_match_sequence password, matches
-  t.equal result.match_sequence.length, 3
-  t.equal result.match_sequence[1], m1
+  t.equal result.match_sequence.length, 3, msg("result.length == 3")
+  t.equal result.match_sequence[1], m1, msg("middle match is the provided match object")
   m0 = result.match_sequence[0]
   m2 = result.match_sequence[2]
-  t.equal m0.pattern, 'bruteforce'
-  t.equal m2.pattern, 'bruteforce'
-  t.deepEqual [m0.i, m0.j], [0, 0]
-  t.deepEqual [m2.i, m2.j], [9, 9]
+  t.equal m0.pattern, 'bruteforce', msg("first match is bruteforce")
+  t.equal m2.pattern, 'bruteforce', msg("third match is bruteforce")
+  t.deepEqual [m0.i, m0.j], [0, 0], msg("first match covers full prefix before second match")
+  t.deepEqual [m2.i, m2.j], [9, 9], msg("third match covers full suffix after second match")
 
-  # when m0 and m1 both cover password and m0 has lower entropy, choose m0
+  msg = (s) -> "chooses lower-entropy match given two matches of the same span: #{s}"
   matches = [m0, m1] = [m(0, 9, 1), m(0, 9, 2)]
   result = scoring.minimum_entropy_match_sequence password, matches
-  t.equal result.match_sequence.length, 1
-  t.equal result.match_sequence[0], m0
+  t.equal result.match_sequence.length, 1, msg("result.length == 1")
+  t.equal result.match_sequence[0], m0, msg("result.match_sequence[0] == m0")
   # make sure ordering doesn't matter
   m0.entropy = 3
   result = scoring.minimum_entropy_match_sequence password, matches
-  t.equal result.match_sequence.length, 1
-  t.equal result.match_sequence[0], m1
+  t.equal result.match_sequence.length, 1, msg("result.length == 1")
+  t.equal result.match_sequence[0], m1, msg("result.match_sequence[0] == m1")
 
-  # when m0 fully covers m1 and m2
-  #  -- returns [m0] when m0 has lower entropy than m1 + m2
+  msg = (s) -> "when m0 covers m1 and m2, choose [m0] when m0 < m1 + m2: #{s}"
   matches = [m0, m1, m2] = [m(0, 9, 1), m(0, 3, 1), m(4, 9, 1)]
   result = scoring.minimum_entropy_match_sequence password, matches
-  t.equal result.entropy, 1
-  t.deepEqual result.match_sequence, [m0]
-  #  -- returns [m1, m2] when m0 has higher entropy
+  t.equal result.entropy, 1, msg("total entropy == 1")
+  t.deepEqual result.match_sequence, [m0], msg("match_sequence is [m0]")
+
+  msg = (s) -> "when m0 covers m1 and m2, choose [m1, m2] when m0 > m1 + m2: #{s}"
   m0.entropy = 3
   result = scoring.minimum_entropy_match_sequence password, matches
-  t.equal result.entropy, 2
-  t.deepEqual result.match_sequence, [m1, m2]
+  t.equal result.entropy, 2, msg("total entropy == 2")
+  t.deepEqual result.match_sequence, [m1, m2], msg("match_sequence is [m1, m2]")
   t.end()
 
 test 'calc_entropy', (t) ->
@@ -223,25 +224,29 @@ test 'regex entropy', (t) ->
     token: 'aizocdk'
     regex_name: 'alpha_lower'
     regex_match: ['aizocdk']
-  t.equal scoring.regex_entropy(match), lg(Math.pow(26, 7))
+  msg = "entropy of lg(26**7) for 7-char lowercase regex"
+  t.equal scoring.regex_entropy(match), lg(Math.pow(26, 7)), msg
 
   match =
     token: 'ag7C8'
     regex_name: 'alphanumeric'
     regex_match: ['ag7C8']
-  t.equal scoring.regex_entropy(match), lg(Math.pow(2 * 26 + 10, 5))
+  msg = "entropy of lg(62**5) for 5-char alphanumeric regex"
+  t.equal scoring.regex_entropy(match), lg(Math.pow(2 * 26 + 10, 5)), msg
 
   match =
     token: '1972'
     regex_name: 'recent_year'
     regex_match: ['1972']
-  t.equal scoring.regex_entropy(match), lg(scoring.REFERENCE_YEAR - 1972)
+  msg = "entropy of |year - REFERENCE_YEAR| for distant year matches"
+  t.equal scoring.regex_entropy(match), lg(scoring.REFERENCE_YEAR - 1972), msg
 
   match =
     token: '1992'
     regex_name: 'recent_year'
     regex_match: ['1992']
-  t.equal scoring.regex_entropy(match), lg(scoring.MIN_YEAR_SPACE)
+  msg = "entropy of lg(MIN_YEAR_SPACE) for a year close to REFERENCE_YEAR"
+  t.equal scoring.regex_entropy(match), lg(scoring.MIN_YEAR_SPACE), msg
   t.end()
 
 test 'date entropy', (t) ->
