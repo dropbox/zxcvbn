@@ -2,6 +2,8 @@
   "name": "zxcvbn",
   "version": "3.4.0",
   "description": "realistic password strength estimation",
+  "author": "Dan Wheeler",
+  "license": "MIT",
   "main": "lib/main.js",
   "repository": {
     "type": "git",
@@ -17,25 +19,19 @@
     "watch-dist": "watchify --debug -v --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee -o 'exorcist dist/zxcvbn.js.map >| dist/zxcvbn.js'",
     "prepublish": "npm run build"
   },
-  "keywords": [
-    "password",
-    "passphrase",
-    "strength",
-    "quality",
-    "estimation",
-    "estimate",
-    "meter",
-    "pattern",
-    "matcher",
-    "security",
-    "authentication",
-    "cracking",
-    "scoring",
-    "entropy",
-    "bruteforce"
-  ],
-  "author": "Dan Wheeler",
-  "license": "MIT",
+  "testling": {
+    "files": "test/*.js",
+    "browsers": [
+      "ie/6..latest",
+      "chrome/22..latest",
+      "firefox/16..latest",
+      "safari/latest",
+      "opera/11.0..latest",
+      "iphone/6",
+      "ipad/6",
+      "android-browser/latest"
+    ]
+  },
   "devDependencies": {
     "browserify": "^11.0.1",
     "coffee-coverage": "^0.6.3",
@@ -50,17 +46,19 @@
     "uglifyify": "^3.0.1",
     "watchify": "^3.3.1"
   },
-  "testling": {
-    "files": "test/*.js",
-    "browsers": [
-      "ie/6..latest",
-      "chrome/22..latest",
-      "firefox/16..latest",
-      "safari/latest",
-      "opera/11.0..latest",
-      "iphone/6",
-      "ipad/6",
-      "android-browser/latest"
-    ]
-  }
+  "keywords": [
+    "password",
+    "passphrase",
+    "security",
+    "authentication",
+    "strength",
+    "meter",
+    "quality",
+    "estimation",
+    "pattern",
+    "cracking",
+    "scoring",
+    "entropy",
+    "bruteforce"
+  ]
 }
