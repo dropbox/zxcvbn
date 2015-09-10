@@ -19,19 +19,6 @@
     "watch-dist": "watchify --debug -v --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee -o 'exorcist dist/zxcvbn.js.map >| dist/zxcvbn.js'",
     "prepublish": "npm run build"
   },
-  "testling": {
-    "files": "test/*.js",
-    "browsers": [
-      "ie/6..latest",
-      "chrome/22..latest",
-      "firefox/16..latest",
-      "safari/latest",
-      "opera/11.0..latest",
-      "iphone/6",
-      "ipad/6",
-      "android-browser/latest"
-    ]
-  },
   "devDependencies": {
     "browserify": "^11.0.1",
     "coffee-coverage": "^0.6.3",
@@ -42,7 +29,6 @@
     "faucet": "^0.0.1",
     "istanbul": "^0.3.18",
     "tape": "^4.2.0",
-    "testling": "^1.7.1",
     "uglifyify": "^3.0.1",
     "watchify": "^3.3.1"
   },
