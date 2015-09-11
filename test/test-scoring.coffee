@@ -39,7 +39,7 @@ test 'lg', (t) ->
   p = 4
   approx_equal t, lg(n * p), lg(n) + lg(p), "product rule"
   approx_equal t, lg(n / p), lg(n) - lg(p), "quotient rule"
-  approx_equal t, lg(10), 1 / Math.log10(2), "base switch rule"
+  approx_equal t, lg(Math.E), 1 / Math.log(2), "base switch rule"
   approx_equal t, lg(Math.pow(n, p)), p * lg(n), "power rule"
   approx_equal t, lg(n), Math.log(n) / Math.log(2), "base change rule"
   t.end()
@@ -206,17 +206,17 @@ test 'repeat entropy', (t) ->
 
 test 'sequence entropy', (t) ->
   for [token, ascending, entropy] in [
-    [ 'ab',   true,  lg(26) + lg(2) ]
+    [ 'ab',   true,  2 + lg(2) ]
     [ 'XYZ',  true,  lg(26) + 1 + lg(3) ]
     [ '4567', true,  lg(10) + lg(4) ]
     [ '7654', false, lg(10) + lg(4) + 1 ]
-    [ 'ZYX',  false, lg(26) + 1 + lg(3) + 1 ]
+    [ 'ZYX',  false, 2 + lg(3) + 1 ]
     ]
     match =
       token: token
       ascending: ascending
     msg = "the sequence pattern '#{token}' has entropy of #{entropy}"
-    t.equal scoring.sequence_entropy(match), scoring.sequence_entropy(match), msg
+    t.equal scoring.sequence_entropy(match), entropy, msg
   t.end()
 
 test 'regex entropy', (t) ->
