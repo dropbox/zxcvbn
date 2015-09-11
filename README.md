@@ -7,11 +7,14 @@ _/\/\/\/\/\__/\/\__/\/\____/\/\/\/\______/\______/\/\/\/\____/\/\__/\/\_
 ________________________________________________________________________
 ```
 
+[![Build Status](https://travis-ci.org/dropbox/zxcvbn.svg?branch=master)](https://travis-ci.org/dropbox/zxcvbn)  
+[![Sauce Test Status](https://saucelabs.com/browser-matrix/dropbox-zxcvbn.svg)](https://saucelabs.com/u/dropbox-zxcvbn)
+
 `zxcvbn` is a password strength estimator inspired by password crackers. Through pattern matching and conservative entropy calculations, it recognizes and weighs 10k common passwords, common names and surnames according to US census data, popular English words, and other common patterns like dates, repeats (`aaa`), sequences (`abcd`), keyboard patterns (`qwertyuiop`), and l33t speak.
 
 Consider using zxcvbn as an algorithmic alternative to password policy — it is more secure, flexible, and usable when sites require a minimal complexity score in place of annoying rules like "passwords must contain three of {lower, upper, numbers, symbols}".
 
-* __More secure__: policies often fail both ways, allowing weak passwords (`P@ssword1`) and disallowing strong passwords (`incorrectdonkeyvoltaicclip`).
+* __More secure__: policies often fail both ways, allowing weak passwords (`P@ssword1`) and disallowing strong passwords.
 * __More flexible__: zxcvbn allows many password styles to flourish so long as it detects sufficient complexity — passphrases are rated highly given enough uncommon words, keyboard patterns are either terrible or great depending on length and number of turns, and capitalization adds more complexity when it's unpredictaBle. Neither crackers nor zxcvbn are fooled by `'@'` for `'a'` or `'0'` for `'o'`.
 * __More usable__: Dumping a list of password rules onto users hurts usability. Understanding and satisfying said rules can be time-consuming and frustrating, leading to passwords that are [harder to remember](https://xkcd.com/936/). Use zxcvbn instead to build simple, rule-free interfaces that give instant feedback.
 
