@@ -145,8 +145,9 @@ scoring =
 
   sequence_entropy: (match) ->
     first_chr = match.token.charAt(0)
-    if first_chr in ['a', '1']
-      base_entropy = 1
+    # lower entropy for obvious starting points
+    if first_chr in ['a', 'A', 'z', 'Z', '0', '1', '9']
+      base_entropy = 2
     else
       if first_chr.match /\d/
         base_entropy = @lg(10) # digits
