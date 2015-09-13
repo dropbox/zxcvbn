@@ -289,31 +289,45 @@ matching =
     matches
 
   #-------------------------------------------------------------------------------
-  # repeats (aaa) and sequences (abcdef) -----------------------------------------
+  # repeats (aaa, abcabcabc) and sequences (abcdef) ------------------------------
   #-------------------------------------------------------------------------------
 
   repeat_match: (password) ->
-    min_repeat_length = 3 # TODO allow 2-char repeats?
     matches = []
-    i = 0
-    while i < password.length
-      j = i + 1
-      loop
-        [prev_char, cur_char] = password[j-1..j]
-        if password.charAt(j-1) == password.charAt(j)
-          j += 1
-        else
-          j -= 1
-          if j - i + 1 >= min_repeat_length
-            matches.push
-              pattern: 'repeat'
-              i: i
-              j: j
-              token: password[i..j]
-              repeated_char: password.charAt(i)
-          break
-      i = j + 1
-    @sorted matches
+    greedy = /(.+)\1+/g
+    lazy = /(.+?)\1+/g
+    lazy_anchored = /^(.+?)\1+$/
+    lastIndex = 0
+    while lastIndex < password.length
+      greedy.lastIndex = lazy.lastIndex = lastIndex
+      greedy_match = greedy.exec password
+      lazy_match = lazy.exec password
+      break unless greedy_match?
+      if greedy_match[0].length > lazy_match[0].length
+        # greedy beats lazy for 'aabaab'
+        #   greedy: [aabaab, aab]
+        #   lazy:   [aa,     a]
+        match = greedy_match
+        # greedy's repeated string might itself be repeated, eg.
+        # aabaab in aabaabaabaab.
+        # run an anchored lazy match on greedy's repeated string
+        # to find the shortest repeated string
+        repeated_string = lazy_anchored.exec(match[0])[1]
+      else
+        # lazy beats greedy for 'aaaaa'
+        #   greedy: [aaaa,  aa]
+        #   lazy:   [aaaaa, a]
+        match = lazy_match
+        repeated_string = match[1]
+      [i, j] = [match.index, match.index + match[0].length - 1]
+      matches.push
+        pattern: 'repeat'
+        i: i
+        j: j
+        token: match[0]
+        repeated_string: repeated_string
+      lastIndex = j + 1
+    matches
 
   sequence_match: (password) ->
     min_sequence_length = 3 # TODO allow 2-char sequences?
