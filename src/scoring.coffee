@@ -140,8 +140,8 @@ scoring =
     match.entropy = entropy_functions[match.pattern].call this, match
 
   repeat_entropy: (match) ->
-    cardinality = @calc_bruteforce_cardinality match.token
-    @lg (cardinality * match.token.length)
+    num_repeats = match.token.length / match.base_token.length
+    match.base_entropy + @lg num_repeats
 
   sequence_entropy: (match) ->
     first_chr = match.token.charAt(0)

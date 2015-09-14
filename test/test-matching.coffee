@@ -367,7 +367,7 @@ test 'repeat matching', (t) ->
     matches = matching.repeat_match password
     msg = "matches embedded repeat patterns"
     check_matches msg, t, matches, 'repeat', [pattern], [[i, j]],
-      repeated_string: ['&']
+      base_token: ['&']
 
   for length in [3, 12]
     for chr in ['a', 'Z', '4', '&']
@@ -375,37 +375,37 @@ test 'repeat matching', (t) ->
       matches = matching.repeat_match pattern
       msg = "matches repeats with base character '#{chr}'"
       check_matches msg, t, matches, 'repeat', [pattern], [[0, pattern.length - 1]],
-        repeated_string: [chr]
+        base_token: [chr]
 
   matches = matching.repeat_match 'BBB1111aaaaa@@@@@@'
   patterns = ['BBB','1111','aaaaa','@@@@@@']
   msg = 'matches multiple adjacent repeats'
   check_matches msg, t, matches, 'repeat', patterns, [[0, 2],[3, 6],[7, 11],[12, 17]],
-    repeated_string: ['B', '1', 'a', '@']
+    base_token: ['B', '1', 'a', '@']
 
   matches = matching.repeat_match '2818BBBbzsdf1111@*&@!aaaaaEUDA@@@@@@1729'
   msg = 'matches multiple repeats with non-repeats in-between'
   check_matches msg, t, matches, 'repeat', patterns, [[4, 6],[12, 15],[21, 25],[30, 35]],
-    repeated_string: ['B', '1', 'a', '@']
+    base_token: ['B', '1', 'a', '@']
 
   # test multi-character repeats
   pattern = 'abab'
   matches = matching.repeat_match pattern
   msg = 'matches multi-character repeat pattern'
   check_matches msg, t, matches, 'repeat', [pattern], [[0, pattern.length - 1]],
-    repeated_string: ['ab']
+    base_token: ['ab']
 
   pattern = 'aabaab'
   matches = matching.repeat_match pattern
   msg = 'matches aabaab as a repeat instead of the aa prefix'
   check_matches msg, t, matches, 'repeat', [pattern], [[0, pattern.length - 1]],
-    repeated_string: ['aab']
+    base_token: ['aab']
 
   pattern = 'abababab'
   matches = matching.repeat_match pattern
   msg = 'identifies ab as repeat string, even though abab is also repeated'
   check_matches msg, t, matches, 'repeat', [pattern], [[0, pattern.length - 1]],
-    repeated_string: ['ab']
+    base_token: ['ab']
   t.end()
 
 

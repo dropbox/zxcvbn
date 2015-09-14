@@ -194,14 +194,24 @@ test 'calc_entropy', (t) ->
   t.end()
 
 test 'repeat entropy', (t) ->
-  for [token, entropy] in [
-    [ 'aa',   lg(26 * 2) ]
-    [ '999',  lg(10 * 3) ]
-    [ '$$$$', lg(33 * 4) ]
+  for [token, base_token] in [
+    [ 'aa',   'a' ]
+    [ '999',  '9' ]
+    [ '$$$$', '$' ]
+    [ 'abab', 'ab']
+    [ 'batterystaplebatterystaplebatterystaple', 'batterystaple']
     ]
-    match = token: token
-    msg = "the repeat pattern '#{token}' has entropy of #{entropy}"
-    t.equal scoring.repeat_entropy(match), entropy, msg
+    base_entropy = scoring.minimum_entropy_match_sequence(
+      base_token
+      matching.omnimatch(base_token)
+    ).entropy
+    match =
+      token: token
+      base_token: base_token
+      base_entropy: base_entropy
+    expected_entropy = base_entropy + lg(match.token.length / match.base_token.length)
+    msg = "the repeat pattern '#{token}' has entropy of #{expected_entropy}"
+    t.equal scoring.repeat_entropy(match), expected_entropy, msg
   t.end()
 
 test 'sequence entropy', (t) ->

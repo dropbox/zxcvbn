@@ -312,20 +312,29 @@ matching =
         # aabaab in aabaabaabaab.
         # run an anchored lazy match on greedy's repeated string
         # to find the shortest repeated string
-        repeated_string = lazy_anchored.exec(match[0])[1]
+        base_token = lazy_anchored.exec(match[0])[1]
       else
         # lazy beats greedy for 'aaaaa'
         #   greedy: [aaaa,  aa]
         #   lazy:   [aaaaa, a]
         match = lazy_match
-        repeated_string = match[1]
+        base_token = match[1]
       [i, j] = [match.index, match.index + match[0].length - 1]
+      # recursively match and score the base string
+      base_analysis = scoring.minimum_entropy_match_sequence(
+        base_token
+        @omnimatch base_token
+      )
+      base_matches = base_analysis.match_sequence
+      base_entropy = base_analysis.entropy
       matches.push
         pattern: 'repeat'
         i: i
         j: j
         token: match[0]
-        repeated_string: repeated_string
+        base_token: base_token
+        base_entropy: base_entropy
+        base_matches: base_matches
       lastIndex = j + 1
     matches
 
