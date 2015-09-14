@@ -424,13 +424,8 @@ matching =
         highest_precedence = precedence_map[key]
         continue if highest_precedence >= precedence
       precedence_map[key] = precedence
-    filtered_matches = []
-    for match in matches
-      key = get_key match
-      precedence = REGEX_PRECEDENCE[match.regex_name]
-      if precedence_map[key] == precedence
-        filtered_matches.push match
-    @sorted filtered_matches
+    @sorted matches.filter (match) ->
+      precedence_map[get_key(match)] == REGEX_PRECEDENCE[match.regex_name]
 
   #-------------------------------------------------------------------------------
   # date matching ----------------------------------------------------------------
@@ -535,16 +530,14 @@ matching =
     # 5(!) other date matches: 15_06_04, 5_06_04, ..., even 2015 (matched as 5/1/2020)
     #
     # to reduce noise, remove date matches that are strict substrings of others
-    filtered_matches = []
-    for match in matches
+    @sorted matches.filter (match) ->
       is_submatch = false
       for other_match in matches
         continue if match is other_match
         if other_match.i <= match.i and other_match.j >= match.j
           is_submatch = true
           break
-      filtered_matches.push match unless is_submatch
-    @sorted filtered_matches
+      not is_submatch
 
   map_ints_to_dmy: (ints) ->
     # given a 3-tuple, discard if:
