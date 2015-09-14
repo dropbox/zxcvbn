@@ -185,8 +185,16 @@ test 'dictionary matching', (t) ->
     matched_word: patterns
     rank: [13085, 65, 245, 786]
     dictionary_name: ['surnames', 'female_names', 'passwords', 'male_names']
-  t.end()
 
+  matching.set_user_input_dictionary ['foo', 'bar']
+  matches = matching.dictionary_match 'foobar'
+  matches = matches.filter (match) ->
+    match.dictionary_name == 'user_inputs'
+  msg = "matches with provided user input dictionary"
+  check_matches msg, t, matches, 'dictionary', ['foo', 'bar'], [[0, 2], [3, 5]],
+    matched_word: ['foo', 'bar']
+    rank: [1, 2]
+  t.end()
 
 test 'reverse dictionary matching', (t) ->
   test_dicts =
