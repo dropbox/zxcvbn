@@ -188,6 +188,24 @@ test 'dictionary matching', (t) ->
   t.end()
 
 
+test 'reverse dictionary matching', (t) ->
+  test_dicts =
+    d1:
+      123: 1
+      321: 2
+      456: 3
+      654: 4
+  password = '0123456789'
+  matches = matching.reverse_dictionary_match password, test_dicts
+  msg = 'matches against reversed words'
+  check_matches msg, t, matches, 'dictionary', ['123', '456'], [[1, 3], [4, 6]],
+    matched_word: ['321', '654']
+    reversed: [true, true]
+    dictionary_name: ['d1', 'd1']
+    rank: [2, 4]
+  t.end()
+
+
 test 'l33t matching', (t) ->
   test_table =
     a: ['4', '@']

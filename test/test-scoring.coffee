@@ -343,6 +343,13 @@ test 'dictionary_entropy', (t) ->
   t.equal scoring.dictionary_entropy(match), lg(32) + scoring.extra_uppercase_entropy(match), msg
 
   match =
+    token: 'aaa'
+    rank: 32
+    reversed: true
+  msg = "1 bit of extra entropy is added for reversed words"
+  t.equal scoring.dictionary_entropy(match), lg(32) + 1, msg
+
+  match =
     token: 'aaa@@@'
     rank: 32
     l33t: true

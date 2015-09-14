@@ -228,8 +228,9 @@ scoring =
   dictionary_entropy: (match) ->
     match.base_entropy = @lg match.rank # keep these as properties for display purposes
     match.uppercase_entropy = @extra_uppercase_entropy match
-    match.l33t_entropy = @extra_l33t_entropy match
-    match.base_entropy + match.uppercase_entropy + match.l33t_entropy
+    match.reversed_entropy = match.reversed and 1 or 0
+    match.l33t_entropy = @extra_l33t_entropy(match)
+    match.base_entropy + match.uppercase_entropy + match.l33t_entropy + match.reversed_entropy
 
   START_UPPER: /^[A-Z][^A-Z]+$/
   END_UPPER: /^[^A-Z]+[A-Z]$/

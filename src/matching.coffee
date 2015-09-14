@@ -96,6 +96,7 @@ matching =
     matches = []
     matchers = [
       @dictionary_match
+      @reverse_dictionary_match
       @l33t_match
       @spatial_match
       @repeat_match
@@ -130,6 +131,20 @@ matching =
               matched_word: word
               rank: rank
               dictionary_name: dictionary_name
+              reversed: false
+    @sorted matches
+
+  reverse_dictionary_match: (password, _ranked_dictionaries = RANKED_DICTIONARIES) ->
+    reversed_password = password.split('').reverse().join('')
+    matches = @dictionary_match reversed_password, _ranked_dictionaries
+    for match in matches
+      match.token = match.token.split('').reverse().join('') # reverse back
+      match.reversed = true
+      # map coordinates back to original string
+      [match.i, match.j] = [
+        password.length - 1 - match.j
+        password.length - 1 - match.i
+      ]
     @sorted matches
 
   set_user_input_dictionary: (ordered_list) ->
