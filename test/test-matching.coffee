@@ -427,6 +427,29 @@ test 'repeat matching', (t) ->
   t.end()
 
 
+test 'regex matching', (t) ->
+  for [pattern, name] in [
+    ['aaa', 'alpha_lower']
+    ['a7c8D9', 'alphanumeric']
+    ['aAaA', 'alpha']
+    ['1922', 'recent_year']
+    ['&@*#', 'symbols']
+    ['94113', 'digits']
+    ]
+    matches = matching.regex_match pattern
+    msg = "matches #{pattern} as a #{name} pattern"
+    check_matches msg, t, matches, 'regex', [pattern], [[0, pattern.length - 1]],
+      regex_name: [name]
+
+  password = 'a7c8D9vvv2015'
+  matches = matching.regex_match password
+  ijs = [[0, 12], [6, 8], [9, 12]]
+  msg = "matches multiple overlapping regex patterns"
+  check_matches msg, t, matches, 'regex', ['a7c8D9vvv2015', 'vvv', '2015'], ijs,
+    regex_name: ['alphanumeric', 'alpha_lower', 'recent_year']
+  t.end()
+
+
 test 'date matching', (t) ->
   for sep in ['', ' ', '-', '/', '\\', '_', '.']
     password = "13#{sep}2#{sep}1921"
