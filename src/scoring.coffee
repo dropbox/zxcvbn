@@ -90,6 +90,8 @@ scoring =
     # final result object
     password: password
     guesses: min_guesses
+    guesses_log10: @log10 min_guesses
+    guesses_log2:  @log2  min_guesses
     match_sequence: match_sequence
 
   # ------------------------------------------------------------------------------
