@@ -345,25 +345,25 @@ matching =
         base_token = match[1]
       [i, j] = [match.index, match.index + match[0].length - 1]
       # recursively match and score the base string
-      base_analysis = scoring.minimum_entropy_match_sequence(
+      base_analysis = scoring.most_guessable_match_sequence(
         base_token
         @omnimatch base_token
       )
       base_matches = base_analysis.match_sequence
-      base_entropy = base_analysis.entropy
+      base_guesses = base_analysis.guesses
       matches.push
         pattern: 'repeat'
         i: i
         j: j
         token: match[0]
         base_token: base_token
-        base_entropy: base_entropy
+        base_guesses: base_guesses
         base_matches: base_matches
+        repeat_count: match[0].length / base_token.length
       lastIndex = j + 1
     matches
 
   sequence_match: (password) ->
-    min_sequence_length = 3 # TODO allow 2-char sequences?
     matches = []
     for sequence_name, sequence of SEQUENCES
       for direction in [1, -1]
@@ -382,7 +382,7 @@ matching =
             j += 1
             sequence_position = next_sequence_position
           j -= 1
-          if j - i + 1 >= min_sequence_length
+          if j - i + 1 > 1
             matches.push
               pattern: 'sequence'
               i: i
@@ -478,7 +478,7 @@ matching =
           candidates.push dmy if dmy?
         continue unless candidates.length > 0
         # at this point: different possible dmy mappings for the same i,j substring.
-        # match the candidate date that has smallest entropy: a year closest to 2000.
+        # match the candidate date that likely takes the fewest guesses: a year closest to 2000.
         # (scoring.REFERENCE_YEAR).
         #
         # ie, considering '111504', prefer 11-15-04 to 1-1-1504

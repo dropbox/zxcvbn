@@ -331,7 +331,7 @@ test 'spatial matching', (t) ->
   t.end()
 
 test 'sequence matching', (t) ->
-  for password in ['', 'a', '1', 'ab']
+  for password in ['', 'a', '1']
     msg = "doesn't match length-#{password.length} sequences"
     t.deepEqual matching.sequence_match(password), [], msg
 
