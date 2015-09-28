@@ -52,23 +52,11 @@ results_tmpl = '''
     <td><strong>{{password}}</strong></td>
   </tr>
   <tr>
-    <td>entropy: </td>
-    <td>{{entropy}}</td>
+    <td>guesses_log10: </td>
+    <td>{{guesses_log10}}</td>
   </tr>
   <tr>
-    <td>crack time (seconds): </td>
-    <td>{{crack_time}}</td>
-  </tr>
-  <tr>
-    <td>crack time (display): </td>
-    <td>{{crack_time_display}}</td>
-  </tr>
-  <tr>
-    <td>score from 0 to 4:</td>
-    <td>{{score}}</td>
-  </tr>
-  <tr>
-    <td>calculation time (ms): </td>
+    <td>calculated in (ms): </td>
     <td>{{calc_time}}</td>
   </tr>
   <tr>
@@ -91,18 +79,22 @@ props_tmpl = '''
     <td>{{pattern}}</td>
   </tr>
   <tr>
-    <td>entropy:</td>
-    <td>{{entropy}}</td>
+    <td>guesses_log10:</td>
+    <td>{{guesses_log10}}</td>
   </tr>
   {{#cardinality}}
   <tr>
     <td>cardinality:</td>
     <td>{{cardinality}}</td>
   </tr>
+  <tr>
+    <td>length:</td>
+    <td>{{token.length}}</td>
+  </tr>
   {{/cardinality}}
   {{#rank}}
   <tr>
-    <td>dict-name:</td>
+    <td>dictionary_name:</td>
     <td>{{dictionary_name}}</td>
   </tr>
   <tr>
@@ -110,19 +102,10 @@ props_tmpl = '''
     <td>{{rank}}</td>
   </tr>
   <tr>
-    <td>base-entropy:</td>
-    <td>{{base_entropy}}</td>
+    <td>reversed:</td>
+    <td>{{reversed}}</td>
   </tr>
-  <tr>
-    <td>upper-entropy:</td>
-    <td>{{uppercase_entropy}}</td>
-  </tr>
-  {{/rank}}
   {{#l33t}}
-  <tr>
-    <td>l33t-entropy:</td>
-    <td>{{l33t_entropy}}</td>
-  </tr>
   <tr>
     <td>l33t subs:</td>
     <td>{{sub_display}}</td>
@@ -132,26 +115,47 @@ props_tmpl = '''
     <td>{{matched_word}}</td>
   </tr>
   {{/l33t}}
+  <tr>
+    <td>base-guesses:</td>
+    <td>{{base_guesses}}</td>
+  </tr>
+  <tr>
+    <td>uppercase-multiplier:</td>
+    <td>{{uppercase_guesses}}</td>
+  </tr>
+  <tr>
+    <td>l33t-multiplier:</td>
+    <td>{{l33t_guesses}}</td>
+  </tr>
+  {{/rank}}
   {{#graph}}
   <tr>
-    <td>graph: </td>
+    <td>graph:</td>
     <td>{{graph}}</td>
   </tr>
   <tr>
-    <td>turns: </td>
+    <td>turns:</td>
     <td>{{turns}}</td>
   </tr>
   <tr>
-    <td>shifted keys: </td>
+    <td>shifted count:</td>
     <td>{{shifted_count}}</td>
   </tr>
   {{/graph}}
-  {{#repeated_char}}
+  {{#base_token}}
   <tr>
-    <td>repeat-char:</td>
-    <td>'{{repeated_char}}'</td>
+    <td>base_token:</td>
+    <td>'{{base_token}}'</td>
   </tr>
-  {{/repeated_char}}
+  <tr>
+    <td>base_guesses:</td>
+    <td>{{base_guesses}}</td>
+  </tr>
+  <td>
+    <td>num_repeats:</td>
+    <td>{{repeat_count}}</td>
+  </tr>
+  {{/base_token}}
   {{#sequence_name}}
   <tr>
     <td>sequence-name:</td>
@@ -166,6 +170,12 @@ props_tmpl = '''
     <td>{{ascending}}</td>
   </tr>
   {{/sequence_name}}
+  {{#regex_name}}
+  <tr>
+    <td>regex_name:</td>
+    <td>{{regex_name}}</td>
+  </tr>
+  {{/regex_name}}
   {{#day}}
   <tr>
     <td>day:</td>
@@ -189,11 +199,22 @@ props_tmpl = '''
 </div>
 '''
 
+round_to_x_digits = (n, x) ->
+  Math.round(n * Math.pow(10, x)) / Math.pow(10, x)
+
+round_logs = (r) ->
+  r.guesses_log2  = round_to_x_digits(r.guesses_log2,  5)
+  r.guesses_log10 = round_to_x_digits(r.guesses_log10, 5)
+  for m in r.match_sequence
+    m.guesses_log2  = round_to_x_digits(m.guesses_log2,  5)
+    m.guesses_log10 = round_to_x_digits(m.guesses_log10, 5)
+
 requirejs ['../dist/zxcvbn'], (zxcvbn) ->
   $ ->
     results_lst = []
     for password in test_passwords.split('\n') when password
       r = zxcvbn(password)
+      round_logs(r)
       r.match_sequence_display = Mustache.render(props_tmpl, r)
       results_lst.push r
 
@@ -211,6 +232,7 @@ requirejs ['../dist/zxcvbn'], (zxcvbn) ->
       if current != last_q
         last_q = current
         r = zxcvbn(current)
+        round_logs(r)
         r.match_sequence_display = Mustache.render(props_tmpl, r)
         results = {results: [r]}
         rendered = Mustache.render(results_tmpl, results)

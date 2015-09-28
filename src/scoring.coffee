@@ -90,8 +90,8 @@ scoring =
     # final result object
     password: password
     guesses: min_guesses
-    guesses_log10: @log10 min_guesses
     guesses_log2:  @log2  min_guesses
+    guesses_log10: @log10 min_guesses
     match_sequence: match_sequence
 
   # ------------------------------------------------------------------------------
@@ -108,6 +108,9 @@ scoring =
       regex:      @regex_guesses
       date:       @date_guesses
     match.guesses = estimation_functions[match.pattern].call this, match
+    match.guesses_log2 = @log2 match.guesses
+    match.guesses_log10 = @log10 match.guesses
+    match.guesses
 
   repeat_guesses: (match) ->
     match.base_guesses * match.repeat_count
