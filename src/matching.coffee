@@ -242,7 +242,11 @@ matching =
         match.sub = match_sub
         match.sub_display = ("#{k} -> #{v}" for k,v of match_sub).join(', ')
         matches.push match
-    @sorted matches
+    @sorted matches.filter (match) ->
+      # filter single-character l33t matches to reduce noise.
+      # otherwise '1' matches 'i', '4' matches 'a', both very common English words
+      # with low dictionary rank.
+      match.token.length > 1
 
   # ------------------------------------------------------------------------------
   # spatial match (qwerty/dvorak/keypad) -----------------------------------------

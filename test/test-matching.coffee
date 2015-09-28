@@ -278,6 +278,10 @@ test 'l33t matching', (t) ->
   msg = "doesn't match when multiple l33t substitutions are needed for the same letter"
   t.deepEqual lm('p4@ssword'), [], msg
 
+  msg = "doesn't match single-character l33ted words"
+  matches = matching.l33t_match '4 1 @'
+  t.deepEqual matches, [], msg
+
   # known issue: subsets of substitutions aren't tried.
   # for long inputs, trying every subset of every possible substitution could quickly get large,
   # but there might be a performant way to fix.
