@@ -56,6 +56,14 @@ results_tmpl = '''
     <td>{{guesses_log10}}</td>
   </tr>
   <tr>
+    <td>sequence_product_log10</td>
+    <td>{{sequence_product_log10}}
+  </tr>
+  <tr>
+    <td>sequence_length_multiplier_log10</td>
+    <td>{{sequence_length_multiplier_log10}}</td>
+  </tr>
+  <tr>
     <td>calculated in (ms): </td>
     <td>{{calc_time}}</td>
   </tr>
@@ -63,13 +71,13 @@ results_tmpl = '''
     <td colspan="2"><strong>match sequence:</strong></td>
   </tr>
 </table>
-{{& match_sequence_display}}
+{{& sequence_display}}
 {{/results}}
 '''
 
 props_tmpl = '''
 <div class="match-sequence">
-{{#match_sequence}}
+{{#sequence}}
 <table>
   <tr>
     <td colspan="2">'{{token}}'</td>
@@ -89,7 +97,7 @@ props_tmpl = '''
   </tr>
   <tr>
     <td>length:</td>
-    <td>{{token.length}}</td>
+    <td>{{length}}</td>
   </tr>
   {{/cardinality}}
   {{#rank}}
@@ -120,12 +128,12 @@ props_tmpl = '''
     <td>{{base_guesses}}</td>
   </tr>
   <tr>
-    <td>uppercase-multiplier:</td>
-    <td>{{uppercase_guesses}}</td>
+    <td>uppercase-variations:</td>
+    <td>{{uppercase_variations}}</td>
   </tr>
   <tr>
-    <td>l33t-multiplier:</td>
-    <td>{{l33t_guesses}}</td>
+    <td>l33t-variations:</td>
+    <td>{{l33t_variations}}</td>
   </tr>
   {{/rank}}
   {{#graph}}
@@ -151,7 +159,7 @@ props_tmpl = '''
     <td>base_guesses:</td>
     <td>{{base_guesses}}</td>
   </tr>
-  <td>
+  <tr>
     <td>num_repeats:</td>
     <td>{{repeat_count}}</td>
   </tr>
@@ -195,7 +203,7 @@ props_tmpl = '''
   </tr>
   {{/day}}
 </table>
-{{/match_sequence}}
+{{/sequence}}
 </div>
 '''
 
@@ -203,10 +211,8 @@ round_to_x_digits = (n, x) ->
   Math.round(n * Math.pow(10, x)) / Math.pow(10, x)
 
 round_logs = (r) ->
-  r.guesses_log2  = round_to_x_digits(r.guesses_log2,  5)
   r.guesses_log10 = round_to_x_digits(r.guesses_log10, 5)
-  for m in r.match_sequence
-    m.guesses_log2  = round_to_x_digits(m.guesses_log2,  5)
+  for m in r.sequence
     m.guesses_log10 = round_to_x_digits(m.guesses_log10, 5)
 
 requirejs ['../dist/zxcvbn'], (zxcvbn) ->
@@ -215,7 +221,7 @@ requirejs ['../dist/zxcvbn'], (zxcvbn) ->
     for password in test_passwords.split('\n') when password
       r = zxcvbn(password)
       round_logs(r)
-      r.match_sequence_display = Mustache.render(props_tmpl, r)
+      r.sequence_display = Mustache.render(props_tmpl, r)
       results_lst.push r
 
     rendered = Mustache.render(results_tmpl, {
@@ -233,7 +239,7 @@ requirejs ['../dist/zxcvbn'], (zxcvbn) ->
         last_q = current
         r = zxcvbn(current)
         round_logs(r)
-        r.match_sequence_display = Mustache.render(props_tmpl, r)
+        r.sequence_display = Mustache.render(props_tmpl, r)
         results = {results: [r]}
         rendered = Mustache.render(results_tmpl, results)
         $('#search-results').html(rendered)
