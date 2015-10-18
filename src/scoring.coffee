@@ -9,6 +9,11 @@ calc_average_degree = (graph) ->
   average /= (k for k,v of graph).length
   average
 
+BRUTEFORCE_CARDINALITY = 10
+MIN_GUESSES_BEFORE_GROWING_SEQUENCE = 10000
+MIN_SUBMATCH_GUESSES_SINGLE_CHAR = 10
+MIN_SUBMATCH_GUESSES_MULTI_CHAR = 50
+
 scoring =
   nCk: (n, k) ->
     # http://blog.plover.com/math/choose.html
@@ -35,109 +40,138 @@ scoring =
   # search --- most guessable match sequence -------------------------------------
   # ------------------------------------------------------------------------------
   #
-  # takes a list of overlapping matches, returns the non-overlapping sublist with
-  # minimum guesses. O(nm) dp alg for length-n password with m candidate matches.
+  # takes a sequence of overlapping matches, returns the non-overlapping sequence with
+  # minimum guesses. O(nml) dp alg for length-n password with m candidate matches
+  # and optimal length-l sequence.
   #
   # the optimal "minimum guesses" sublist is here defined to be the sublist that
   # minimizes:
   #
-  #    product(m.guesses for m in sequence) * factorial(sequence.length)
+  #    l! * Product(m.guesses for m in sequence) + D^(l - 1)
   #
-  # the factorial term is the number of ways to order n patterns. it serves as a
-  # light penalty for longer sequences.
+  # where l is the length of the sequence.
+  #
+  # the factorial term is the number of ways to order l patterns.
+  #
+  # the D^(l-1) term is another length penalty, roughly capturing the idea that an
+  # attacker will try lower-length sequences first before trying length-l sequences.
   #
   # for example, consider a sequence that is date-repeat-dictionary.
   #  - an attacker would need to try other date-repeat-dictionary combinations,
   #    hence the product term.
   #  - an attacker would need to try repeat-date-dictionary, dictionary-repeat-date,
   #    ..., hence the factorial term.
-  #  - an attacker would also likely try length-1 and length-2 sequences before
-  #    length-3. those terms tend to be small in comparison and are excluded
-  #    for simplicity.
+  #  - an attacker would also likely try length-1 (dictionary) and length-2 (dictionary-date)
+  #    sequences before length-3. assuming at minimum D guesses per pattern type,
+  #    D^(l-1) approximates Sum(D^i for i in [1..l-1]
   #
   # ------------------------------------------------------------------------------
 
   most_guessable_match_sequence: (password, matches) ->
-    # at index k, the product of guesses of the optimal sequence covering password[0..k]
+
+    # at [k][l], the product of guesses of the optimal sequence of length-l
+    # covering password[0..k].
     optimal_product = []
 
-    # at index k, the number of matches in the optimal sequence covering password[0..k].
-    # used to calculate the factorial term.
-    optimal_sequence_length = []
-
-    # if the optimal sequence ends in a bruteforce match, this records those bruteforce
-    # characters, otherwise ''
-    ending_bruteforce_chars = ''
-
-    # at index k, the final match (match.j == k) in said optimal sequence.
+    # at [k][l], the final match (match.j == k) in said optimal sequence of length l.
     backpointers = []
 
+    max_l = 0        # max-length sequence ever recorded
+    optimal_l = null # length of current optimal sequence
+
     make_bruteforce_match = (i, j) =>
-      cardinality = @cardinality password[i..j]
-      guesses = Math.pow cardinality, j - i + 1
-      # return object:
-      pattern: 'bruteforce'
-      i: i
-      j: j
-      token: password[i..j]
-      guesses: guesses
-      guesses_log10: @log10(guesses)
-      cardinality: cardinality
-      length: j - i + 1
+      match =
+        pattern: 'bruteforce'
+        token: password[i..j]
+        i: i
+        j: j
+      match
+
+    score = (guess_product, sequence_length) =>
+      result = @factorial(sequence_length) * guess_product
+      result += Math.pow MIN_GUESSES_BEFORE_GROWING_SEQUENCE, sequence_length - 1
+      result
 
     for k in [0...password.length]
-      # starting scenario to beat:
-      # adding a brute-force character to the sequence with min guesses at k-1.
-      ending_bruteforce_chars += password.charAt(k)
+      backpointers[k] = []
+      optimal_product[k] = []
+      optimal_score = Infinity
+      for prev_l in [0..max_l]
+        # for each new k, starting scenario to try to beat: bruteforce matches
+        # involving the lowest-possible l. three cases:
+        #
+        # 1. all-bruteforce match (for length-1 sequences.)
+        # 2. extending a previous bruteforce match
+        #    (possible when optimal[k-1][l] ends in bf.)
+        # 3. starting a new single-char bruteforce match
+        #    (possible when optimal[k-1][l] exists but does not end in bf.)
+        #
+        # otherwise: there is no bruteforce starting scenario that might be better
+        # than already-discovered lower-l sequences.
+        consider_bruteforce = true
+        bf_j = k
+        if prev_l == 0
+          bf_i = 0
+          new_l = 1
+        else if backpointers[k-1]?[prev_l]?.pattern == 'bruteforce'
+          bf_i = backpointers[k-1][prev_l].i
+          new_l = prev_l
+        else if backpointers[k-1]?[prev_l]?
+          bf_i = k
+          new_l = prev_l + 1
+        else
+          consider_bruteforce = false
 
-      l = ending_bruteforce_chars.length
-      optimal_product[k] = Math.pow @cardinality(ending_bruteforce_chars), l
-      optimal_sequence_length[k] = 1
-      if k - l >= 0
-        optimal_product[k] *= optimal_product[k - l]
-        optimal_sequence_length[k] += optimal_sequence_length[k - l]
+        if consider_bruteforce
+          bf_match = make_bruteforce_match bf_i, bf_j
+          prev_j = k - bf_match.token.length # end of preceeding match
+          candidate_product = @estimate_guesses bf_match
+          candidate_product *= optimal_product[prev_j][new_l - 1] if new_l > 1
+          candidate_score = score candidate_product, new_l
+          if candidate_score < optimal_score
+            optimal_score = candidate_score
+            optimal_product[k][new_l] = candidate_product
+            optimal_l = new_l
+            max_l = Math.max max_l, new_l
+            backpointers[k][new_l] = bf_match
 
-      backpointers[k] = make_bruteforce_match(k - l + 1, k)
+        # now try beating those bruteforce starting scenarios.
+        # for each match m ending at k, see if forming a (prev_l + 1) sequence
+        # ending at m is better than the current optimum.
+        for match in matches when match.j == k
+          [i, j] = [match.i, match.j]
+          if prev_l == 0
+            # if forming a len-1 sequence [match], match.i must fully cover [0..k]
+            continue unless i == 0
+          else
+            # it's only possible to form a new potentially-optimal sequence ending at
+            # match when there's an optimal length-prev_l sequence ending at match.i-1.
+            continue unless optimal_product[i-1]?[prev_l]?
+          candidate_product = @estimate_guesses match
+          candidate_product *= optimal_product[i-1][prev_l] if prev_l > 0
+          candidate_score = score candidate_product, prev_l + 1
+          if candidate_score < optimal_score
+            optimal_score = candidate_score
+            optimal_product[k][prev_l+1] = candidate_product
+            optimal_l = prev_l + 1
+            max_l = Math.max max_l, prev_l+1
+            backpointers[k][prev_l+1] = match
 
-      minimum_guesses = optimal_product[k] * @factorial optimal_sequence_length[k]
-      for match in matches when match.j == k
-        [i, j] = [match.i, match.j]
-        candidate_product = @estimate_guesses match
-        candidate_length = 1
-        if i - 1 >= 0
-          candidate_product *= optimal_product[i - 1]
-          candidate_length += optimal_sequence_length[i - 1]
-        candidate_guesses = candidate_product * @factorial candidate_length
-
-        if candidate_guesses < minimum_guesses
-          minimum_guesses = candidate_guesses
-          ending_bruteforce_chars = ''
-          optimal_product[k] = candidate_product
-          optimal_sequence_length[k] = candidate_length
-          backpointers[k] = match
-
-    # walk backwards and decode the best sequence
+    # walk backwards and decode the optimal sequence
     match_sequence = []
+    l = optimal_l
     k = password.length - 1
     while k >= 0
-      match = backpointers[k]
+      match = backpointers[k][l]
       match_sequence.push match
       k = match.i - 1
+      l -= 1
     match_sequence.reverse()
-
-    if password.length > 0
-      sequence_length_multiplier = @factorial optimal_sequence_length[password.length - 1]
-      guesses = optimal_product[password.length - 1] * sequence_length_multiplier
-    else
-      sequence_length_multiplier = 1
-      guesses = 1
 
     # final result object
     password: password
-    guesses: guesses
-    guesses_log10: @log10 guesses
-    sequence_product_log10: @log10(optimal_product[password.length - 1])
-    sequence_length_multiplier_log10: @log10 sequence_length_multiplier
+    guesses: optimal_score
+    guesses_log10: @log10 optimal_score
     sequence: match_sequence
 
   # ------------------------------------------------------------------------------
@@ -147,15 +181,24 @@ scoring =
   estimate_guesses: (match) ->
     return match.guesses if match.guesses? # a match's guess estimate doesn't change. cache it.
     estimation_functions =
+      bruteforce: @bruteforce_guesses
       dictionary: @dictionary_guesses
       spatial:    @spatial_guesses
       repeat:     @repeat_guesses
       sequence:   @sequence_guesses
       regex:      @regex_guesses
       date:       @date_guesses
-    match.guesses = estimation_functions[match.pattern].call this, match
+    guesses = estimation_functions[match.pattern].call this, match
+    if match.token.length == 1
+      min_guesses = MIN_SUBMATCH_GUESSES_SINGLE_CHAR
+    else
+      min_guesses = MIN_SUBMATCH_GUESSES_MULTI_CHAR
+    match.guesses = Math.max guesses, min_guesses
     match.guesses_log10 = @log10 match.guesses
     match.guesses
+
+  bruteforce_guesses: (match) ->
+    1 + Math.pow BRUTEFORCE_CARDINALITY, match.token.length
 
   repeat_guesses: (match) ->
     match.base_guesses * match.repeat_count
@@ -295,50 +338,5 @@ scoring =
     variations
 
   # utilities --------------------------------------------------------------------
-
-  cardinality: (password) ->
-    [lower, upper, digits, symbols, latin1_symbols, latin1_letters] = (
-      false for i in [0...6]
-    )
-    unicode_codepoints = []
-    for chr in password.split('')
-      ord = chr.charCodeAt(0)
-      if 0x30 <= ord <= 0x39
-        digits = true
-      else if 0x41 <= ord <= 0x5a
-        upper = true
-      else if 0x61 <= ord <= 0x7a
-        lower = true
-      else if ord <= 0x7f
-        symbols = true
-      else if 0x80 <= ord <= 0xBF
-        latin1_symbols = true
-      else if 0xC0 <= ord <= 0xFF
-        latin1_letters = true
-      else if ord > 0xFF
-        unicode_codepoints.push ord
-    c = 0
-    c += 10 if digits
-    c += 26 if upper
-    c += 26 if lower
-    c += 33 if symbols
-    c += 64 if latin1_symbols
-    c += 64 if latin1_letters
-    if unicode_codepoints.length
-      min_cp = max_cp = unicode_codepoints[0]
-      for cp in unicode_codepoints[1..]
-        min_cp = cp if cp < min_cp
-        max_cp = cp if cp > max_cp
-      # if the range between unicode codepoints is small,
-      # assume one extra alphabet is in use (eg cyrillic, korean) and add a ballpark +40
-      #
-      # if the range is large, be very conservative and add +100 instead of the range.
-      # (codepoint distance between chinese chars can be many thousand, for example,
-      # but that cardinality boost won't be justified if the characters are common.)
-      range = max_cp - min_cp + 1
-      range = 40 if range < 40
-      range = 100 if range > 100
-      c += range
-    c
 
 module.exports = scoring
