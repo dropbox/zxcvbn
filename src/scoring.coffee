@@ -125,7 +125,7 @@ scoring =
         if consider_bruteforce
           bf_match = make_bruteforce_match bf_i, bf_j
           prev_j = k - bf_match.token.length # end of preceeding match
-          candidate_product = @estimate_guesses bf_match
+          candidate_product = @estimate_guesses bf_match, password
           candidate_product *= optimal_product[prev_j][new_l - 1] if new_l > 1
           candidate_score = score candidate_product, new_l
           if candidate_score < optimal_score
@@ -147,7 +147,7 @@ scoring =
             # it's only possible to form a new potentially-optimal sequence ending at
             # match when there's an optimal length-prev_l sequence ending at match.i-1.
             continue unless optimal_product[i-1]?[prev_l]?
-          candidate_product = @estimate_guesses match
+          candidate_product = @estimate_guesses match, password
           candidate_product *= optimal_product[i-1][prev_l] if prev_l > 0
           candidate_score = score candidate_product, prev_l + 1
           if candidate_score < optimal_score
@@ -178,8 +178,14 @@ scoring =
   # guess estimation -- one function per match pattern ---------------------------
   # ------------------------------------------------------------------------------
 
-  estimate_guesses: (match) ->
+  estimate_guesses: (match, password) ->
     return match.guesses if match.guesses? # a match's guess estimate doesn't change. cache it.
+    min_guesses = 1
+    if match.token.length < password.length
+      min_guesses = if match.token.length == 1
+        MIN_SUBMATCH_GUESSES_SINGLE_CHAR
+      else
+        MIN_SUBMATCH_GUESSES_MULTI_CHAR
     estimation_functions =
       bruteforce: @bruteforce_guesses
       dictionary: @dictionary_guesses
@@ -189,16 +195,19 @@ scoring =
       regex:      @regex_guesses
       date:       @date_guesses
     guesses = estimation_functions[match.pattern].call this, match
-    if match.token.length == 1
-      min_guesses = MIN_SUBMATCH_GUESSES_SINGLE_CHAR
-    else
-      min_guesses = MIN_SUBMATCH_GUESSES_MULTI_CHAR
     match.guesses = Math.max guesses, min_guesses
     match.guesses_log10 = @log10 match.guesses
     match.guesses
 
   bruteforce_guesses: (match) ->
-    1 + Math.pow BRUTEFORCE_CARDINALITY, match.token.length
+    guesses = Math.pow BRUTEFORCE_CARDINALITY, match.token.length
+    # small detail: make bruteforce matches at minimum one guess bigger than smallest allowed
+    # submatch guesses, such that non-bruteforce submatches over the same [i..j] take precidence.
+    min_guesses = if match.token.length == 1
+      MIN_SUBMATCH_GUESSES_SINGLE_CHAR + 1
+    else
+      MIN_SUBMATCH_GUESSES_MULTI_CHAR + 1
+    Math.max guesses, min_guesses
 
   repeat_guesses: (match) ->
     match.base_guesses * match.repeat_count
