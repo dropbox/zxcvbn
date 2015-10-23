@@ -85,30 +85,51 @@ results_tmpl = '''
 <table class="result">
   <tr>
     <td>password: </td>
-    <td><strong>{{password}}</strong></td>
+    <td colspan="2"><strong>{{password}}</strong></td>
   </tr>
   <tr>
     <td>guesses_log10: </td>
-    <td>{{guesses_log10}}</td>
+    <td colspan="2">{{guesses_log10}}</td>
   </tr>
   <tr>
-    <td>sequence_product_log10</td>
-    <td>{{sequence_product_log10}}
+    <td>score: </td>
+    <td>{{score}} / 4</td>
+  <tr>
+    <td colspan="3">guess times:</td>
+  </tr>
+  {{& guess_times_display}}
+  <tr>
+    <td>function runtime (ms): </td>
+    <td colspan="2">{{calc_time}}</td>
   </tr>
   <tr>
-    <td>sequence_length_multiplier_log10</td>
-    <td>{{sequence_length_multiplier_log10}}</td>
-  </tr>
-  <tr>
-    <td>calculated in (ms): </td>
-    <td>{{calc_time}}</td>
-  </tr>
-  <tr>
-    <td colspan="2"><strong>match sequence:</strong></td>
+    <td colspan="3"><strong>match sequence:</strong></td>
   </tr>
 </table>
 {{& sequence_display}}
 {{/results}}
+'''
+
+guess_times_tmpl = '''
+  <tr>
+    <td>100 / hour:</td>
+    <td>{{online_throttling_100_per_hour}}</td>
+    <td> (throttled online attack)</td>
+  </tr>
+  <tr>
+    <td>10&nbsp; / second:</td>
+    <td>{{online_no_throttling_10_per_second}}</td>
+    <td> (unthrottled online attack)</td>
+  </tr>
+  <tr>
+    <td>10k / second:</td>
+    <td>{{offline_salted_slow_hashing_1e4_per_second}}</td>
+    <td> (offline attack, salted slow hash, many cores)</td>
+  <tr>
+    <td>10B / second:</td>
+    <td>{{offline_salted_fast_hashing_1e10_per_second}}</td>
+    <td> (offline attack, salted fast hash, many cores)</td>
+  </tr>
 '''
 
 props_tmpl = '''
@@ -258,6 +279,7 @@ requirejs ['../dist/zxcvbn'], (zxcvbn) ->
       r = zxcvbn(password)
       round_logs(r)
       r.sequence_display = Mustache.render(props_tmpl, r)
+      r.guess_times_display = Mustache.render(guess_times_tmpl, r.crack_times_display)
       results_lst.push r
 
     rendered = Mustache.render(results_tmpl, {
@@ -276,6 +298,7 @@ requirejs ['../dist/zxcvbn'], (zxcvbn) ->
         r = zxcvbn(current)
         round_logs(r)
         r.sequence_display = Mustache.render(props_tmpl, r)
+        r.guess_times_display = Mustache.render(guess_times_tmpl, r.crack_times_display)
         results = {results: [r]}
         rendered = Mustache.render(results_tmpl, results)
         $('#search-results').html(rendered)
