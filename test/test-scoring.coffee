@@ -51,42 +51,15 @@ test 'log', (t) ->
   approx_equal t, log10(n), Math.log(n) / Math.log(10), "base change rule"
   t.end()
 
-test 'bruteforce cardinality', (t) ->
-  for [str, cardinality] in [
-    # beginning / middle / end of lowers range
-    [ 'a', 26 ]
-    [ 'h', 26 ]
-    [ 'z', 26 ]
-    # sample from each other character group
-    [ 'Q', 26 ]
-    [ '0', 10 ]
-    [ '9', 10 ]
-    [ '$', 33 ]
-    [ '£', 64 ]
-    [ 'å', 64 ]
-    # unicode
-    [ 'α', 40 ]
-    [ 'αβ', 40 ]
-    [ 'Ϫα', 58 ]
-    [ '好', 40 ]
-    [ '信息论', 100 ]
-    # combinations
-    [ 'a$', 59 ]
-    [ 'aQ£', 116 ]
-    [ '9Z9Z', 36 ]
-    [ '«信息论»', 164 ]
-    ]
-    msg = "cardinality of #{str} is #{cardinality}"
-    t.equal scoring.cardinality(str), cardinality, msg
-  t.end()
-
 test 'search', (t) ->
   m = (i, j, guesses) ->
     i: i
     j: j
     guesses: guesses
   password = '0123456789'
-  cardinality = 10 # |digits| == 10
+
+  # for tests, set additive penalty to zero.
+  exclude_additive = true
 
   msg = (s) -> "returns one bruteforce match given an empty match sequence: #{s}"
   result = scoring.most_guessable_match_sequence password, []
@@ -94,15 +67,11 @@ test 'search', (t) ->
   m0 = result.sequence[0]
   t.equal m0.pattern, 'bruteforce', msg("match.pattern == 'bruteforce'")
   t.equal m0.token, password, msg("match.token == #{password}")
-  t.equal m0.cardinality, cardinality, msg("match.cardinality == #{cardinality}")
-  expected = Math.pow(cardinality, password.length)
-  t.equal result.guesses, expected, msg("total guesses == #{expected}")
-  t.equal m0.guesses, expected, msg("match guesses == #{expected}")
   t.deepEqual [m0.i, m0.j], [0, 9], msg("[i, j] == [#{m0.i}, #{m0.j}]")
 
   msg = (s) -> "returns match + bruteforce when match covers a prefix of password: #{s}"
   matches = [m0] = [m(0, 5, 1)]
-  result = scoring.most_guessable_match_sequence password, matches
+  result = scoring.most_guessable_match_sequence password, matches, exclude_additive
   t.equal result.sequence.length, 2, msg("result.match.sequence.length == 2")
   t.equal result.sequence[0], m0, msg("first match is the provided match object")
   m1 = result.sequence[1]
@@ -111,7 +80,7 @@ test 'search', (t) ->
 
   msg = (s) -> "returns bruteforce + match when match covers a suffix: #{s}"
   matches = [m1] = [m(3, 9, 1)]
-  result = scoring.most_guessable_match_sequence password, matches
+  result = scoring.most_guessable_match_sequence password, matches, exclude_additive
   t.equal result.sequence.length, 2, msg("result.match.sequence.length == 2")
   m0 = result.sequence[0]
   t.equal m0.pattern, 'bruteforce', msg("first match is bruteforce")
@@ -120,7 +89,7 @@ test 'search', (t) ->
 
   msg = (s) -> "returns bruteforce + match + bruteforce when match covers an infix: #{s}"
   matches = [m1] = [m(1, 8, 1)]
-  result = scoring.most_guessable_match_sequence password, matches
+  result = scoring.most_guessable_match_sequence password, matches, exclude_additive
   t.equal result.sequence.length, 3, msg("result.length == 3")
   t.equal result.sequence[1], m1, msg("middle match is the provided match object")
   m0 = result.sequence[0]
@@ -132,24 +101,24 @@ test 'search', (t) ->
 
   msg = (s) -> "chooses lower-guesses match given two matches of the same span: #{s}"
   matches = [m0, m1] = [m(0, 9, 1), m(0, 9, 2)]
-  result = scoring.most_guessable_match_sequence password, matches
+  result = scoring.most_guessable_match_sequence password, matches, exclude_additive
   t.equal result.sequence.length, 1, msg("result.length == 1")
   t.equal result.sequence[0], m0, msg("result.sequence[0] == m0")
   # make sure ordering doesn't matter
   m0.guesses = 3
-  result = scoring.most_guessable_match_sequence password, matches
+  result = scoring.most_guessable_match_sequence password, matches, exclude_additive
   t.equal result.sequence.length, 1, msg("result.length == 1")
   t.equal result.sequence[0], m1, msg("result.sequence[0] == m1")
 
   msg = (s) -> "when m0 covers m1 and m2, choose [m0] when m0 < m1 * m2 * fact(2): #{s}"
   matches = [m0, m1, m2] = [m(0, 9, 3), m(0, 3, 2), m(4, 9, 1)]
-  result = scoring.most_guessable_match_sequence password, matches
+  result = scoring.most_guessable_match_sequence password, matches, exclude_additive
   t.equal result.guesses, 3, msg("total guesses == 3")
   t.deepEqual result.sequence, [m0], msg("sequence is [m0]")
 
   msg = (s) -> "when m0 covers m1 and m2, choose [m1, m2] when m0 > m1 * m2 * fact(2): #{s}"
   m0.guesses = 5
-  result = scoring.most_guessable_match_sequence password, matches
+  result = scoring.most_guessable_match_sequence password, matches, exclude_additive
   t.equal result.guesses, 4, msg("total guesses == 4")
   t.deepEqual result.sequence, [m1, m2], msg("sequence is [m1, m2]")
   t.end()
@@ -158,14 +127,15 @@ test 'calc_guesses', (t) ->
   match =
     guesses: 1
   msg = "estimate_guesses returns cached guesses when available"
-  t.equal scoring.estimate_guesses(match), 1, msg
+  t.equal scoring.estimate_guesses(match, ''), 1, msg
   match =
     pattern: 'date'
+    token: '1977'
     year: 1977
     month: 7
     day: 14
   msg = "estimate_guesses delegates based on pattern"
-  t.equal scoring.estimate_guesses(match), scoring.date_guesses(match), msg
+  t.equal scoring.estimate_guesses(match, '1977'), scoring.date_guesses(match), msg
   t.end()
 
 test 'repeat guesses', (t) ->
