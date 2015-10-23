@@ -1,5 +1,6 @@
 matching = require('./matching')
 scoring = require('./scoring')
+time_estimates = require('./time_estimates')
 
 time = -> (new Date()).getTime()
 
@@ -14,6 +15,9 @@ zxcvbn = (password, user_inputs = []) ->
   matches = matching.omnimatch password
   result = scoring.most_guessable_match_sequence password, matches
   result.calc_time = time() - start
+  attack_times = time_estimates.estimate_attack_times result.guesses
+  for prop, val of attack_times
+    result[prop] = val
   result
 
 module.exports = zxcvbn

@@ -67,7 +67,7 @@ scoring =
   #
   # ------------------------------------------------------------------------------
 
-  most_guessable_match_sequence: (password, matches) ->
+  most_guessable_match_sequence: (password, matches, _exclude_additive=false) ->
 
     # at [k][l], the product of guesses of the optimal sequence of length-l
     # covering password[0..k].
@@ -89,7 +89,8 @@ scoring =
 
     score = (guess_product, sequence_length) =>
       result = @factorial(sequence_length) * guess_product
-      result += Math.pow MIN_GUESSES_BEFORE_GROWING_SEQUENCE, sequence_length - 1
+      unless _exclude_additive
+        result += Math.pow MIN_GUESSES_BEFORE_GROWING_SEQUENCE, sequence_length - 1
       result
 
     for k in [0...password.length]
