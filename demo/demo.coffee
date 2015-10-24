@@ -123,12 +123,12 @@ guess_times_tmpl = '''
   </tr>
   <tr>
     <td>10k / second:</td>
-    <td>{{offline_salted_slow_hashing_1e4_per_second}}</td>
-    <td> (offline attack, salted slow hash, many cores)</td>
+    <td>{{offline_slow_hashing_1e4_per_second}}</td>
+    <td> (offline attack, slow hash, many cores)</td>
   <tr>
     <td>10B / second:</td>
-    <td>{{offline_salted_fast_hashing_1e10_per_second}}</td>
-    <td> (offline attack, salted fast hash, many cores)</td>
+    <td>{{offline_fast_hashing_1e10_per_second}}</td>
+    <td> (offline attack, fast hash, many cores)</td>
   </tr>
 '''
 

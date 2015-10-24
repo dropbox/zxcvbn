@@ -7,7 +7,7 @@ _/\/\/\/\/\__/\/\__/\/\____/\/\/\/\______/\______/\/\/\/\____/\/\__/\/\_
 ________________________________________________________________________
 ```
 
-[![Build Status](https://travis-ci.org/dropbox/zxcvbn.svg?branch=master)](https://travis-ci.org/dropbox/zxcvbn)  
+[![Build Status](https://travis-ci.org/dropbox/zxcvbn.svg?branch=master)](https://travis-ci.org/dropbox/zxcvbn)
 [![Sauce Test Status](https://saucelabs.com/browser-matrix/dropbox-zxcvbn.svg)](https://saucelabs.com/u/dropbox-zxcvbn)
 
 `zxcvbn` is a password strength estimator inspired by password crackers. Through pattern matching and conservative entropy calculations, it recognizes and weighs 10k common passwords, common names and surnames according to US census data, popular English words, and other common patterns like dates, repeats (`aaa`), sequences (`abcd`), keyboard patterns (`qwertyuiop`), and l33t speak.
@@ -127,25 +127,56 @@ Add to your .html:
 zxcvbn(password, user_inputs=[])
 ```
 
-`zxcvbn()` takes one required argument, a password, and returns a result object. The result includes a few properties:
+`zxcvbn()` takes one required argument, a password, and returns a result object with several properties:
 
 ``` coffee
-result.entropy            # bits
+result.guesses            # estimated guesses needed to crack password
+result.guesses_log10      # order of magnitude of result.guesses
 
-result.crack_time         # estimation of actual crack time, in seconds.
+result.crack_time_seconds # dictionary of back-of-the-envelope crack time
+                          # estimations, in seconds, based on a few scenarios:
+{
+  # online attack on a service that ratelimits password auth attempts.
+  online_throttling_100_per_hour
 
-result.crack_time_display # same crack time, as a friendlier string:
-                          # "instant", "6 minutes", "centuries", etc.
+  # online attack on a service that doesn't ratelimit,
+  # or where an attacker has outsmarted ratelimiting.
+  online_no_throttling_10_per_second
 
-result.score              # [0,1,2,3,4] if crack time is less than
-                          # [10**2, 10**4, 10**6, 10**8, Infinity].
-                          # (useful for implementing a strength bar.)
+  # offline attack. assumes multiple attackers,
+  # proper user-unique salting, and a slow hash function
+  # w/ moderate work factor, such as bcrypt, scrypt, PBKDF2.
+  offline_slow_hashing_1e4_per_second
 
-result.match_sequence     # the list of patterns that zxcvbn based the
-                          # entropy calculation on.
+  # offline attack with user-unique salting but a fast hash
+  # function like SHA-1, SHA-256 or MD5. A wide range of
+  # reasonable numbers anywhere from one billion - one trillion
+  # guesses per second, depending on number of cores and machines.
+  # ballparking at 10B/sec.
+  offline_fast_hashing_1e10_per_second
+}
 
-result.calc_time          # how long it took zxcvbn to calculate an answer,
-                          # in milliseconds.
+result.crack_time_display # same keys as result.crack_time_seconds,
+                          # with friendlier display string values:
+                          # "subsecond", "3 hours", "centuries", etc.
+
+result.score      # Integer from 0-4 (useful for implementing a strength bar)
+
+  0 # too guessable: risky password. (guesses < 10^3)
+
+  1 # very guessable: protection from throttled online attacks. (guesses < 10^6)
+
+  2 # somewhat guessable: protection from unthrottled online attacks. (guesses < 10^8)
+
+  3 # safely unguessable: moderate protection from offline slow-hash scenario. (guesses < 10^10)
+
+  4 # very unguessable: strong protection from offline slow-hash scenario. (guesses >= 10^10)
+
+result.sequence   # the list of patterns that zxcvbn based the
+                  # entropy calculation on.
+
+result.calc_time  # how long it took zxcvbn to calculate an answer,
+                  # in milliseconds.
 ````
 
 The optional `user_inputs` argument is an array of strings that zxcvbn will treat as an extra dictionary. This can be whatever list of strings you like, but is meant for user inputs from other fields of the form, like name and email. That way a password that includes a user's personal information can be heavily penalized. This list is also good for site-specific vocabulary — Acme Brick Co. might want to include ['acme', 'brick', 'acmebrick', etc].

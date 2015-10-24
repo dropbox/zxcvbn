@@ -3,8 +3,8 @@ time_estimates =
     crack_times_seconds =
       online_throttling_100_per_hour: guesses / (100 / 3600)
       online_no_throttling_10_per_second: guesses / 1e2
-      offline_salted_slow_hashing_1e4_per_second: guesses / 1e4
-      offline_salted_fast_hashing_1e10_per_second: guesses / 1e10
+      offline_slow_hashing_1e4_per_second: guesses / 1e4
+      offline_fast_hashing_1e10_per_second: guesses / 1e10
 
     crack_times_display = {}
     for scenario, seconds of crack_times_seconds
@@ -41,7 +41,9 @@ time_estimates =
     month = day * 31
     year = month * 12
     century = year * 100
-    [display_num, display_str] = if seconds < minute
+    [display_num, display_str] = if seconds < 1
+      [null, 'subsecond']
+    else if seconds < minute
       [seconds, "#{seconds} second"]
     else if seconds < hour
       base = Math.round seconds / minute
