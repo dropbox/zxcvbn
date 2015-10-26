@@ -42,9 +42,10 @@ time_estimates =
     year = month * 12
     century = year * 100
     [display_num, display_str] = if seconds < 1
-      [null, 'subsecond']
+      [null, 'less than a second']
     else if seconds < minute
-      [seconds, "#{seconds} second"]
+      base = Math.round seconds
+      [base, "#{base} second"]
     else if seconds < hour
       base = Math.round seconds / minute
       [base, "#{base} minute"]
