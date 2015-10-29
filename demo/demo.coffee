@@ -11,6 +11,7 @@ p@$$word
 123456
 123456789
 11111111
+zxcvbnm,./
 love88
 angel08
 monkey13
@@ -95,13 +96,14 @@ results_tmpl = '''
     <td>score: </td>
     <td>{{score}} / 4</td>
   <tr>
-    <td colspan="3">guess times:</td>
-  </tr>
-  {{& guess_times_display}}
-  <tr>
     <td>function runtime (ms): </td>
     <td colspan="2">{{calc_time}}</td>
   </tr>
+  <tr>
+    <td colspan="3">guess times:</td>
+  </tr>
+  {{& guess_times_display}}
+  {{& feedback_display }}
   <tr>
     <td colspan="3"><strong>match sequence:</strong></td>
   </tr>
@@ -130,6 +132,25 @@ guess_times_tmpl = '''
     <td>{{offline_fast_hashing_1e10_per_second}}</td>
     <td> (offline attack, fast hash, many cores)</td>
   </tr>
+'''
+
+feedback_tmpl = '''
+{{#warning}}
+<tr>
+  <td>warning: </td>
+  <td colspan="2">{{warning}}</td>
+</tr>
+{{/warning}}
+{{#has_suggestions}}
+<tr>
+  <td style="vertical-align: top">suggestions:</td>
+  <td colspan="2">
+    {{#suggestions}}
+    - {{.}} <br />
+    {{/suggestions}}
+  </td>
+</tr>
+{{/has_suggestions}}
 '''
 
 props_tmpl = '''
@@ -274,12 +295,15 @@ round_logs = (r) ->
 
 requirejs ['../dist/zxcvbn'], (zxcvbn) ->
   $ ->
+    window.zxcvbn = zxcvbn
     results_lst = []
     for password in test_passwords.split('\n') when password
       r = zxcvbn(password)
       round_logs(r)
       r.sequence_display = Mustache.render(props_tmpl, r)
       r.guess_times_display = Mustache.render(guess_times_tmpl, r.crack_times_display)
+      r.feedback.has_suggestions = r.feedback.suggestions.length > 0
+      r.feedback_display = Mustache.render(feedback_tmpl, r.feedback)
       results_lst.push r
 
     rendered = Mustache.render(results_tmpl, {
@@ -299,6 +323,8 @@ requirejs ['../dist/zxcvbn'], (zxcvbn) ->
         round_logs(r)
         r.sequence_display = Mustache.render(props_tmpl, r)
         r.guess_times_display = Mustache.render(guess_times_tmpl, r.crack_times_display)
+        r.feedback.has_suggestions = r.feedback.suggestions.length > 0
+        r.feedback_display = Mustache.render(feedback_tmpl, r.feedback)
         results = {results: [r]}
         rendered = Mustache.render(results_tmpl, results)
         $('#search-results').html(rendered)
