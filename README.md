@@ -172,6 +172,16 @@ result.score      # Integer from 0-4 (useful for implementing a strength bar)
 
   4 # very unguessable: strong protection from offline slow-hash scenario. (guesses >= 10^10)
 
+result.feedback   # verbal feedback to help choose better passwords. set when score <= 2.
+
+  result.feedback.warning     # explains what's wrong, eg. 'this is a top-10 common password'.
+                              # not always set -- sometimes an empty string
+
+  result.feedback.suggestions # a possibly-empty list of suggestions to help choose a less
+                              # guessable password. eg. 'Add another word or two'
+
+result.suggestions
+
 result.sequence   # the list of patterns that zxcvbn based the
                   # entropy calculation on.
 
