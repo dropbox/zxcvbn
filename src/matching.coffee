@@ -43,22 +43,7 @@ L33T_TABLE =
   z: ['2']
 
 REGEXEN =
-  alphanumeric: /[a-zA-Z0-9]{2,}/g
-  alpha:        /[a-zA-Z]{2,}/g
-  alpha_lower:  /[a-z]{2,}/g
-  alpha_upper:  /[A-Z]{2,}/g
-  digits:       /\d{2,}/g
-  symbols:      /[\W_]{2,}/g # includes non-latin unicode chars
   recent_year:  /19\d\d|200\d|201\d/g
-
-REGEX_PRECEDENCE =
-  alphanumeric: 0
-  alpha:        1
-  alpha_lower:  2
-  alpha_upper:  2
-  digits:       2
-  symbols:      2
-  recent_year:  3
 
 DATE_MAX_YEAR = 2050
 DATE_MIN_YEAR = 1000
@@ -141,6 +126,7 @@ matching =
               rank: rank
               dictionary_name: dictionary_name
               reversed: false
+              l33t: false
     @sorted matches
 
   reverse_dictionary_match: (password, _ranked_dictionaries = RANKED_DICTIONARIES) ->
@@ -415,21 +401,7 @@ matching =
           j: rx_match.index + rx_match[0].length - 1
           regex_name: name
           regex_match: rx_match
-    # currently, match list includes a bunch of redundancies:
-    # ex for every alpha_lower match, also an alpha and alphanumeric match of the same [i,j].
-    # ex for every recent_year match, also an alphanumeric match and digits match.
-    # use precedence to filter these redundancies out.
-    precedence_map = {} # maps from 'i-j' to current highest precedence
-    get_key = (match) -> "#{match.i}-#{match.j}"
-    for match in matches
-      key = get_key match
-      precedence = REGEX_PRECEDENCE[match.regex_name]
-      if key of precedence_map
-        highest_precedence = precedence_map[key]
-        continue if highest_precedence >= precedence
-      precedence_map[key] = precedence
-    @sorted matches.filter (match) ->
-      precedence_map[get_key(match)] == REGEX_PRECEDENCE[match.regex_name]
+    @sorted matches
 
   #-------------------------------------------------------------------------------
   # date matching ----------------------------------------------------------------
