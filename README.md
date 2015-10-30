@@ -122,7 +122,7 @@ Add to your .html:
 ```
 
 # Usage
-
+ 
 ``` javascript
 zxcvbn(password, user_inputs=[])
 ```
@@ -158,7 +158,7 @@ result.crack_time_seconds # dictionary of back-of-the-envelope crack time
 
 result.crack_time_display # same keys as result.crack_time_seconds,
                           # with friendlier display string values:
-                          # "subsecond", "3 hours", "centuries", etc.
+                          # "less than a second", "3 hours", "centuries", etc.
 
 result.score      # Integer from 0-4 (useful for implementing a strength bar)
 
@@ -180,16 +180,16 @@ result.feedback   # verbal feedback to help choose better passwords. set when sc
   result.feedback.suggestions # a possibly-empty list of suggestions to help choose a less
                               # guessable password. eg. 'Add another word or two'
 
-result.suggestions
-
 result.sequence   # the list of patterns that zxcvbn based the
-                  # entropy calculation on.
+                  # guess calculation on.
 
 result.calc_time  # how long it took zxcvbn to calculate an answer,
                   # in milliseconds.
 ````
 
 The optional `user_inputs` argument is an array of strings that zxcvbn will treat as an extra dictionary. This can be whatever list of strings you like, but is meant for user inputs from other fields of the form, like name and email. That way a password that includes a user's personal information can be heavily penalized. This list is also good for site-specific vocabulary — Acme Brick Co. might want to include ['acme', 'brick', 'acmebrick', etc].
+
+[try zxcvbn interactively](https://dl.dropboxusercontent.com/u/209/zxcvbn/test/index.html) to see these docs in action.
 
 # <a name="perf"></a>Performance
 
