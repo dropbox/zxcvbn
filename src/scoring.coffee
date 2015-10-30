@@ -169,10 +169,16 @@ scoring =
       l -= 1
     match_sequence.reverse()
 
+    # corner: empty password
+    if password.length == 0
+      guesses = 1
+    else
+      guesses = optimal_score
+
     # final result object
     password: password
-    guesses: optimal_score
-    guesses_log10: @log10 optimal_score
+    guesses: guesses
+    guesses_log10: @log10 guesses
     sequence: match_sequence
 
   # ------------------------------------------------------------------------------
