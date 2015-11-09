@@ -38,7 +38,7 @@ check_usage = () ->
     process.exit(0)
 
 # after all passwords are counted, discard pws with counts <= COUNTS
-CUTOFF = 15
+CUTOFF = 10
 
 # to save memory, after every batch of size BATCH_SIZE, go through counts and delete
 # long tail of entries with only one count.
@@ -52,6 +52,14 @@ normalize = (token) ->
   token.toLowerCase()
 
 should_include = (password, xato_rank) ->
+  for i in [0...password.length]
+    if password.charCodeAt(i) > 127
+      # xato mostly contains ascii-only passwords, so in practice
+      # this will only skip one or two things. were that not the case /
+      # were this used on a different data source, consider using
+      # a unidecode-like library instead, similar to count_wikipedia / count_wiktionary
+      console.log 'SKIPPING non-ascii password=#{password}, rank=#{xato_rank}'
+      return false
   matches = []
   for matcher in [
     matching.spatial_match
