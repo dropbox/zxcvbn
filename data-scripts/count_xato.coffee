@@ -55,10 +55,10 @@ should_include = (password, xato_rank) ->
   for i in [0...password.length]
     if password.charCodeAt(i) > 127
       # xato mostly contains ascii-only passwords, so in practice
-      # this will only skip one or two things. were that not the case /
-      # were this used on a different data source, consider using
+      # this will only skip one or two top passwords over the cutoff.
+      # were that not the case / were this used on a different data source, consider using
       # a unidecode-like library instead, similar to count_wikipedia / count_wiktionary
-      console.log 'SKIPPING non-ascii password=#{password}, rank=#{xato_rank}'
+      console.log "SKIPPING non-ascii password=#{password}, rank=#{xato_rank}"
       return false
   matches = []
   for matcher in [
