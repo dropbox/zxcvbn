@@ -5,6 +5,8 @@ import sys
 import codecs
 import operator
 
+from unidecode import unidecode
+
 def usage():
     return '''
 This script extracts words and counts from a 2006 wiktionary word frequency study over American
@@ -40,11 +42,20 @@ def parse_wiki_tokens(html_doc_str):
             rank, token, count = last3
             rank = int(rank.split()[0])
             token = token.replace('</a>', '')
-            token = token[token.index('>')+1:].lower()
+            token = token[token.index('>')+1:]
+            token = normalize(token)
+            # wikitonary has thousands of words that end in 's
+            # keep the common ones (rank under 1000), discard the rest
+            #
+            # otherwise end up with a bunch of duplicates eg victor / victor's
+            if token.endswith("'s") and rank > 1000:
+                continue
             count = int(count)
             results.append((rank, token, count))
-    assert len(results) in [1000, 2000, 1284] # early docs have 1k entries, later 2k, last 1284
     return results
+
+def normalize(token):
+    return unidecode(token).lower()
 
 def main(wiktionary_html_root, output_filename):
     rank_token_count = [] # list of 3-tuples
@@ -54,10 +65,7 @@ def main(wiktionary_html_root, output_filename):
             rank_token_count.extend(parse_wiki_tokens(f.read()))
     rank_token_count.sort(key=operator.itemgetter(0))
     with codecs.open(output_filename, 'w', 'utf8') as f:
-        last_rank = 0
         for rank, token, count in rank_token_count:
-            assert rank == last_rank + 1
-            last_rank = rank
             f.write('%-18s %d\n' % (token, count))
 
 if __name__ == '__main__':

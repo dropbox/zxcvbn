@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import sys
 import os
 import re
@@ -5,6 +7,9 @@ import codecs
 import operator
 import datetime
 import nltk
+import warnings
+
+from unidecode import unidecode
 
 def usage():
     print '''
@@ -46,7 +51,7 @@ Then run:
 ''' % sys.argv[0]
 
 SENTENCES_PER_BATCH = 500000 # after each batch, delete all counts with count == 1 (hapax legomena)
-PRE_SORT_CUTOFF = 10          # before sorting, discard all words with less than this count
+PRE_SORT_CUTOFF = 300        # before sorting, discard all words with less than this count
 
 ALL_NON_ALPHA = re.compile(r'^[\W\d]*$', re.UNICODE)
 SOME_NON_ALPHA = re.compile(r'[\W\d]', re.UNICODE)
@@ -60,10 +65,9 @@ class TopTokenCounter(object):
     def add_tokens(self, tokens, split_hyphens=True):
         for token in tokens:
             # add eg 'marxist-leninist' as two tokens instead of one
-            if split_hyphens and token.count('-') == 1:
-                t1, t2 = token.split('-')
-                self.add_token(t1)
-                self.add_token(t2)
+            if split_hyphens and token.count('-') in [1, 2]:
+                for subtoken in token.split('-'):
+                    self.add_token(subtoken)
             else:
                 self.add_token(token)
 
@@ -125,6 +129,7 @@ class TopTokenCounter(object):
 
 def main(input_dir_str, output_filename):
     counter = TopTokenCounter()
+    print counter.get_ts(), 'starting...'
     lines = 0
     for root, dirs, files in os.walk(input_dir_str, topdown=True):
         if not files:
@@ -132,6 +137,12 @@ def main(input_dir_str, output_filename):
         for fname in files:
             path = os.path.join(root, fname)
             for line in codecs.open(path, 'r', 'utf8'):
+                with warnings.catch_warnings():
+                    # unidecode() occasionally (rarely but enough to clog terminal outout)
+                    # complains about surrogate characters.
+                    # ignore those warnings.
+                    warnings.simplefilter('ignore')
+                    line = unidecode(line)
                 tokens = nltk.word_tokenize(line)
                 counter.add_tokens(tokens)
                 lines += 1
@@ -144,9 +155,9 @@ def main(input_dir_str, output_filename):
     counter.pre_sort_prune()
     print 'done'
     print counter.get_stats()
-    print self.get_ts(), 'sorting...'
+    print counter.get_ts(), 'sorting...'
     sorted_pairs = counter.get_sorted_pairs()
-    print self.get_ts(), 'done'
+    print counter.get_ts(), 'done'
     print 'writing...'
     with codecs.open(output_filename, 'w', 'utf8') as f:
         for token, count in sorted_pairs:
