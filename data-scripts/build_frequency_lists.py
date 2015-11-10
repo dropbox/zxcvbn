@@ -68,7 +68,6 @@ def has_comma_or_double_quote(token, rank, lst_name):
     # client-side w/o needing a lib, and so far this only excludes a few
     # very high-rank tokens eg 'ps8,000' at rank 74868 from wikipedia list.
     if ',' in token or '"' in token:
-        print 'excluding token=%s rank=%s lst_name=%s -- contains comma or double-quote char' % (token, rank, lst_name)
         return True
     return False
 
@@ -101,22 +100,22 @@ def filter_frequency_lists(freq_lists):
                     minimum_rank[token] = rank
                     minimum_name[token] = name
     for name, token_to_rank in freq_lists.iteritems():
-        max_tokens = DICTIONARIES[name]
         for token, rank in token_to_rank.iteritems():
-            assert not max_tokens or token_count[name] <= max_tokens
-            if max_tokens and token_count[name] == max_tokens:
-                print 'hit cutoff limit for:', name
-                break
             if minimum_name[token] != name:
                 continue
             if is_rare_and_short(token, rank) or has_comma_or_double_quote(token, rank, name):
                 continue
-            token_count[name] += 1
             filtered_token_and_rank[name].append((token, rank))
+            token_count[name] += 1
     result = {}
     for name, token_rank_pairs in filtered_token_and_rank.iteritems():
         token_rank_pairs.sort(key=itemgetter(1))
-        result[name] = [pair[0] for pair in token_rank_pairs]
+        cutoff_limit = DICTIONARIES[name]
+        if cutoff_limit and len(token_rank_pairs) > cutoff_limit:
+            token_rank_pairs = token_rank_pairs[:cutoff_limit]
+        result[name] = [pair[0] for pair in token_rank_pairs] # discard rank post-sort
+        with open(name + '_test.txt', 'w') as f2:
+            f2.write('\n'.join(result[name]))
     return result
 
 def to_kv(lst, lst_name):
