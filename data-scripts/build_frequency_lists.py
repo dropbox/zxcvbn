@@ -29,10 +29,10 @@ passed data dir, or vice-versa.
 
 # maps dict name to num words. None value means "include all words"
 DICTIONARIES = dict(
-    us_tv_and_film    = 25000,
-    english_wikipedia = 25000,
-    passwords         = 25000,
-    surnames          = 20000,
+    us_tv_and_film    = 30000,
+    english_wikipedia = 30000,
+    passwords         = 30000,
+    surnames          = 10000,
     male_names        = None,
     female_names      = None,
 )
@@ -61,6 +61,16 @@ def parse_frequency_lists(data_dir):
 
 def is_rare_and_short(token, rank):
     return rank >= 10**len(token)
+
+def has_comma_or_double_quote(token, rank, lst_name):
+    # hax, switch to csv or similar if this excludes too much.
+    # simple comma joining has the advantage of being easy to process
+    # client-side w/o needing a lib, and so far this only excludes a few
+    # very high-rank tokens eg 'ps8,000' at rank 74868 from wikipedia list.
+    if ',' in token or '"' in token:
+        print 'excluding token=%s rank=%s lst_name=%s -- contains comma or double-quote char' % (token, rank, lst_name)
+        return True
+    return False
 
 def filter_frequency_lists(freq_lists):
     '''
@@ -95,9 +105,11 @@ def filter_frequency_lists(freq_lists):
         for token, rank in token_to_rank.iteritems():
             assert not max_tokens or token_count[name] <= max_tokens
             if max_tokens and token_count[name] == max_tokens:
-                print 'cutting off for:', name
+                print 'hit cutoff limit for:', name
                 break
-            if minimum_name[token] != name or is_rare_and_short(token, rank):
+            if minimum_name[token] != name:
+                continue
+            if is_rare_and_short(token, rank) or has_comma_or_double_quote(token, rank, name):
                 continue
             token_count[name] += 1
             filtered_token_and_rank[name].append((token, rank))
@@ -108,8 +120,6 @@ def filter_frequency_lists(freq_lists):
     return result
 
 def to_kv(lst, lst_name):
-    for word in lst:
-        assert ',' not in word and '"' not in word, "hax, switch to csv if this starts failing"
     val = '"%s".split(",")' % ','.join(lst)
     return '%s: %s' % (lst_name, val)
 

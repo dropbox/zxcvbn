@@ -139,7 +139,7 @@ def main(input_dir_str, output_filename):
             for line in codecs.open(path, 'r', 'utf8'):
                 with warnings.catch_warnings():
                     # unidecode() occasionally (rarely but enough to clog terminal outout)
-                    # complains about surrogate characters.
+                    # complains about surrogate characters in some wikipedia sentences.
                     # ignore those warnings.
                     warnings.simplefilter('ignore')
                     line = unidecode(line)
