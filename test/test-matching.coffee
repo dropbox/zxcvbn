@@ -177,14 +177,14 @@ test 'dictionary matching', (t) ->
         dictionary_name: [name]
 
   # test the default dictionaries
-  matches = matching.dictionary_match 'rosebud'
-  patterns = ['ros', 'rose', 'rosebud', 'bud']
-  ijs = [[0,2], [0,3], [0,6], [4,6]]
+  matches = matching.dictionary_match 'wow'
+  patterns = ['wow']
+  ijs = [[0,2]]
   msg = "default dictionaries"
   check_matches msg, t, matches, 'dictionary', patterns, ijs,
     matched_word: patterns
-    rank: [13085, 65, 245, 786]
-    dictionary_name: ['surnames', 'female_names', 'passwords', 'male_names']
+    rank: [322]
+    dictionary_name: ['us_tv_and_film']
 
   matching.set_user_input_dictionary ['foo', 'bar']
   matches = matching.dictionary_match 'foobar'
