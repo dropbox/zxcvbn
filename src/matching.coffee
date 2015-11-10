@@ -10,12 +10,9 @@ build_ranked_dict = (ordered_list) ->
     i += 1
   result
 
-RANKED_DICTIONARIES =
-  passwords:    build_ranked_dict frequency_lists.passwords
-  english:      build_ranked_dict frequency_lists.english
-  surnames:     build_ranked_dict frequency_lists.surnames
-  male_names:   build_ranked_dict frequency_lists.male_names
-  female_names: build_ranked_dict frequency_lists.female_names
+RANKED_DICTIONARIES = {}
+for name, lst of frequency_lists
+  RANKED_DICTIONARIES[name] = build_ranked_dict lst
 
 GRAPHS =
   qwerty:     adjacency_graphs.qwerty
