@@ -67,6 +67,11 @@ $ node
 > zxcvbn('Tr0ub4dour&3');
 ```
 
+## Meteor (via [Atmosphere](https://atmospherejs.com/codetheweb/zxcvbn))
+``` shell
+meteor add codetheweb:zxcvbn
+```
+
 ## RequireJS
 
 Add [`zxcvbn.js`](https://raw.githubusercontent.com/dropbox/zxcvbn/master/dist/zxcvbn.js) to your project (using bower, npm or direct download) and import as usual:
