@@ -114,8 +114,6 @@ def filter_frequency_lists(freq_lists):
         if cutoff_limit and len(token_rank_pairs) > cutoff_limit:
             token_rank_pairs = token_rank_pairs[:cutoff_limit]
         result[name] = [pair[0] for pair in token_rank_pairs] # discard rank post-sort
-        with open(name + '_test.txt', 'w') as f2:
-            f2.write('\n'.join(result[name]))
     return result
 
 def to_kv(lst, lst_name):
