@@ -17,7 +17,7 @@ https://en.wiktionary.org/wiki/Wiktionary:Frequency_lists#TV_and_movie_scripts
 
 Put those into a single directory and point it to this script:
 
-%s wiktionary_html_dir ../data/spoken_english.txt
+%s wiktionary_html_dir ../data/us_tv_and_film.txt
 
 output.txt will include one line per word in the study, ordered by rank, of the form:
 
@@ -31,6 +31,7 @@ def parse_wiki_tokens(html_doc_str):
     results = []
     last3 = ['', '', '']
     header = True
+    skipped = 0
     for line in html_doc_str.split('\n'):
         last3.pop(0)
         last3.append(line.strip())
@@ -49,9 +50,12 @@ def parse_wiki_tokens(html_doc_str):
             #
             # otherwise end up with a bunch of duplicates eg victor / victor's
             if token.endswith("'s") and rank > 1000:
+                skipped += 1
                 continue
             count = int(count)
             results.append((rank, token, count))
+    # early docs have 1k entries, later 2k, last 1284
+    assert len(results) + skipped in [1000, 2000, 1284]
     return results
 
 def normalize(token):

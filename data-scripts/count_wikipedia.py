@@ -16,7 +16,7 @@ def usage():
 tokenize a directory of text and count unigrams.
 
 usage:
-%s input_dir ../data/written_english.txt
+%s input_dir ../data/english_wikipedia.txt
 
 input_dir is the root directory where sentence files live. Each file should contain
 one sentence per line, with punctuation. This script will walk the directory recursively,

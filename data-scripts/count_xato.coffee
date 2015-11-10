@@ -9,7 +9,7 @@ sprintf = require('sprintf-js').sprintf
 check_usage = () ->
   usage = '''
 
-  Run a frequency count on the raw 10M xato password set and keep the top 40k by
+  Run a frequency count on the raw 10M xato password set and keep counts over CUTOFF in
   descending frequency. That file can be found by googling around for:
   "xato 10-million-combos.txt"
 
