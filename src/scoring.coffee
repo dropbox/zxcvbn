@@ -275,7 +275,7 @@ scoring =
   KEYPAD_STARTING_POSITIONS: (k for k,v of adjacency_graphs.keypad).length
 
   spatial_guesses: (match) ->
-    if match.graph in ['qwerty', 'dvorak']
+    if match.graph in ['qwerty', 'qwertz', 'dvorak']
       s = @KEYBOARD_STARTING_POSITIONS
       d = @KEYBOARD_AVERAGE_DEGREE
     else
