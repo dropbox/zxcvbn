@@ -344,11 +344,6 @@ test 'sequence matching', (t) ->
   check_matches msg, t, matches, 'sequence', ['abc', 'cba', 'abc'], [[0, 2], [2, 4], [4, 6]],
     ascending: [true, false, true]
 
-  msg = 'matches sequences that wrap from end to start'
-  t.equal matching.sequence_match('xyzabc').length, 1, msg
-  msg = 'matches reverse sequences that wrap from start to end'
-  t.equal matching.sequence_match('cbazyx').length, 1, msg
-
   prefixes = ['!', '22']
   suffixes = ['!', '22']
   pattern = 'jihg'
@@ -370,11 +365,9 @@ test 'sequence matching', (t) ->
     ['dcba',  'lower',  false]
     ['jihg',  'lower',  false]
     ['wxyz',  'lower',  true]
-    ['zyxw',  'lower',  false]
-    ['01234', 'digits', true]
-    ['43210', 'digits', false]
-    ['67890', 'digits', true]
-    ['09876', 'digits', false]
+    ['zxvt',  'lower',  false]
+    ['0369', 'digits', true]
+    ['97531', 'digits', false]
     ]
     matches = matching.sequence_match pattern
     msg = "matches '#{pattern}' as a '#{name}' sequence"
