@@ -140,7 +140,7 @@ zxcvbn(password, user_inputs=[])
 result.guesses            # estimated guesses needed to crack password
 result.guesses_log10      # order of magnitude of result.guesses
 
-result.crack_time_seconds # dictionary of back-of-the-envelope crack time
+result.crack_times_seconds # dictionary of back-of-the-envelope crack time
                           # estimations, in seconds, based on a few scenarios:
 {
   # online attack on a service that ratelimits password auth attempts.
@@ -163,9 +163,9 @@ result.crack_time_seconds # dictionary of back-of-the-envelope crack time
   offline_fast_hashing_1e10_per_second
 }
 
-result.crack_time_display # same keys as result.crack_time_seconds,
-                          # with friendlier display string values:
-                          # "less than a second", "3 hours", "centuries", etc.
+result.crack_times_display # same keys as result.crack_times_seconds,
+                           # with friendlier display string values:
+                           # "less than a second", "3 hours", "centuries", etc.
 
 result.score      # Integer from 0-4 (useful for implementing a strength bar)
 
@@ -216,7 +216,7 @@ Then try one of these alternatives:
 
 3. Use the HTML5 [`async`](http://www.w3schools.com/tags/att_script_async.asp) script attribute. Downside: [doesn't work](http://caniuse.com/#feat=script-async) in IE7-9 or Opera Mini.
 
-4. Include an inline `<script>` in `<head>` that asynchronously loads `zxcvbn.js` in the background. Despite the extra code I prefer this over (3) because it works in older browsers.
+4. Include an inline `<script>` in `<head>` that asynchronously loads `zxcvbn.js` in the background. Advantage over (3): it works in older browsers.
 
 ``` javascript
 // cross-browser asynchronous script loading for zxcvbn.
