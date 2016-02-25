@@ -316,7 +316,7 @@ scoring =
 
   uppercase_variations: (match) ->
     word = match.token
-    return 1 if word.match @ALL_LOWER
+    return 1 if word.match(@ALL_LOWER) or word.toLowerCase() == word
     # a capitalized word is the most common capitalization scheme,
     # so it only doubles the search space (uncapitalized + capitalized).
     # allcaps and end-capitalized are common enough too, underestimate as 2x factor to be safe.

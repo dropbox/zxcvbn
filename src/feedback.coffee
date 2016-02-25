@@ -104,7 +104,7 @@ feedback =
     word = match.token
     if word.match(scoring.START_UPPER)
       suggestions.push "Capitalization doesn't help very much"
-    else if word.match(scoring.ALL_UPPER)
+    else if word.match(scoring.ALL_UPPER) and word.toLowerCase() != word
       suggestions.push "All-uppercase is almost as easy to guess as all-lowercase"
 
     if match.reversed and match.token.length >= 4
