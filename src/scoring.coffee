@@ -238,7 +238,8 @@ scoring =
     base_guesses * match.token.length
 
   MIN_YEAR_SPACE: 20
-  REFERENCE_YEAR: 2000
+  REFERENCE_YEAR: 2016
+
   regex_guesses: (match) ->
     char_class_bases =
       alpha_lower:  26
@@ -260,7 +261,7 @@ scoring =
   date_guesses: (match) ->
     # base guesses: (year distance from REFERENCE_YEAR) * num_days * num_years
     year_space = Math.max(Math.abs(match.year - @REFERENCE_YEAR), @MIN_YEAR_SPACE)
-    guesses = year_space * 31 * 12
+    guesses = year_space * 365
     # double for four-digit years
     guesses *= 2 if match.has_full_year
     # add factor of 4 for separator selection (one of ~4 choices)

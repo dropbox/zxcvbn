@@ -601,9 +601,9 @@ matching =
       year
     else if year > 50
       # 87 -> 1987
-      year + scoring.REFERENCE_YEAR - 100
+      year + 1900
     else
       # 15 -> 2015
-      year + scoring.REFERENCE_YEAR
+      year + 2000
 
 module.exports = matching

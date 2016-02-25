@@ -198,9 +198,9 @@ test 'regex guesses', (t) ->
   t.equal scoring.regex_guesses(match), Math.abs(scoring.REFERENCE_YEAR - 1972), msg
 
   match =
-    token: '1992'
+    token: '2005'
     regex_name: 'recent_year'
-    regex_match: ['1992']
+    regex_match: ['2005']
   msg = "guesses of MIN_YEAR_SPACE for a year close to REFERENCE_YEAR"
   t.equal scoring.regex_guesses(match), scoring.MIN_YEAR_SPACE, msg
   t.end()
@@ -213,8 +213,8 @@ test 'date guesses', (t) ->
     year: 1923
     month: 1
     day: 1
-  msg = "guesses for #{match.token} is days * months * distance_from_ref_year"
-  t.equal scoring.date_guesses(match), 12 * 31 * Math.abs(scoring.REFERENCE_YEAR - match.year), msg
+  msg = "guesses for #{match.token} is 365 * distance_from_ref_year"
+  t.equal scoring.date_guesses(match), 365 * Math.abs(scoring.REFERENCE_YEAR - match.year), msg
 
   match =
     token: '1/1/2010'
@@ -225,7 +225,7 @@ test 'date guesses', (t) ->
     day: 1
   msg = "recent years assume MIN_YEAR_SPACE."
   msg += " extra guesses is added for separators and a 4-digit year."
-  t.equal scoring.date_guesses(match), 12 * 31 * scoring.MIN_YEAR_SPACE * 4 * 2, msg
+  t.equal scoring.date_guesses(match), 365 * scoring.MIN_YEAR_SPACE * 4 * 2, msg
   t.end()
 
 test 'spatial guesses', (t) ->
