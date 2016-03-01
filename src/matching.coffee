@@ -244,7 +244,7 @@ matching =
       j = i + 1
       last_direction = null
       turns = 0
-      if graph_name in ['qwerty', 'dvorak'] and @SHIFTED_RX.exec(password.charAt(i))
+      if graph_name in ['qwerty', 'dvorak', 'jis'] and @SHIFTED_RX.exec(password.charAt(i))
         # initial character is shifted
         shifted_count = 1
       else
