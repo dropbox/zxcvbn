@@ -272,6 +272,8 @@ For node developers, in addition to `dist`, the zxcvbn `npm` module includes a `
 
 Leah Culver and Ryan Pearl for porting zxcvbn to [Objective C](https://github.com/dropbox/zxcvbn-ios) and [python](https://github.com/dropbox/python-zxcvbn).
 
+[Nulab Inc](https://nulab-inc.com) for unofficial porting zxcvbn to [Java](https://github.com/nulab/zxcvbn4j).
+
 Mark Burnett for releasing his 10M password corpus and for his 2005 book, [Perfect Passwords: Selection, Protection, Authentication](http://www.amazon.com/Perfect-Passwords-Selection-Protection-Authentication/dp/1597490415).
 
 Wiktionary contributors for building a [frequency list of English](http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists) as used in television and movies.
