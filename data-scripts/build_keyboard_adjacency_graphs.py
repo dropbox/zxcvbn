@@ -24,6 +24,13 @@ dvorak = r'''
       ;: qQ jJ kK xX bB mM wW vV zZ
 '''
 
+jis = r'''
+`~ 1! 2" 3# 4$ 5% 6& 7' 8( 9) 00 -= -= ^~ \|
+    qQ wW eE rR tT yY uU iI oO pP @` [{
+     aA sS dD fF gG hH jJ kK lL ;+ :* ]}
+      zZ xX cC vV bB nN mM ,< .> /?
+'''
+
 keypad = r'''
   / * -
 7 8 9 +
@@ -99,6 +106,7 @@ if __name__ == '__main__':
         lines = []
         for graph_name, args in [('qwerty', (qwerty, True)),
                                  ('dvorak', (dvorak, True)),
+                                 ('jis', (jis, True)),
                                  ('keypad', (keypad, False)),
                                  ('mac_keypad', (mac_keypad, False))]:
             graph = build_graph(*args)
@@ -107,4 +115,3 @@ if __name__ == '__main__':
         f.write('\n\n')
         f.write('module.exports = adjacency_graphs\n')
     sys.exit(0)
-
