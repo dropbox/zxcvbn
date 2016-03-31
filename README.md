@@ -10,17 +10,24 @@ ________________________________________________________________________
 [![Build Status](https://travis-ci.org/dropbox/zxcvbn.svg?branch=master)](https://travis-ci.org/dropbox/zxcvbn)
 [![Sauce Test Status](https://saucelabs.com/browser-matrix/dropbox-zxcvbn.svg)](https://saucelabs.com/u/dropbox-zxcvbn)
 
-`zxcvbn` is a password strength estimator inspired by password crackers. Through pattern matching and conservative entropy calculations, it recognizes and weighs 30k common passwords, common names and surnames according to US census data, popular English words from Wikipedia and US television and movies, and other common patterns like dates, repeats (`aaa`), sequences (`abcd`), keyboard patterns (`qwertyuiop`), and l33t speak.
+`zxcvbn` is a password strength estimator inspired by password crackers. Through pattern matching and conservative estimation, it recognizes and weighs 30k common passwords, common names and surnames according to US census data, popular English words from Wikipedia and US television and movies, and other common patterns like dates, repeats (`aaa`), sequences (`abcd`), keyboard patterns (`qwertyuiop`), and l33t speak.
 
 Consider using zxcvbn as an algorithmic alternative to password composition policy — it is more secure, flexible, and usable when sites require a minimal complexity score in place of annoying rules like "passwords must contain three of {lower, upper, numbers, symbols}".
 
 * __More secure__: policies often fail both ways, allowing weak passwords (`P@ssword1`) and disallowing strong passwords.
 * __More flexible__: zxcvbn allows many password styles to flourish so long as it detects sufficient complexity — passphrases are rated highly given enough uncommon words, keyboard patterns are ranked based on length and number of turns, and capitalization adds more complexity when it's unpredictaBle.
-* __More usable__: Use zxcvbn to build simple, rule-free interfaces that give instant feedback. In addition to scoring, zxcvbn includes minimal, targeted verbal feedback that can help guide users towards less guessable passwords.
+* __More usable__: zxcvbn is designed to power simple, rule-free interfaces that give instant feedback. In addition to strength estimation, zxcvbn includes minimal, targeted verbal feedback that can help guide users towards less guessable passwords.
 
-At Dropbox we use zxcvbn on our [signup page](https://www.dropbox.com/register) and change/reset password flows. zxcvbn is designed for node and the browser, but we use our [python port](https://github.com/dropbox/python-zxcvbn) inside the Dropbox desktop client and [Objective C port](https://github.com/dropbox/zxcvbn-ios) in our iOS app.
+At Dropbox we use zxcvbn ([Release notes](https://github.com/dropbox/zxcvbn/releases)) on our web, desktop, iOS and Android clients. If Javascript doesn't work for you, others have graciously ported the library to these languages:
 
-[Release notes](https://github.com/dropbox/zxcvbn/releases)
+* [`zxcvbn4j`](https://github.com/nulab/zxcvbn4j) (Java)
+* [`zxcvbn-ios`](https://github.com/dropbox/zxcvbn-ios) (Objective-C)
+* [`python-zxcvbn`](https://github.com/dropbox/python-zxcvbn) (Python)
+* [`zxcvbn-go`](https://github.com/nbutton23/zxcvbn-go) (Go)
+* [`zxcvbn-ruby`](https://github.com/envato/zxcvbn-ruby) (Ruby)
+* [`zxcvbn-php`](https://github.com/bjeavons/zxcvbn-php) (PHP)
+* [`zxcvbn-cs`](https://github.com/mickford/zxcvbn-cs) (C#/.NET)
+* [`szxcvbn`](https://github.com/tekul/szxcvbn) (Scala)
 
 For more motivation, see:
 
