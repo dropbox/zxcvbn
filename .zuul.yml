@@ -12,6 +12,10 @@ browsers:
       version: -1..latest
     - name: android
       version: -2..latest
+    - name: MicrosoftEdge
+      version: '20.10240..latest'
+    - name: iphone
+      version: '6.0..latest'
 browserify:
    - transform: coffeeify
    - options:
