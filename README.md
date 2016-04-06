@@ -29,6 +29,9 @@ At Dropbox we use zxcvbn ([Release notes](https://github.com/dropbox/zxcvbn/rele
 * [`zxcvbn-cs`](https://github.com/mickford/zxcvbn-cs) (C#/.NET)
 * [`szxcvbn`](https://github.com/tekul/szxcvbn) (Scala)
 
+Integrations with other frameworks:
+* [`angular-zxcvbn`](https://github.com/ghostbar/angular-zxcvbn) (AngularJS)
+
 For more motivation, see:
 
 http://tech.dropbox.com/?p=165
@@ -129,8 +132,7 @@ Download [zxcvbn.js](https://raw.githubusercontent.com/dropbox/zxcvbn/master/dis
 Add to your .html:
 
 ``` html
-<script type="text/javascript" src="path/to/zxcvbn.js">
-</script>
+<script type="text/javascript" src="path/to/zxcvbn.js"></script>
 ```
 
 # Usage
