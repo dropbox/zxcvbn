@@ -63,7 +63,7 @@ To pull in updates and bug fixes:
 bower update zxcvbn
 ```
 
-## Node / npm
+## Node / npm / MeteorJS
 
 zxcvbn works identically on the server.
 
@@ -72,11 +72,6 @@ $ npm install zxcvbn
 $ node
 > var zxcvbn = require('zxcvbn');
 > zxcvbn('Tr0ub4dour&3');
-```
-
-## Meteor (via [Atmosphere](https://atmospherejs.com/codetheweb/zxcvbn))
-``` shell
-meteor add codetheweb:zxcvbn
 ```
 
 ## RequireJS
