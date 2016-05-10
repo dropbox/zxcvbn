@@ -17,6 +17,7 @@ for name, lst of frequency_lists
 GRAPHS =
   qwerty:     adjacency_graphs.qwerty
   dvorak:     adjacency_graphs.dvorak
+  jis:        adjacency_graphs.jis
   keypad:     adjacency_graphs.keypad
   mac_keypad: adjacency_graphs.mac_keypad
 
@@ -244,7 +245,7 @@ matching =
       j = i + 1
       last_direction = null
       turns = 0
-      if graph_name in ['qwerty', 'dvorak'] and @SHIFTED_RX.exec(password.charAt(i))
+      if graph_name in ['qwerty', 'dvorak', 'jis'] and @SHIFTED_RX.exec(password.charAt(i))
         # initial character is shifted
         shifted_count = 1
       else
