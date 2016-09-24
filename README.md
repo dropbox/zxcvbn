@@ -51,7 +51,7 @@ bower install zxcvbn
 Add this script to your `index.html`:
 
 ``` html
-<script type="text/javascript" src="bower_components/zxcvbn/dist/zxcvbn.js">
+<script src="bower_components/zxcvbn/dist/zxcvbn.js">
 </script>
 ```
 

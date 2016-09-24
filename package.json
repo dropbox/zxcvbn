@@ -5,10 +5,7 @@
   "author": "Dan Wheeler",
   "license": "MIT",
   "main": "lib/main.js",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/dropbox/zxcvbn.git"
-  },
+  "repository": "dropbox/zxcvbn",
   "scripts": {
     "test": "coffeetape test/*.coffee | faucet",
     "test-saucelabs": "zuul -- test/*.coffee",
