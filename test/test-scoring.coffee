@@ -224,8 +224,8 @@ test 'date guesses', (t) ->
     month: 1
     day: 1
   msg = "recent years assume MIN_YEAR_SPACE."
-  msg += " extra guesses is added for separators and a 4-digit year."
-  t.equal scoring.date_guesses(match), 365 * scoring.MIN_YEAR_SPACE * 4 * 2, msg
+  msg += " extra guesses are added for separators."
+  t.equal scoring.date_guesses(match), 365 * scoring.MIN_YEAR_SPACE * 4, msg
   t.end()
 
 test 'spatial guesses', (t) ->

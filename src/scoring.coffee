@@ -263,8 +263,6 @@ scoring =
     # base guesses: (year distance from REFERENCE_YEAR) * num_days * num_years
     year_space = Math.max(Math.abs(match.year - @REFERENCE_YEAR), @MIN_YEAR_SPACE)
     guesses = year_space * 365
-    # double for four-digit years
-    guesses *= 2 if match.has_full_year
     # add factor of 4 for separator selection (one of ~4 choices)
     guesses *= 4 if match.separator
     guesses
