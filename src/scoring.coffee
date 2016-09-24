@@ -89,8 +89,9 @@ scoring =
       # optimal.pi allows for fast (non-looping) updates to the minimization function.
       pi: ({} for _ in [0...n])
 
-      # optimal.g[k] holds the lowest guesses up to k according to the minimization function.
-      g:  (Infinity for _ in [0...n])
+      # optimal.g[k][l] holds the lowest guesses for a length-l match up to k characters
+      # according to the minimization function.
+      g:  ((Infinity for _ in [0...n + 1]) for _ in [0...n])
 
       # optimal.l[k] holds the length, l, of the optimal sequence covering up to k.
       # (this is also the largest key in optimal.m[k] and optimal.pi[k] objects)
@@ -111,11 +112,13 @@ scoring =
       unless _exclude_additive
         g += Math.pow(MIN_GUESSES_BEFORE_GROWING_SEQUENCE, l - 1)
       # update state if new best
-      if g < optimal.g[k]
-        optimal.g[k] = g
-        optimal.l[k] = l
+      if g < optimal.g[k][l]
+        optimal.g[k][l] = g
         optimal.m[k][l] = m
         optimal.pi[k][l] = pi
+
+        if optimal.l[k] == 0 or g < optimal.g[k][optimal.l[k]]
+          optimal.l[k] = l
 
     # helper: considers whether bruteforce matches ending at position k are optimal.
     # three cases to consider...
@@ -174,7 +177,7 @@ scoring =
     if password.length == 0
       guesses = 1
     else
-      guesses = optimal.g[n - 1]
+      guesses = optimal.g[n - 1][optimal.l[n - 1]]
 
     # final result object
     password: password
