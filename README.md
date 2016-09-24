@@ -18,8 +18,9 @@ Consider using zxcvbn as an algorithmic alternative to password composition poli
 * __More flexible__: zxcvbn allows many password styles to flourish so long as it detects sufficient complexity — passphrases are rated highly given enough uncommon words, keyboard patterns are ranked based on length and number of turns, and capitalization adds more complexity when it's unpredictaBle.
 * __More usable__: zxcvbn is designed to power simple, rule-free interfaces that give instant feedback. In addition to strength estimation, zxcvbn includes minimal, targeted verbal feedback that can help guide users towards less guessable passwords.
 
-At Dropbox we use zxcvbn ([Release notes](https://github.com/dropbox/zxcvbn/releases)) on our web, desktop, iOS and Android clients. If Javascript doesn't work for you, others have graciously ported the library to these languages:
+At Dropbox we use zxcvbn ([Release notes](https://github.com/dropbox/zxcvbn/releases)) on our web, desktop, iOS and Android clients. If JavaScript doesn't work for you, others have graciously ported the library to these languages:
 
+* [`zxcvbn-c`](https://github.com/tsyrogit/zxcvbn-c) (C/C++)
 * [`zxcvbn4j`](https://github.com/nulab/zxcvbn4j) (Java)
 * [`zxcvbn-ios`](https://github.com/dropbox/zxcvbn-ios) (Objective-C)
 * [`python-zxcvbn`](https://github.com/dropbox/python-zxcvbn) (Python)
@@ -28,6 +29,9 @@ At Dropbox we use zxcvbn ([Release notes](https://github.com/dropbox/zxcvbn/rele
 * [`zxcvbn-php`](https://github.com/bjeavons/zxcvbn-php) (PHP)
 * [`zxcvbn-cs`](https://github.com/mickford/zxcvbn-cs) (C#/.NET)
 * [`szxcvbn`](https://github.com/tekul/szxcvbn) (Scala)
+
+Integrations with other frameworks:
+* [`angular-zxcvbn`](https://github.com/ghostbar/angular-zxcvbn) (AngularJS)
 
 For more motivation, see:
 
@@ -51,7 +55,7 @@ bower install zxcvbn
 Add this script to your `index.html`:
 
 ``` html
-<script type="text/javascript" src="bower_components/zxcvbn/dist/zxcvbn.js">
+<script src="bower_components/zxcvbn/dist/zxcvbn.js">
 </script>
 ```
 
@@ -124,8 +128,7 @@ Download [zxcvbn.js](https://raw.githubusercontent.com/dropbox/zxcvbn/master/dis
 Add to your .html:
 
 ``` html
-<script type="text/javascript" src="path/to/zxcvbn.js">
-</script>
+<script type="text/javascript" src="path/to/zxcvbn.js"></script>
 ```
 
 # Usage
@@ -206,15 +209,15 @@ zxcvbn operates below human perception of delay for most input: ~5-20ms for ~25 
 
 ## script load latency
 
-`zxcvbn.js` bundled and minified is about 390kb gzipped or 800kb uncompressed, most of which is dictionaries. Consider these tips if you're noticing page load latency on your site.
+`zxcvbn.js` bundled and minified is about 400kB gzipped or 820kB uncompressed, most of which is dictionaries. Consider these tips if you're noticing page load latency on your site.
 
-* Make sure your server is configured to compress static assets for browsers that support it. ([nginx tutorial](https://rtcamp.com/tutorials/nginx/enable-gzip/), [apache/IIS tutorial](http://betterexplained.com/articles/how-to-optimize-your-site-with-gzip-compression/).)
+* Make sure your server is configured to compress static assets for browsers that support it. ([nginx tutorial](https://rtcamp.com/tutorials/nginx/enable-gzip/), [Apache/IIS tutorial](http://betterexplained.com/articles/how-to-optimize-your-site-with-gzip-compression/).)
 
 Then try one of these alternatives:
 
 1. Put your `<script src="zxcvbn.js">` tag at the end of your html, just before the closing `</body>` tag. This insures your page loads and renders before the browser fetches and loads `zxcvbn.js`. The downside with this approach is `zxcvbn()` becomes available later than had it been included in `<head>` — not an issue on most signup pages where users are filling out other fields first.
 
-2. If you're using requirejs, try loading `zxcvbn.js` separately from your main bundle. Something to watch out for: if `zxcvbn.js` is required inside a keyboard handler waiting for user input, the entire script might be loaded only after the user presses their first key, creating nasty latency. Avoid this by calling your handler once upon page load, independent of user input, such that the `requirejs()` call runs earlier.
+2. If you're using RequireJS, try loading `zxcvbn.js` separately from your main bundle. Something to watch out for: if `zxcvbn.js` is required inside a keyboard handler waiting for user input, the entire script might be loaded only after the user presses their first key, creating nasty latency. Avoid this by calling your handler once upon page load, independent of user input, such that the `requirejs()` call runs earlier.
 
 3. Use the HTML5 [`async`](http://www.w3schools.com/tags/att_script_async.asp) script attribute. Downside: [doesn't work](http://caniuse.com/#feat=script-async) in IE7-9 or Opera Mini.
 
@@ -272,11 +275,11 @@ For node developers, in addition to `dist`, the zxcvbn `npm` module includes a `
 
 [Dropbox](https://dropbox.com) for supporting open source!
 
-Leah Culver and Ryan Pearl for porting zxcvbn to [Objective C](https://github.com/dropbox/zxcvbn-ios) and [python](https://github.com/dropbox/python-zxcvbn).
+Leah Culver and Ryan Pearl for porting zxcvbn to [Objective-C](https://github.com/dropbox/zxcvbn-ios) and [Python](https://github.com/dropbox/python-zxcvbn).
 
 Mark Burnett for releasing his 10M password corpus and for his 2005 book, [Perfect Passwords: Selection, Protection, Authentication](http://www.amazon.com/Perfect-Passwords-Selection-Protection-Authentication/dp/1597490415).
 
-Wiktionary contributors for building a [frequency list of English](http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists) as used in television and movies.
+Wiktionary contributors for building a [frequency list of English words](http://en.wiktionary.org/wiki/Wiktionary:Frequency_lists) as used in television and movies.
 
 Researchers at Concordia University for [studying password estimation rigorously](http://www.concordia.ca/cunews/main/stories/2015/03/25/does-your-password-pass-muster.html) and recommending zxcvbn.
 

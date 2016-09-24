@@ -331,7 +331,7 @@ matching =
         base_token
         @omnimatch base_token
       )
-      base_matches = base_analysis.match_sequence
+      base_matches = base_analysis.sequence
       base_guesses = base_analysis.guesses
       matches.push
         pattern: 'repeat'
