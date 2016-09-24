@@ -119,12 +119,10 @@ $ browserify --debug --standalone zxcvbn \
 
 ## Manual installation
 
-Download [zxcvbn.js](https://raw.githubusercontent.com/dropbox/zxcvbn/master/dist/zxcvbn.js).
-
 Add to your .html:
 
 ``` html
-<script type="text/javascript" src="path/to/zxcvbn.js">
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.3.0/zxcvbn.js">
 </script>
 ```
 
