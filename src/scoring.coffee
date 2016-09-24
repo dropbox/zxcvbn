@@ -49,7 +49,7 @@ scoring =
   # the optimal "minimum guesses" sequence is here defined to be the sequence that
   # minimizes the following function:
   #
-  #    l! * Product(m.guesses for m in sequence) + D^(l - 1)
+  #    g = l! * Product(m.guesses for m in sequence) + D^(l - 1)
   #
   # where l is the length of the sequence.
   #
@@ -77,6 +77,9 @@ scoring =
     matches_by_j = ([] for _ in [0...n])
     for m in matches
       matches_by_j[m.j].push m
+    # small detail: for deterministic output, sort each sublist by i.
+    for lst in matches_by_j
+      lst.sort (m1, m2) -> m1.i - m2.i
 
     optimal =
       # optimal.m[k][l] holds final match in the best length-l match sequence covering the
@@ -85,16 +88,12 @@ scoring =
       # a shorter match sequence spanning the same prefix, optimal.m[k][l] is undefined.
       m:  ({} for _ in [0...n])
 
-      # same structure as optimal.m, except holds the product term Prod(m.guesses for m in sequence).
+      # same structure as optimal.m -- holds the product term Prod(m.guesses for m in sequence).
       # optimal.pi allows for fast (non-looping) updates to the minimization function.
       pi: ({} for _ in [0...n])
 
-      # optimal.g[k] holds the lowest guesses up to k according to the minimization function.
-      g:  (Infinity for _ in [0...n])
-
-      # optimal.l[k] holds the length, l, of the optimal sequence covering up to k.
-      # (this is also the largest key in optimal.m[k] and optimal.pi[k] objects)
-      l:  (0 for _ in [0...n])
+      # same structure as optimal.m -- holds the overall metric.
+      g:  ({} for _ in [0...n])
 
     # helper: considers whether a length-l sequence ending at match m is better (fewer guesses)
     # than previously encountered sequences, updating state if so.
@@ -110,12 +109,16 @@ scoring =
       g = @factorial(l) * pi
       unless _exclude_additive
         g += Math.pow(MIN_GUESSES_BEFORE_GROWING_SEQUENCE, l - 1)
-      # update state if new best
-      if g < optimal.g[k]
-        optimal.g[k] = g
-        optimal.l[k] = l
-        optimal.m[k][l] = m
-        optimal.pi[k][l] = pi
+      # update state if new best.
+      # first see if any competing sequences covering this prefix, with l or fewer matches,
+      # fare better than this sequence. if so, skip it and return.
+      for competing_l, competing_g of optimal.g[k]
+        continue if competing_l > l
+        return if competing_g <= g
+      # this sequence might be part of the final optimal sequence.
+      optimal.g[k][l] = g
+      optimal.m[k][l] = m
+      optimal.pi[k][l] = pi
 
     # helper: considers whether bruteforce matches ending at position k are optimal.
     # three cases to consider...
@@ -151,7 +154,14 @@ scoring =
     unwind = (n) =>
       optimal_match_sequence = []
       k = n - 1
-      l = optimal.l[k]
+      # find the final best sequence length and score
+      l = undefined
+      g = Infinity
+      for candidate_l, candidate_g of optimal.g[k]
+        if candidate_g < g
+          l = candidate_l
+          g = candidate_g
+
       while k >= 0
         m = optimal.m[k][l]
         optimal_match_sequence.unshift m
@@ -169,12 +179,13 @@ scoring =
           update(m, 1)
       bruteforce_update(k)
     optimal_match_sequence = unwind(n)
+    optimal_l = optimal_match_sequence.length
 
     # corner: empty password
     if password.length == 0
       guesses = 1
     else
-      guesses = optimal.g[n - 1]
+      guesses = optimal.g[n - 1][optimal_l]
 
     # final result object
     password: password
@@ -210,7 +221,7 @@ scoring =
   bruteforce_guesses: (match) ->
     guesses = Math.pow BRUTEFORCE_CARDINALITY, match.token.length
     # small detail: make bruteforce matches at minimum one guess bigger than smallest allowed
-    # submatch guesses, such that non-bruteforce submatches over the same [i..j] take precidence.
+    # submatch guesses, such that non-bruteforce submatches over the same [i..j] take precedence.
     min_guesses = if match.token.length == 1
       MIN_SUBMATCH_GUESSES_SINGLE_CHAR + 1
     else
