@@ -220,6 +220,8 @@ scoring =
 
   bruteforce_guesses: (match) ->
     guesses = Math.pow BRUTEFORCE_CARDINALITY, match.token.length
+    if guesses == Number.POSITIVE_INFINITY
+        guesses = Number.MAX_VALUE;
     # small detail: make bruteforce matches at minimum one guess bigger than smallest allowed
     # submatch guesses, such that non-bruteforce submatches over the same [i..j] take precedence.
     min_guesses = if match.token.length == 1
