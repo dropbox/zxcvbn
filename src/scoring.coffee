@@ -120,26 +120,24 @@ scoring =
       optimal.m[k][l] = m
       optimal.pi[k][l] = pi
 
-    # helper: considers whether bruteforce matches ending at position k are optimal.
-    # three cases to consider...
+    # helper: evaluate bruteforce matches ending at k.
     bruteforce_update = (k) =>
-      # case 1: a bruteforce match spanning the full prefix.
+      # see if a single bruteforce match spanning the k-prefix is optimal.
       m = make_bruteforce_match(0, k)
       update(m, 1)
-      return if k == 0
-      for l, last_m of optimal.m[k - 1]
-        l = parseInt(l) # note: js stores object keys as strings
-        if last_m.pattern == 'bruteforce'
-          # case 2: if the optimal length-l sequence up to k - 1 ended in a bruteforce match,
-          # consider whether extending it by one character is optimal up to k.
-          # this preserves the sequence length l.
-          m = make_bruteforce_match(last_m.i, k)
-          update(m, l)
-        else
-          # case 3: if the optimal length-l sequence up to k - 1 ends in a non-bruteforce match,
-          # consider whether starting a new single-character bruteforce match is optimal.
-          # this adds a new match, adding 1 to the prior sequence length l.
-          m = make_bruteforce_match(k, k)
+      for i in [1..k]
+        # generate k bruteforce matches, spanning from (i=1, j=k) up to (i=k, j=k).
+        # see if adding these new matches to any of the sequences in optimal[i-1]
+        # leads to new bests.
+        m = make_bruteforce_match(i, k)
+        for l, last_m of optimal.m[i-1]
+          l = parseInt(l)
+          # corner: an optimal sequence will never have two adjacent bruteforce matches.
+          # it is strictly better to have a single bruteforce match spanning the same region:
+          # same contribution to the guess product with a lower length.
+          # --> safe to skip those cases.
+          continue if last_m.pattern == 'bruteforce'
+          # try adding m to this length-l sequence.
           update(m, l + 1)
 
     # helper: make bruteforce match objects spanning i to j, inclusive.
