@@ -21,6 +21,7 @@ Consider using zxcvbn as an algorithmic alternative to password composition poli
 At Dropbox we use zxcvbn ([Release notes](https://github.com/dropbox/zxcvbn/releases)) on our web, desktop, iOS and Android clients. If JavaScript doesn't work for you, others have graciously ported the library to these languages:
 
 * [`zxcvbn-c`](https://github.com/tsyrogit/zxcvbn-c) (C/C++)
+* [`zxcvbn-cpp`](https://github.com/rianhunter/zxcvbn-cpp) (C/C++/Python/JS)
 * [`zxcvbn4j`](https://github.com/nulab/zxcvbn4j) (Java)
 * [`zxcvbn-ios`](https://github.com/dropbox/zxcvbn-ios) (Objective-C)
 * [`python-zxcvbn`](https://github.com/dropbox/python-zxcvbn) (Python)
