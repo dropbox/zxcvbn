@@ -349,7 +349,7 @@ test 'sequence matching', (t) ->
   pattern = 'jihg'
   for [password, i, j] in genpws pattern, prefixes, suffixes
     matches = matching.sequence_match password
-    msg = 'matches embedded sequence patterns'
+    msg = "matches embedded sequence patterns #{password}"
     check_matches msg, t, matches, 'sequence', [pattern], [[i, j]],
       sequence_name: ['lower']
       ascending: [false]
