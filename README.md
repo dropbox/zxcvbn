@@ -24,7 +24,7 @@ At Dropbox we use zxcvbn ([Release notes](https://github.com/dropbox/zxcvbn/rele
 * [`zxcvbn-cpp`](https://github.com/rianhunter/zxcvbn-cpp) (C/C++/Python/JS)
 * [`zxcvbn4j`](https://github.com/nulab/zxcvbn4j) (Java)
 * [`zxcvbn-ios`](https://github.com/dropbox/zxcvbn-ios) (Objective-C)
-* [`python-zxcvbn`](https://github.com/dropbox/python-zxcvbn) (Python)
+* [`zxcvbn-python`](https://github.com/dwolfhub/zxcvbn-python) (Python)
 * [`zxcvbn-go`](https://github.com/nbutton23/zxcvbn-go) (Go)
 * [`zxcvbn-ruby`](https://github.com/envato/zxcvbn-ruby) (Ruby)
 * [`zxcvbn-js`](https://github.com/bitzesty/zxcvbn-js) (Ruby [via ExecJS])
@@ -278,7 +278,7 @@ For node developers, in addition to `dist`, the zxcvbn `npm` module includes a `
 
 [Dropbox](https://dropbox.com) for supporting open source!
 
-Leah Culver and Ryan Pearl for porting zxcvbn to [Objective-C](https://github.com/dropbox/zxcvbn-ios) and [Python](https://github.com/dropbox/python-zxcvbn).
+Leah Culver for porting zxcvbn to [Objective-C](https://github.com/dropbox/zxcvbn-ios).
 
 Mark Burnett for releasing his 10M password corpus and for his 2005 book, [Perfect Passwords: Selection, Protection, Authentication](http://www.amazon.com/Perfect-Passwords-Selection-Protection-Authentication/dp/1597490415).
 
