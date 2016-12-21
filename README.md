@@ -32,6 +32,7 @@ At Dropbox we use zxcvbn ([Release notes](https://github.com/dropbox/zxcvbn/rele
 * [`zxcvbn-cs`](https://github.com/mickford/zxcvbn-cs) (C#/.NET)
 * [`szxcvbn`](https://github.com/tekul/szxcvbn) (Scala)
 * [`zxcvbn-api`](https://github.com/wcjr/zxcvbn-api) (REST)
+* [`zxcvbn-rs`](https://github.com/shssoichiro/zxcvbn-rs) (Rust)
 
 Integrations with other frameworks:
 * [`angular-zxcvbn`](https://github.com/ghostbar/angular-zxcvbn) (AngularJS)
