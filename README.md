@@ -22,6 +22,7 @@ At Dropbox we use zxcvbn ([Release notes](https://github.com/dropbox/zxcvbn/rele
 
 * [`zxcvbn-c`](https://github.com/tsyrogit/zxcvbn-c) (C/C++)
 * [`zxcvbn-cpp`](https://github.com/rianhunter/zxcvbn-cpp) (C/C++/Python/JS)
+* [`nbvcxz`](https://github.com/GoSimpleLLC/nbvcxz) (Java)
 * [`zxcvbn4j`](https://github.com/nulab/zxcvbn4j) (Java)
 * [`zxcvbn-ios`](https://github.com/dropbox/zxcvbn-ios) (Objective-C)
 * [`zxcvbn-python`](https://github.com/dwolfhub/zxcvbn-python) (Python)
