@@ -250,7 +250,7 @@ scoring =
     base_guesses * match.token.length
 
   MIN_YEAR_SPACE: 20
-  REFERENCE_YEAR: 2016
+  REFERENCE_YEAR: new Date().getFullYear()
 
   regex_guesses: (match) ->
     char_class_bases =
