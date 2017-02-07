@@ -1,6 +1,6 @@
 {
   "name": "zxcvbn",
-  "version": "4.4.1",
+  "version": "4.4.2",
   "description": "realistic password strength estimation",
   "author": "Dan Wheeler",
   "license": "MIT",
