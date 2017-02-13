@@ -5,7 +5,10 @@
   "author": "Dan Wheeler",
   "license": "MIT",
   "main": "lib/main.js",
-  "repository": "dropbox/zxcvbn",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dropbox/zxcvbn"
+  },
   "scripts": {
     "test": "coffeetape test/*.coffee | faucet",
     "test-saucelabs": "zuul -- test/*.coffee",
@@ -45,5 +48,12 @@
     "scoring",
     "entropy",
     "bruteforce"
-  ]
+  ],
+  "directories": {
+    "test": "test"
+  },
+  "homepage": "https://github.com/dropbox/zxcvbn#readme",
+  "bugs": {
+    "url": "https://github.com/dropbox/zxcvbn/issues"
+  }
 }
