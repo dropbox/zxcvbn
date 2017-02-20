@@ -1,66 +1,56 @@
 scoring = require('./scoring')
 
 feedback =
-  messages: [
-    "Use a few words, avoid common phrases"
-    "No need for symbols, digits, or uppercase letters"
-    "Add another word or two. Uncommon words are better."
-    "Straight rows of keys are easy to guess"
-    "Short keyboard patterns are easy to guess"
-    "Use a longer keyboard pattern with more turns"
-    "Repeats like \"aaa\" are easy to guess"
-    "Repeats like \"abcabcabc\" are only slightly harder to guess than \"abc\""
-    "Avoid repeated words and characters"
-    "Sequences like abc or 6543 are easy to guess"
-    "Avoid sequences"
-    "Recent years are easy to guess"
-    "Avoid recent years"
-    "Avoid years that are associated with you"
-    "Dates are often easy to guess"
-    "Avoid dates and years that are associated with you"
-    "This is a top-10 common password"
-    "This is a top-100 common password"
-    "This is a very common password"
-    "This is similar to a commonly used password"
-    "A word by itself is easy to guess"
-    "Names and surnames by themselves are easy to guess"
-    "Common names and surnames are easy to guess"
-    "Capitalization doesn't help very much"
-    "All-uppercase is almost as easy to guess as all-lowercase"
-    "Reversed words aren't much harder to guess"
-    "Predictable substitutions like '@' instead of 'a' don't help very much"
-  ]
+  messages:
+    use_a_few_words: 'Use a few words, avoid common phrases'
+    no_need_for_mixed_chars: 'No need for symbols, digits, or uppercase letters'
+    uncommon_words_are_better: 'Add another word or two. Uncommon words are better.'
+    straight_rows_of_keys_are_easy: 'Straight rows of keys are easy to guess'
+    short_keyboard_patterns_are_easy: 'Short keyboard patterns are easy to guess'
+    use_longer_keyboard_patterns: 'Use a longer keyboard pattern with more turns'
+    repeated_chars_are_easy: 'Repeats like "aaa" are easy to guess'
+    repeated_patterns_are_easy: 'Repeats like "abcabcabc" are only slightly harder to guess than "abc"'
+    avoid_repeated_chars: 'Avoid repeated words and characters'
+    sequences_are_easy: 'Sequences like abc or 6543 are easy to guess'
+    avoid_sequences: 'Avoid sequences'
+    recent_years_are_easy: 'Recent years are easy to guess'
+    avoid_recent_years: 'Avoid recent years'
+    avoid_associated_years: 'Avoid years that are associated with you'
+    dates_are_easy: 'Dates are often easy to guess'
+    avoid_associated_dates_and_years: 'Avoid dates and years that are associated with you'
+    top10_common_password: 'This is a top-10 common password'
+    top100_common_password: 'This is a top-100 common password'
+    very_common_password: 'This is a very common password'
+    similar_to_common_password: 'This is similar to a commonly used password'
+    a_word_is_easy: 'A word by itself is easy to guess'
+    names_are_easy: 'Names and surnames by themselves are easy to guess'
+    common_names_are_easy: 'Common names and surnames are easy to guess'
+    capitalization_doesnt_help: 'Capitalization doesn\'t help very much'
+    all_uppercase_doesnt_help: 'All-uppercase is almost as easy to guess as all-lowercase'
+    reverse_doesnt_help: 'Reversed words aren\'t much harder to guess'
+    substitution_doesnt_help: 'Predictable substitutions like \'@\' instead of \'a\' don\'t help very much'
 
   get_feedback: (score, sequence, custom_messages) ->
     @custom_messages = custom_messages
 
     # starting feedback
     return if sequence.length == 0
-      warning: ''
-      suggestions: [
-        @get_message(0) # Use a few words, avoid common phrases
-        @get_message(1) # No need for symbols, digits, or uppercase letters
-      ]
+      @build_feedback(null, ['use_a_few_words', 'no_need_for_mixed_chars'])
 
     # no feedback if score is good or great.
     return if score > 2
-      warning: ''
-      suggestions: []
+      @build_feedback()
 
     # tie feedback to the longest match for longer sequences
     longest_match = sequence[0]
     for match in sequence[1..]
       longest_match = match if match.token.length > longest_match.token.length
     feedback = @get_match_feedback(longest_match, sequence.length == 1)
-    extra_feedback = @get_message(2) # Add another word or two. Uncommon words are better.
+    extra_feedback = ['uncommon_words_are_better']
     if feedback?
-      feedback.suggestions.unshift extra_feedback
-      feedback.warning = '' unless feedback.warning?
+      @build_feedback(feedback.warning, extra_feedback.concat feedback.suggestions)
     else
-      feedback =
-        warning: ''
-        suggestions: [extra_feedback]
-    feedback
+      @build_feedback(null, extra_feedback)
 
   get_match_feedback: (match, is_sole_match) ->
     switch match.pattern
@@ -70,87 +60,87 @@ feedback =
       when 'spatial'
         layout = match.graph.toUpperCase()
         warning = if match.turns == 1
-          @get_message(3) # Straight rows of keys are easy to guess
+          'straight_rows_of_keys_are_easy'
         else
-          @get_message(4) # Short keyboard patterns are easy to guess
+          'short_keyboard_patterns_are_easy'
         warning: warning
-        suggestions: [
-          @get_message(5) # Use a longer keyboard pattern with more turns
-        ]
+        suggestions: ['use_longer_keyboard_patterns']
 
       when 'repeat'
         warning = if match.base_token.length == 1
-          @get_message(6) # Repeats like \"aaa\" are easy to guess
+          'repeated_chars_are_easy'
         else
-          @get_message(7) # Repeats like \"abcabcabc\" are only slightly harder to guess than \"abc\"
+          'repeated_patterns_are_easy'
         warning: warning
-        suggestions: [
-          @get_message(8) # Avoid repeated words and characters
-        ]
+        suggestions: ['avoid_repeated_chars']
 
       when 'sequence'
-        @get_message(9) # Sequences like abc or 6543 are easy to guess
-        suggestions: [
-          @get_message(10) # Avoid sequences
-        ]
+        warning: 'sequences_are_easy'
+        suggestions: ['avoid_sequences']
 
       when 'regex'
         if match.regex_name == 'recent_year'
-          warning: @get_message(11) # Recent years are easy to guess
-          suggestions: [
-            @get_message(12) # Avoid recent years
-            @get_message(13) # Avoid years that are associated with you
-          ]
+          warning: 'recent_years_are_easy'
+          suggestions: ['avoid_recent_years', 'avoid_associated_years']
 
       when 'date'
-        warning: @get_message(14) # Dates are often easy to guess
-        suggestions: [
-          @get_message(15) # Avoid dates and years that are associated with you
-        ]
+        warning: 'dates_are_easy'
+        suggestions: ['avoid_associated_dates_and_years']
 
   get_dictionary_match_feedback: (match, is_sole_match) ->
     warning = if match.dictionary_name == 'passwords'
       if is_sole_match and not match.l33t and not match.reversed
         if match.rank <= 10
-          @get_message(16) # This is a top-10 common password
+          'top10_common_password'
         else if match.rank <= 100
-          @get_message(17) # This is a top-100 common password
+          'top100_common_password'
         else
-          @get_message(18) # This is a very common password
+          'very_common_password'
       else if match.guesses_log10 <= 4
-        @get_message(19) # This is similar to a commonly used password
+        'similar_to_common_password'
     else if match.dictionary_name == 'english_wikipedia'
       if is_sole_match
-        @get_message(20) # A word by itself is easy to guess
+        'a_word_is_easy'
     else if match.dictionary_name in ['surnames', 'male_names', 'female_names']
       if is_sole_match
-        @get_message(21) # Names and surnames by themselves are easy to guess
+        'names_are_easy'
       else
-        @get_message(22) # Common names and surnames are easy to guess
-    else
-      ''
+        'common_names_are_easy'
 
     suggestions = []
     word = match.token
     if word.match(scoring.START_UPPER)
-      suggestions.push @get_message(23) # Capitalization doesn't help very much
+      suggestions.push 'capitalization_doesnt_help'
     else if word.match(scoring.ALL_UPPER) and word.toLowerCase() != word
-      suggestions.push @get_message(24) # All-uppercase is almost as easy to guess as all-lowercase
+      suggestions.push 'all_uppercase_doesnt_help'
 
     if match.reversed and match.token.length >= 4
-      suggestions.push @get_message(25) # Reversed words aren't much harder to guess
+      suggestions.push 'reverse_doesnt_help'
     if match.l33t
-      suggestions.push @get_message(26) # Predictable substitutions like '@' instead of 'a' don't help very much
+      suggestions.push 'substitution_doesnt_help'
 
     result =
       warning: warning
       suggestions: suggestions
     result
 
-  get_message: (index) ->
-    if @custom_messages? and @custom_messages[index]?
-      @custom_messages[index]
+  get_message: (key) ->
+    if @custom_messages?
+      @custom_messages[key] || ''
+    else if @messages[key]?
+      @messages[key]
     else
-      @messages[index]
+      throw new Error("unknown message: #{key}")
+
+  build_feedback: (warning_key = null, suggestion_keys = []) ->
+    console.log("warning", warning_key, "suggestions", suggestion_keys)
+    suggestions = []
+    for suggestion_key in suggestion_keys
+      message = @get_message(suggestion_key)
+      suggestions.push message if message?
+    feedback =
+      warning: if warning_key then @get_message(warning_key) else ''
+      suggestions: suggestions
+    feedback
 
 module.exports = feedback
