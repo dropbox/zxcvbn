@@ -124,8 +124,8 @@ feedback =
     result
 
   get_message: (key) ->
-    if @custom_messages?
-      @custom_messages[key] || ''
+    if @custom_messages? and key of @custom_messages
+        @custom_messages[key] or ''
     else if @messages[key]?
       @messages[key]
     else

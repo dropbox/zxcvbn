@@ -2,15 +2,8 @@ test = require 'tape'
 feedback = require '../src/feedback'
 
 test 'default feedback messages', (t) ->
-  feedback_given = [];
-
-  record_message = (message) ->
-    if message.length and feedback_given.indexOf(message) == -1
-      feedback_given.push(message)
 
   check_feedback = (f, expected_warning, expected_suggestions) ->
-    record_message f.warning
-    record_message suggestion for suggestion in f.suggestions
     t.equal f.warning, expected_warning
     t.deepEqual f.suggestions, expected_suggestions
 
@@ -123,7 +116,51 @@ test 'default feedback messages', (t) ->
   f = feedback.get_feedback(1, [match])
   check_feedback(f, 'Dates are often easy to guess', ['Add another word or two. Uncommon words are better.', 'Avoid dates and years that are associated with you'])
 
-  # Test if there are unused or untested feedback messages
-  t.equal feedback_given.length, Object.keys(feedback.messages).length
+  t.end()
+
+test 'custom feedback messages', (t) ->
+
+  match =
+    pattern: 'dictionary'
+    token: 'token'
+    rank: 10
+    dictionary_name: 'passwords'
+
+  custom_messages =
+    top10_common_password: 'custom#top10_common_password',
+    uncommon_words_are_better: 'custom#uncommon_words_are_better'
+
+  # Uses custom messages
+  f = feedback.get_feedback(1, [match], custom_messages)
+  t.equal f.warning, custom_messages.top10_common_password
+  t.deepEqual f.suggestions, [custom_messages.uncommon_words_are_better]
+
+  # If custom messages are null then defaults to in-app messages
+  f = feedback.get_feedback(1, [match], null)
+  t.equal f.warning, 'This is a top-10 common password'
+  t.deepEqual f.suggestions, ['Add another word or two. Uncommon words are better.']
+
+  # If message is absent in custom messages defaults to in-app messages
+  custom_messages =
+    uncommon_words_are_better: 'custom#uncommon_words_are_better'
+  f = feedback.get_feedback(1, [match], custom_messages)
+  t.equal f.warning, 'This is a top-10 common password'
+  t.deepEqual f.suggestions, [custom_messages.uncommon_words_are_better]
+
+  # If message is present in custom messages and has a falsy value returns empty string
+  custom_messages =
+    top10_common_password: null,
+    uncommon_words_are_better: 'custom#uncommon_words_are_better'
+  f = feedback.get_feedback(1, [match], custom_messages)
+  t.equal f.warning, ''
+  t.deepEqual f.suggestions, [custom_messages.uncommon_words_are_better]
+
+  custom_messages.top10_common_password = undefined
+  f = feedback.get_feedback(1, [match], custom_messages)
+  t.equal f.warning, ''
+
+  custom_messages.top10_common_password = false
+  f = feedback.get_feedback(1, [match], custom_messages)
+  t.equal f.warning, ''
 
   t.end()
