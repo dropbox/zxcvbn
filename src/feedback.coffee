@@ -58,7 +58,6 @@ feedback =
         @get_dictionary_match_feedback match, is_sole_match
 
       when 'spatial'
-        layout = match.graph.toUpperCase()
         warning = if match.turns == 1
           'straight_rows_of_keys_are_easy'
         else
@@ -133,7 +132,6 @@ feedback =
       throw new Error("unknown message: #{key}")
 
   build_feedback: (warning_key = null, suggestion_keys = []) ->
-    console.log("warning", warning_key, "suggestions", suggestion_keys)
     suggestions = []
     for suggestion_key in suggestion_keys
       message = @get_message(suggestion_key)
