@@ -8,8 +8,8 @@ time = -> (new Date()).getTime()
 zxcvbn = (password, options = {}) ->
   if options instanceof Array
     user_inputs = options # backward-compatibility
-  else if typeof options === 'object'
-    { user_inputs, feedback_messages } = options
+  else if typeof options == 'object'
+    { user_inputs = [], feedback_messages = {}} = options
   else
     user_inputs = []
     feedback_messages = {}
