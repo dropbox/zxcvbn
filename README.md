@@ -137,7 +137,7 @@ Add to your .html:
 
 # Usage
 
-[try zxcvbn interactively](https://dl.dropboxusercontent.com/u/209/zxcvbn/test/index.html) to see these docs in action.
+[try zxcvbn interactively](https://lowe.github.io/tryzxcvbn/) to see these docs in action.
 
 ``` javascript
 zxcvbn(password, user_inputs=[])
