@@ -140,7 +140,7 @@ Add to your .html:
 [try zxcvbn interactively](https://lowe.github.io/tryzxcvbn/) to see these docs in action.
 
 ``` javascript
-zxcvbn(password, user_inputs=[])
+zxcvbn(password, options={})
 ```
 
 `zxcvbn()` takes one required argument, a password, and returns a result object with several properties:
@@ -203,7 +203,28 @@ result.calc_time  # how long it took zxcvbn to calculate an answer,
                   # in milliseconds.
 ````
 
-The optional `user_inputs` argument is an array of strings that zxcvbn will treat as an extra dictionary. This can be whatever list of strings you like, but is meant for user inputs from other fields of the form, like name and email. That way a password that includes a user's personal information can be heavily penalized. This list is also good for site-specific vocabulary — Acme Brick Co. might want to include ['acme', 'brick', 'acmebrick', etc].
+The optional `options` argument is an object that can contain the following optional properties:
+- `user_inputs` is an array of strings that zxcvbn will treat as an extra dictionary. This can be whatever list of strings you like, but is meant for user inputs from other fields of the form, like name and email. That way a password that includes a user's personal information can be heavily penalized. This list is also good for site-specific vocabulary — Acme Brick Co. might want to include ['acme', 'brick', 'acmebrick', etc].
+- `feedback_messages` is an object that enables zxcvbn's consumers to customize the messages used for giving feedback to the user. This could be used to skip messages that aren't desired to be returned as feedback to the user, or to modify or internationalize the existing messages.
+The list of keys to be used in this parameter could be find in [./src/feedback.coffee](./blob/master/src/feedback.coffee#L4).
+For example, to remove the `use_a_few_words` feedback message, we would call zxcvbn as follows:
+```javascript
+zxcvbn(password, {
+  feedback_messages:{
+    use_a_few_words: null
+  }
+});
+```
+any falsey value passed as a message will make zxcvbn skip it.
+If we would like to modify or internationalize the message instead, we would pass the new message as the value as follows:
+```javascript
+zxcvbn(password, {
+  feedback_messages:{
+    use_a_few_words: 'Usa algunas palabras, evita frases comunes'
+  }
+});
+```
+any absent message in the `feedback_messages` object will default to the in-app feedback message.
 
 # <a name="perf"></a>Performance
 

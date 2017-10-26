@@ -5,7 +5,15 @@ feedback = require './feedback'
 
 time = -> (new Date()).getTime()
 
-zxcvbn = (password, user_inputs = []) ->
+zxcvbn = (password, options = {}) ->
+  if options instanceof Array
+    user_inputs = options # backward-compatibility
+  else if typeof options == 'object'
+    { user_inputs = [], feedback_messages = {}} = options
+  else
+    user_inputs = []
+    feedback_messages = {}
+
   start = time()
   # reset the user inputs matcher on a per-request basis to keep things stateless
   sanitized_inputs = []
@@ -19,7 +27,7 @@ zxcvbn = (password, user_inputs = []) ->
   attack_times = time_estimates.estimate_attack_times result.guesses
   for prop, val of attack_times
     result[prop] = val
-  result.feedback = feedback.get_feedback result.score, result.sequence
+  result.feedback = feedback.get_feedback result.score, result.sequence, feedback_messages
   result
 
 module.exports = zxcvbn
