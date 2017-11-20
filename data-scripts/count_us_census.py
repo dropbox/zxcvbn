@@ -18,7 +18,7 @@ Then run:
 %s dist.male.names   ../data/male_names.txt
 
 for each file.
-''' % [sys.argv[0]] * 3
+''' % tuple([sys.argv[0]] * 3)
 
 def main(input_filename, output_filename):
     with codecs.open(output_filename, 'w', 'utf8') as f:
