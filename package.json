@@ -21,13 +21,13 @@
     "browserify": "^11.0.1",
     "coffee-coverage": "^0.6.3",
     "coffee-script": "^1.10.0",
-    "coffeeify": "^1.1.0",
+    "coffeeify": "^1.2.0",
     "coffeetape": "^1.0.1",
     "exorcist": "^0.4.0",
     "faucet": "^0.0.1",
     "istanbul": "^0.3.18",
     "tape": "^4.2.0",
-    "uglifyify": "^3.0.1",
+    "uglifyify": "^3.0.4",
     "watchify": "^3.3.1",
     "zuul": "^3.4.0"
   },
@@ -45,5 +45,8 @@
     "scoring",
     "entropy",
     "bruteforce"
-  ]
+  ],
+  "dependencies": {
+    "uglify": "^0.1.5"
+  }
 }

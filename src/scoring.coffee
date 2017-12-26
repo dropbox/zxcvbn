@@ -189,7 +189,12 @@ scoring =
     password: password
     guesses: guesses
     guesses_log10: @log10 guesses
+# hack for entropy based on number of guesses
+    guesses_log2: @estimate_entropy guesses
+# entropy computed based on traditional characters in set and token length
+    entropy: @binary_entropy password
     sequence: optimal_match_sequence
+    
 
   # ------------------------------------------------------------------------------
   # guess estimation -- one function per match pattern ---------------------------
@@ -203,7 +208,7 @@ scoring =
         MIN_SUBMATCH_GUESSES_SINGLE_CHAR
       else
         MIN_SUBMATCH_GUESSES_MULTI_CHAR
-    estimation_functions =
+    estimation_functions = 
       bruteforce: @bruteforce_guesses
       dictionary: @dictionary_guesses
       spatial:    @spatial_guesses
@@ -214,8 +219,59 @@ scoring =
     guesses = estimation_functions[match.pattern].call this, match
     match.guesses = Math.max guesses, min_guesses
     match.guesses_log10 = @log10 match.guesses
+# hack for entropy based on number of guesses
+    match.guesses_log2 = @estimate_entropy match.guesses
+# entropy computed based on traditional characters in set and token length
+    match.entropy = @binary_entropy match.token
     match.guesses
 
+  estimate_entropy: (guesses) ->
+    return @log2 guesses
+
+
+  binary_entropy: (password) ->
+
+# step through password or match token and assess character type and set a flag
+# possible types are
+# 	lower case alpha
+# 	upper case alpha
+# 	digits
+# 	symbols
+# 	a space
+    for i in [0..password.length-1] 
+      if (password.charCodeAt(i) > 64 and password.charCodeAt(i) < 91) and not isalphau?
+        isalphau = 1
+      else if (password.charCodeAt(i) > 96 and password.charCodeAt(i) < 123) and not isalphal?
+        isalphal = 1
+      else if (password.charCodeAt(i) > 47 and password.charCodeAt(i) < 58) and not isnumeric?
+        isnumeric = 1
+      else if (password.charCodeAt(i) > 32 and password.charCodeAt(i) < 48) and not issymbol?
+        issymbol = 1
+      else if (password.charCodeAt(i) > 57 and password.charCodeAt(i) < 65) and not issymbol?
+        issymbol = 1
+      else if (password.charCodeAt(i) > 90 and password.charCodeAt(i) < 97) and not issymbol?
+        issymbol = 1
+      else if (password.charCodeAt(i) > 122 and password.charCodeAt(i) < 127) and not issymbol?
+        issymbol = 1
+      else if password.charCodeAt(i) == 32 and not isspace?
+        isspace = 1
+
+    if not charsinset? then charsinset = 0;
+# now compute charactes in possible set
+# similar to regex_guesses, but more accurate for entropy computation
+    if isalphal?
+      charsinset += 26
+    if isalphau?
+      charsinset += 26
+    if isnumeric?
+      charsinset += 10
+    if issymbol?
+      charsinset += 32
+    if isspace?
+      charsinset += 1
+# return entropy based of length and characters in set 
+    return @log2 Math.pow(charsinset,password.length)
+    
   bruteforce_guesses: (match) ->
     guesses = Math.pow BRUTEFORCE_CARDINALITY, match.token.length
     if guesses == Number.POSITIVE_INFINITY
