@@ -93,6 +93,15 @@ results_tmpl = '''
     <td colspan="2">{{guesses_log10}}</td>
   </tr>
   <tr>
+    <td>guesses_log2: </td>
+    <td colspan="2">{{guesses_log2}}</td>
+  </tr>
+  <tr>
+    <td>entropy: </td>
+    <td colspan="2">{{entropy}}</td>
+  </tr>
+  <tr>
+  <tr>
     <td>score: </td>
     <td>{{score}} / 4</td>
   <tr>
@@ -165,8 +174,20 @@ props_tmpl = '''
     <td>{{pattern}}</td>
   </tr>
   <tr>
+    <td>sequence name:</td>
+    <td>{{sequence_name}}</td>
+  </tr>
+  <tr>
     <td>guesses_log10:</td>
     <td>{{guesses_log10}}</td>
+  </tr>
+  <tr>
+    <td>guesses_log2:</td>
+    <td>{{guesses_log2}}</td>
+  </tr>
+  <tr>
+    <td>entropy:</td>
+    <td>{{entropy}}</td>
   </tr>
   {{#cardinality}}
   <tr>
@@ -288,10 +309,15 @@ props_tmpl = '''
 round_to_x_digits = (n, x) ->
   Math.round(n * Math.pow(10, x)) / Math.pow(10, x)
 
+# add two entropy computations
 round_logs = (r) ->
   r.guesses_log10 = round_to_x_digits(r.guesses_log10, 5)
+  r.guesses_log2 = round_to_x_digits(r.guesses_log2, 3)
+  r.entropy = round_to_x_digits(r.entropy,3)
   for m in r.sequence
     m.guesses_log10 = round_to_x_digits(m.guesses_log10, 5)
+    m.guesses_log2 = round_to_x_digits(m.guesses_log2, 3)
+    m.entropy = round_to_x_digits(m.entropy, 3)
 
 requirejs ['../dist/zxcvbn'], (zxcvbn) ->
   $ ->

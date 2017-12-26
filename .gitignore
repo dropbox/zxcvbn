@@ -3,6 +3,7 @@
 !demo/jquery.js
 !demo/require.js
 !demo/mustache.js
+!demo/demo.js
 node_modules
 lib
 *~
