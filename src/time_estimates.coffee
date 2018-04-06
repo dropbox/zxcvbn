@@ -5,6 +5,7 @@ time_estimates =
       online_no_throttling_10_per_second: guesses / 10
       offline_slow_hashing_1e4_per_second: guesses / 1e4
       offline_fast_hashing_1e10_per_second: guesses / 1e10
+      offline_fast_hashing_1e12_per_second: guesses / 1e12
 
     crack_times_display = {}
     for scenario, seconds of crack_times_seconds
@@ -41,6 +42,9 @@ time_estimates =
     month = day * 31
     year = month * 12
     century = year * 100
+    millenium = century * 10
+    megennium = millenium * 1000
+    gigennium = megennium * 1000
     [display_num, display_str] = if seconds < 1
       [null, 'less than a second']
     else if seconds < minute
@@ -61,9 +65,30 @@ time_estimates =
     else if seconds < century
       base = Math.round seconds / year
       [base, "#{base} year"]
+    else if seconds < millenium
+      base = Math.round seconds / century
+      [base, "#{base} centur"]
+    else if seconds < megennium
+      base = Math.round seconds / millenium
+      [base, "#{base} milleni"]
+    else if seconds < gigennium
+      base = Math.round seconds / megennium
+      [base, "#{base} megenni"]
     else
-      [null, 'centuries']
-    display_str += 's' if display_num? and display_num != 1
+      [base, '#{base} gigenni']
+    
+    if seconds < century
+      display_str += 's' if display_num? and display_num != 1
+    else if seconds < millenium
+      if display_num? and display_num != 1
+        display_str += 'ies'
+      else
+        display_str += 'y'
+    else
+      if display_num? and display_num != 1
+        display_str += 'ia'
+      else
+        display_str += 'ium'
     display_str
 
 module.exports = time_estimates
