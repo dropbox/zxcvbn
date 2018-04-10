@@ -75,7 +75,7 @@ time_estimates =
       base = Math.round seconds / megennium
       [base, "#{base} megenni"]
     else
-      [base, '#{base} gigenni']
+      [null, 'gigennia']
     
     if seconds < century
       display_str += 's' if display_num? and display_num != 1
@@ -84,11 +84,11 @@ time_estimates =
         display_str += 'ies'
       else
         display_str += 'y'
-    else
-      if display_num? and display_num != 1
-        display_str += 'ia'
+    else if display_num?
+      if display_num != 1
+        display_str += 'a'
       else
-        display_str += 'ium'
+        display_str += 'um'
     display_str
 
 module.exports = time_estimates
