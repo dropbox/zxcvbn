@@ -43,8 +43,6 @@ time_estimates =
     year = month * 12
     century = year * 100
     millennium = century * 10
-    megennium = millennium * 1000
-    gigennium = megennium * 1000
     [display_num, display_str] = if seconds < 1
       [null, 'less than a second']
     else if seconds < minute
@@ -68,14 +66,11 @@ time_estimates =
     else if seconds < millennium
       base = Math.round seconds / century
       [base, "#{base} centur"]
-    else if seconds < megennium
+    else if seconds < 1000 * millennium
       base = Math.round seconds / millennium
       [base, "#{base} millenni"]
-    else if seconds < gigennium
-      base = Math.round seconds / megennium
-      [base, "#{base} megenni"]
     else
-      [null, 'gigennia']
+      [null, '>1000 millennia']
     
     if seconds < century
       display_str += 's' if display_num? and display_num != 1
