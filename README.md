@@ -170,6 +170,11 @@ result.crack_times_seconds # dictionary of back-of-the-envelope crack time
   # guesses per second, depending on number of cores and machines.
   # ballparking at 10B/sec.
   offline_fast_hashing_1e10_per_second
+
+  # for particularly exorbitant protection estimation and the
+  # interest of knowing how the password would stand up to
+  # a sustained attack from a particularly well-funded attacker
+  offline_fast_hashing_1e12_per_second
 }
 
 result.crack_times_display # same keys as result.crack_times_seconds,
