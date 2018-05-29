@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS202: Simplify dynamic range loops
  * DS205: Consider reworking code to avoid use of IIFEs
@@ -87,7 +86,7 @@ const should_include = function(password, xato_rank) {
     // only keep matches that span full password
     (match.i === 0) && (match.j === (password.length - 1))
   );
-  for (let match of Array.from(matches)) {
+  for (let match of matches) {
     if (scoring.estimate_guesses(match, password) < xato_rank) {
       // filter out this entry: non-dictionary matching will assign
       // a lower guess estimate.
@@ -129,7 +128,7 @@ const main = function(xato_filename, output_filename) {
           skipped_lines += 1;
           continue;
         }
-        let [username, password] = Array.from(tokens.slice(0, 2));
+        let [username, password] = tokens.slice(0, 2);
         password = normalize(password);
         if (password in counts) {
           result.push(counts[password] += 1);
@@ -159,12 +158,12 @@ const main = function(xato_filename, output_filename) {
     console.log('filtering');
     pairs = pairs.filter(function(pair, i) {
       const rank = i + 1;
-      [pw, count] = Array.from(pair);
+      [pw, count] = pair;
       return should_include(pw, rank);
     });
     const output_stream = fs.createWriteStream(output_filename, {encoding: 'utf8'});
-    for (let pair of Array.from(pairs)) {
-      [pw, count] = Array.from(pair);
+    for (let pair of pairs) {
+      [pw, count] = pair;
       output_stream.write(sprintf("%-15s %d\n", pw, count));
     }
     return output_stream.end();
