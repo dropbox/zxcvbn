@@ -1,8 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS202: Simplify dynamic range loops
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const matching = require('../lib/matching');
 const scoring = require('../lib/scoring');
 
@@ -58,9 +53,7 @@ let line_count = 0;    // current number of lines processed
 const normalize = token => token.toLowerCase();
 
 const should_include = function(password, xato_rank) {
-  let i;
-  let asc, end;
-  for (i = 0, end = password.length, asc = 0 <= end; asc ? i < end : i > end; asc ? i++ : i--) {
+  for (let i = 0, end = password.length; i < end; i++) {
     if (password.charCodeAt(i) > 127) {
       // xato mostly contains ascii-only passwords, so in practice
       // this will only skip one or two top passwords over the cutoff.
