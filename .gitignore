@@ -3,6 +3,7 @@
 !demo/jquery.js
 !demo/require.js
 !demo/mustache.js
+!data-scripts/count_xato.js
 node_modules
 lib
 *~
