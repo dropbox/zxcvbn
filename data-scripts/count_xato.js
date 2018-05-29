@@ -6,7 +6,7 @@ const byline = require('byline');
 const { sprintf } = require('sprintf-js');
 
 
-const check_usage = function() {
+function check_usage() {
   const usage = `\
 
 Run a frequency count on the raw 10M xato password set and keep counts over CUTOFF in
@@ -37,7 +37,7 @@ coffee count_xato.coffee --nodejs xato_file.txt ../data/passwords.txt
     console.log(usage);
     process.exit(0);
   }
-};
+}
 
 // after all passwords are counted, discard pws with counts <= COUNTS
 const CUTOFF = 10;
@@ -50,9 +50,11 @@ const counts = {};       // maps pw -> count
 let skipped_lines = 0; // skipped lines in xato file -- lines w/o two tokens
 let line_count = 0;    // current number of lines processed
 
-const normalize = token => token.toLowerCase();
+function normalize(token) {
+  return token.toLowerCase();
+}
 
-const should_include = function(password, xato_rank) {
+function should_include(password, xato_rank) {
   for (let i = 0, end = password.length; i < end; i++) {
     if (password.charCodeAt(i) > 127) {
       // xato mostly contains ascii-only passwords, so in practice
@@ -85,7 +87,7 @@ const should_include = function(password, xato_rank) {
     }
   }
   return true;
-};
+}
 
 function prune(counts) {
   for (let pw in counts) {
@@ -96,7 +98,7 @@ function prune(counts) {
   }
 }
 
-const main = function(xato_filename, output_filename) {
+function main(xato_filename, output_filename) {
   const stream = byline.createStream(fs.createReadStream(xato_filename, {encoding: 'utf8'}));
   stream.on('readable', () => {
     let line;
@@ -149,7 +151,7 @@ const main = function(xato_filename, output_filename) {
     }
     output_stream.end();
   });
-};
+}
 
 check_usage();
 main(process.argv[3], process.argv[4]);
