@@ -1,8 +1,6 @@
 /*
  * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
  * DS202: Simplify dynamic range loops
- * DS205: Consider reworking code to avoid use of IIFEs
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const matching = require('../lib/matching');
@@ -42,7 +40,7 @@ coffee count_xato.coffee --nodejs xato_file.txt ../data/passwords.txt
   valid = valid && (__dirname.split('/').slice(-1)[0] === 'data-scripts');
   if (!valid) {
     console.log(usage);
-    return process.exit(0);
+    process.exit(0);
   }
 };
 
@@ -96,50 +94,40 @@ const should_include = function(password, xato_rank) {
   return true;
 };
 
-const prune = counts =>
-  (() => {
-    const result = [];
-    for (let pw in counts) {
-      const count = counts[pw];
-      if (count === 1) {
-        result.push(delete counts[pw]);
-      } else {
-        result.push(undefined);
-      }
+function prune(counts) {
+  for (let pw in counts) {
+    const count = counts[pw];
+    if (count === 1) {
+      delete counts[pw];
     }
-    return result;
-  })()
-;
+  }
+}
 
 const main = function(xato_filename, output_filename) {
   const stream = byline.createStream(fs.createReadStream(xato_filename, {encoding: 'utf8'}));
-  stream.on('readable', () =>
-    (() => {
-      let line;
-      const result = [];
-      while (null !== (line = stream.read())) {
-        line_count += 1;
-        if ((line_count % BATCH_SIZE) === 0) {
-          console.log('counting tokens:', line_count);
-          prune(counts);
-        }
-        const tokens = line.trim().split(/\s+/);
-        if (tokens.length !== 2) {
-          skipped_lines += 1;
-          continue;
-        }
-        let [username, password] = tokens.slice(0, 2);
-        password = normalize(password);
-        if (password in counts) {
-          result.push(counts[password] += 1);
-        } else {
-          result.push(counts[password] = 1);
-        }
+  stream.on('readable', () => {
+    let line;
+    while (null !== (line = stream.read())) {
+      line_count += 1;
+      if ((line_count % BATCH_SIZE) === 0) {
+        console.log('counting tokens:', line_count);
+        prune(counts);
       }
-      return result;
-    })()
-  );
-  return stream.on('end', function() {
+      const tokens = line.trim().split(/\s+/);
+      if (tokens.length !== 2) {
+        skipped_lines += 1;
+        continue;
+      }
+      let [username, password] = tokens.slice(0, 2);
+      password = normalize(password);
+      if (password in counts) {
+        counts[password] += 1;
+      } else {
+        counts[password] = 1;
+      }
+    }
+  });
+  stream.on('end', function() {
     let count;
     console.log('skipped lines:', skipped_lines);
     let pairs = [];
@@ -166,7 +154,7 @@ const main = function(xato_filename, output_filename) {
       [pw, count] = pair;
       output_stream.write(sprintf("%-15s %d\n", pw, count));
     }
-    return output_stream.end();
+    output_stream.end();
   });
 };
 
