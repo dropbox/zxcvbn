@@ -326,7 +326,8 @@ scoring =
   ALL_LOWER: /^[^A-Z]+$/
 
   uppercase_variations: (match) ->
-    word = match.token
+    # non-letters should be stripped before we do this calculation
+    word = match.token.replace /[^A-Za-z]/gi, ''
     return 1 if word.match(@ALL_LOWER) or word.toLowerCase() == word
     # a capitalized word is the most common capitalization scheme,
     # so it only doubles the search space (uncapitalized + capitalized).
