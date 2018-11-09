@@ -15,7 +15,7 @@ ________________________________________________________________________
 Consider using zxcvbn as an algorithmic alternative to password composition policy — it is more secure, flexible, and usable when sites require a minimal complexity score in place of annoying rules like "passwords must contain three of {lower, upper, numbers, symbols}".
 
 * __More secure__: policies often fail both ways, allowing weak passwords (`P@ssword1`) and disallowing strong passwords.
-* __More flexible__: zxcvbn allows many password styles to flourish so long as it detects sufficient complexity — passphrases are rated highly given enough uncommon words, keyboard patterns are ranked based on length and number of turns, and capitalization adds more complexity when it's unpredictaBle.
+* __More flexible__: zxcvbn allows many password styles to flourish so long as it detects sufficient complexity — passphrases are rated highly given enough uncommon words, keyboard patterns are ranked based on length and number of turns, and capitalization adds more complexity when it's unpredictable.
 * __More usable__: zxcvbn is designed to power simple, rule-free interfaces that give instant feedback. In addition to strength estimation, zxcvbn includes minimal, targeted verbal feedback that can help guide users towards less guessable passwords.
 
 For further detail and motivation, please refer to the USENIX Security '16 [paper and presentation](https://www.usenix.org/conference/usenixsecurity16/technical-sessions/presentation/wheeler).
@@ -103,11 +103,11 @@ $ browserify mymodule.js > browserify_bundle.js
 $ webpack mymodule.js webpack_bundle.js
 ```
 
-But we recommend against bundling zxcvbn via tools like browserify and webpack, for three reasons:
+But we recommend against bundling zxcvbn via tools like browserify and web pack, for three reasons:
 
 * Minified and gzipped, zxcvbn is still several hundred kilobytes. (Significantly grows bundle size.)
 * Most sites will only need zxcvbn on a few pages (registration, password reset).
-* Most sites won't need `zxcvbn()` immediately upon page load; since `zxcvbn()` is typically called in response to user events like filling in a password, there's ample time to fetch `zxcvbn.js` after initial html/css/js loads and renders.
+* Most sites won't need `zxcvbn()` immediately upon page load; since `zxcvbn()` is typically called in response to user events like filling in a password, there's ample time to fetch `zxcvbn.js` after initial HTML/CSS/js loads and renders.
 
 See the [performance](#perf) section below for tips on loading zxcvbn stand-alone.
 
@@ -123,7 +123,7 @@ $ browserify --debug --standalone zxcvbn \
 * `--debug` adds an inline source map to the bundle. `exorcist` pulls it out into `dist/zxcvbn.js.map`.
 * `--standalone zxcvbn` exports a global `zxcvbn` when CommonJS/AMD isn't detected.
 * `-t coffeeify --extension='.coffee'` compiles `.coffee` to `.js` before bundling. This is convenient as it allows `.js` modules to import from `.coffee` modules and vice-versa. Instead of this transform, one could also compile everything to `.js` first (`npm run prepublish`) and point `browserify` to `lib` instead of `src`.
-* `-t uglifyify` minifies the bundle through UglifyJS, maintaining proper source mapping.
+* `-t uglifying` minify the bundle through UglifyJS, maintaining proper source mapping.
 
 ## Manual installation
 
@@ -167,7 +167,7 @@ result.crack_times_seconds # dictionary of back-of-the-envelope crack time
   # offline attack with user-unique salting but a fast hash
   # function like SHA-1, SHA-256 or MD5. A wide range of
   # reasonable numbers anywhere from one billion - one trillion
-  # guesses per second, depending on number of cores and machines.
+  # guesses per second, depending on the number of cores and machines.
   # ballparking at 10B/sec.
   offline_fast_hashing_1e10_per_second
 }
@@ -221,7 +221,7 @@ Then try one of these alternatives:
 
 1. Put your `<script src="zxcvbn.js">` tag at the end of your html, just before the closing `</body>` tag. This ensures your page loads and renders before the browser fetches and loads `zxcvbn.js`. The downside with this approach is `zxcvbn()` becomes available later than had it been included in `<head>` — not an issue on most signup pages where users are filling out other fields first.
 
-2. If you're using RequireJS, try loading `zxcvbn.js` separately from your main bundle. Something to watch out for: if `zxcvbn.js` is required inside a keyboard handler waiting for user input, the entire script might be loaded only after the user presses their first key, creating nasty latency. Avoid this by calling your handler once upon page load, independent of user input, such that the `requirejs()` call runs earlier.
+2. If you're using RequireJS, try loading `zxcvbn.js` separately from your main bundle. Something to watch out for: if `zxcvbn.js` is required inside a keyboard handler waiting for user input, the entire script might be loaded only after the user presses their first key, creating nasty latency. Avoid this by calling your handler once upon page load, independent of user input, such that the `require()` call runs earlier.
 
 3. Use the HTML5 [`async`](http://www.w3schools.com/tags/att_script_async.asp) script attribute. Downside: [doesn't work](http://caniuse.com/#feat=script-async) in IE7-9 or Opera Mini.
 
