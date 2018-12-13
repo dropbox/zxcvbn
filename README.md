@@ -40,6 +40,7 @@ At Dropbox we use zxcvbn ([Release notes](https://github.com/dropbox/zxcvbn/rele
 
 Integrations with other frameworks:
 * [`angular-zxcvbn`](https://github.com/ghostbar/angular-zxcvbn) (AngularJS)
+* [`vue-password-strength-meter`](https://github.com/apertureless/vue-password-strength-meter) (Vue.js)
 
 # Installation
 
