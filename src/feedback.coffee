@@ -4,8 +4,8 @@ feedback =
   default_feedback:
     warning: ''
     suggestions: [
-      "Use a few words, avoid common phrases"
-      "No need for symbols, digits, or uppercase letters"
+      'Use a few words, avoid common phrases'
+      'No need for symbols, digits, or uppercase letters'
     ]
 
   get_feedback: (score, sequence) ->
@@ -59,21 +59,21 @@ feedback =
         ]
 
       when 'sequence'
-        warning: "Sequences like abc or 6543 are easy to guess"
+        warning: 'Sequences like abc or 6543 are easy to guess'
         suggestions: [
           'Avoid sequences'
         ]
 
       when 'regex'
         if match.regex_name == 'recent_year'
-          warning: "Recent years are easy to guess"
+          warning: 'Recent years are easy to guess'
           suggestions: [
             'Avoid recent years'
             'Avoid years that are associated with you'
           ]
 
       when 'date'
-        warning: "Dates are often easy to guess"
+        warning: 'Dates are often easy to guess'
         suggestions: [
           'Avoid dates and years that are associated with you'
         ]
@@ -103,14 +103,14 @@ feedback =
     suggestions = []
     word = match.token
     if word.match(scoring.START_UPPER)
-      suggestions.push "Capitalization doesn't help very much"
+      suggestions.push 'Capitalization doesn\'t help very much'
     else if word.match(scoring.ALL_UPPER) and word.toLowerCase() != word
-      suggestions.push "All-uppercase is almost as easy to guess as all-lowercase"
+      suggestions.push 'All-uppercase is almost as easy to guess as all-lowercase'
 
     if match.reversed and match.token.length >= 4
-      suggestions.push "Reversed words aren't much harder to guess"
+      suggestions.push 'Reversed words aren\'t much harder to guess'
     if match.l33t
-      suggestions.push "Predictable substitutions like '@' instead of 'a' don't help very much"
+      suggestions.push 'Predictable substitutions like "@" instead of "a" don\'t help very much'
 
     result =
       warning: warning
