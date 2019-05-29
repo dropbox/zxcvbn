@@ -22,7 +22,7 @@ feedback =
     for match in sequence[1..]
       longest_match = match if match.token.length > longest_match.token.length
     feedback = @get_match_feedback(longest_match, sequence.length == 1)
-    extra_feedback = 'Add another word or two. Uncommon words are better.'
+    extra_feedback = 'Add another word or two, uncommon words are better'
     if feedback?
       feedback.suggestions.unshift extra_feedback
       feedback.warning = '' unless feedback.warning?
@@ -65,7 +65,7 @@ feedback =
         ]
 
       when 'regex'
-        if match.regex_name == 'recent_year'
+        if match`regex_name == 'recent_year'
           warning: "Recent years are easy to guess"
           suggestions: [
             'Avoid recent years'
