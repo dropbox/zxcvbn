@@ -65,7 +65,7 @@ feedback =
         ]
 
       when 'regex'
-        if match`regex_name == 'recent_year'
+        if match.regex_name == 'recent_year'
           warning: "Recent years are easy to guess"
           suggestions: [
             'Avoid recent years'
