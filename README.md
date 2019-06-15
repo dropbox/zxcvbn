@@ -41,6 +41,10 @@ At Dropbox we use zxcvbn ([Release notes](https://github.com/dropbox/zxcvbn/rele
 Integrations with other frameworks:
 * [`angular-zxcvbn`](https://github.com/ghostbar/angular-zxcvbn) (AngularJS)
 
+Adaptation to other languages and locales:
+* [`zxcvbn for Germany`](https://github.com/qutorial/zxcvbn) (German-DE keyboard and German language) [`try it out here`](https://molotnikov.de/zxcvbn)
+
+
 # Installation
 
 zxcvbn detects and supports CommonJS (node, browserify) and AMD (RequireJS). In the absence of those, it adds a single function `zxcvbn()` to the global namespace.
