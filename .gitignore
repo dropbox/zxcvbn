@@ -9,3 +9,4 @@ lib
 *.swp
 *.swo
 tmux-*.log
+.vscode
