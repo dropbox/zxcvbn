@@ -50,7 +50,7 @@ def parse_frequency_lists(data_dir):
             continue
         token_to_rank = {}
         if filename == 'russian.txt':
-            with codecs.open(os.path.join(data_dir, filename), 'r', 'latin-1') as f:
+            with codecs.open(os.path.join(data_dir, filename), 'r', 'windows-1251') as f:
                 for i, line in enumerate(f):
                     rank = i + 1 # rank starts at 1
                     token = line.split()[0]
