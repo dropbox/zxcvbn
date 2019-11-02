@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/python
 import sys
 import simplejson
@@ -16,11 +17,19 @@ qwerty = r'''
      aA sS dD fF gG hH jJ kK lL ;: '"
       zZ xX cC vV bB nN mM ,< .> /?
 '''
+
 russian_qwerty = r'''
 ёЁ 1! 2" 3№ 4; 5% 6: 7? 8* 9( 0) -_ =+
     йЙ цЦ уУ кК еЕ нН гГ шШ щЩ зЗ хХ ъЪ \/
      фФ ыЫ вВ аА пП рР оО лЛ дД жЖ эЭ
       \/ яЯ чЧ сС мМ иИ тТ ьЬ бБ юЮ .,
+'''
+
+italian_qwerty = r'''
+\| 1! 2" 3£ 4$ 5% 6& 7/ 8( 9) 0= ‘? ì^
+    qQ wW eE rR tT yY uU iI oO pP èé +*
+     aA sS dD fF gG hH jJ kK lL òç à° ù§
+     <> zZ xX cC vV bB nN mM ,; .: -_
 '''
 
 dvorak = r'''
@@ -72,8 +81,11 @@ def build_graph(layout_str, slanted):
     position_table = {} # maps from tuple (x,y) -> characters at that position.
     tokens = layout_str.split()
     token_size = len(tokens[0])
+    print "Token Size", token_size
     x_unit = token_size + 1 # x position unit len is token len plus 1 for the following whitespace.
     adjacency_func = get_slanted_adjacent_coords if slanted else get_aligned_adjacent_coords
+    for token in tokens:
+        print token, token_size
     assert all(len(token) == token_size for token in tokens), 'token len mismatch:\n ' + layout_str
     for y, line in enumerate(layout_str.split('\n')):
         # the way I illustrated keys above, each qwerty row is indented one space in from the last
@@ -104,8 +116,8 @@ if __name__ == '__main__':
         f.write('adjacency_graphs = \n  ')
         lines = []
         for graph_name, args in [('qwerty', (qwerty, True)),
-                                 ('italian_qwerty', (qwerty, True)),
-                                 ('russian_qwerty', (qwerty, True)),
+                                 ('russian_qwerty', (russian_qwerty, True)),
+                                 ('italian_qwerty', (italian_qwerty, True)),
                                  ('dvorak', (dvorak, True)),
                                  ('keypad', (keypad, False)),
                                  ('mac_keypad', (mac_keypad, False))]:
