@@ -104,6 +104,8 @@ if __name__ == '__main__':
         f.write('adjacency_graphs = \n  ')
         lines = []
         for graph_name, args in [('qwerty', (qwerty, True)),
+                                 ('italian_qwerty', (qwerty, True)),
+                                 ('russian_qwerty', (qwerty, True)),
                                  ('dvorak', (dvorak, True)),
                                  ('keypad', (keypad, False)),
                                  ('mac_keypad', (mac_keypad, False))]:
