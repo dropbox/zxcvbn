@@ -17,6 +17,13 @@ qwerty = r'''
       zZ xX cC vV bB nN mM ,< .> /?
 '''
 
+italian_qwerty = r'''
+`\| 1! 2" 3£ 4$ 5% 6& 7/ 8( 9) 0= ‘? ì^
+    qQ wW eE rR tT yY uU iI oO pP èé +*
+     aA sS dD fF gG hH jJ kK lL òç à° ù§
+     <> zZ xX cC vV bB nN mM ,; .: -_
+'''
+
 dvorak = r'''
 `~ 1! 2@ 3# 4$ 5% 6^ 7& 8* 9( 0) [{ ]}
     '" ,< .> pP yY fF gG cC rR lL /? =+ \|
