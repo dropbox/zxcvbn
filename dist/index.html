@@ -162,6 +162,10 @@
         strengthButtonTextToggle: 'Hide Password'
       })
 
+      $('input[value="Clear"]').on('click', () => {
+        $('#search-bar').val("")
+      })
+
     })
   </script>
 
@@ -172,8 +176,8 @@
   <form id="myform" action="" method="get" accept-charset="utf-8">
 
     <p> Let us analyse the password strength!!</p>
-    <span class='lang-wrap'>Choose keyboard: <select class="form-control" id="lang"></select> </span>
-    <input id="search-bar" type="text" size="50">
+    <span class='column-wrap '>Choose keyboard (no IME): <select class="form-control" id="lang"></select> </span>
+    <span class='column-wrap '><input id="search-bar" type="text" size="50"><input type=button value="Clear"></span>
 
   </form>
 
