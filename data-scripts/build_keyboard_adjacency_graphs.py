@@ -16,12 +16,11 @@ qwerty = r'''
      aA sS dD fF gG hH jJ kK lL ;: '"
       zZ xX cC vV bB nN mM ,< .> /?
 '''
-
-italian_qwerty = r'''
-`\| 1! 2" 3£ 4$ 5% 6& 7/ 8( 9) 0= ‘? ì^
-    qQ wW eE rR tT yY uU iI oO pP èé +*
-     aA sS dD fF gG hH jJ kK lL òç à° ù§
-     <> zZ xX cC vV bB nN mM ,; .: -_
+russian_qwerty = r'''
+ёЁ 1! 2" 3№ 4; 5% 6: 7? 8* 9( 0) -_ =+
+    йЙ цЦ уУ кК еЕ нН гГ шШ щЩ зЗ хХ ъЪ \/
+     фФ ыЫ вВ аА пП рР оО лЛ дД жЖ эЭ
+      \/ яЯ чЧ сС мМ иИ тТ ьЬ бБ юЮ .,
 '''
 
 dvorak = r'''
