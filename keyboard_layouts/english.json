@@ -1,0 +1,12 @@
+[
+    {
+        "id": "qwerty",
+        "layout_str": "\n`~ 1! 2@ 3# 4$ 5% 6^ 7& 8* 9( 0) -_ =+\n    qQ wW eE rR tT yY uU iI oO pP [{ ]} \\|\n     aA sS dD fF gG hH jJ kK lL ;: '\"\n      zZ xX cC vV bB nN mM ,< .> /?\n",
+        "slanted": true
+    },
+    {
+        "id": "dvorak",
+        "layout_str": "\n`~ 1! 2@ 3# 4$ 5% 6^ 7& 8* 9( 0) [{ ]}\n '\" ,< .> pP yY fF gG cC rR lL /? =+ \\|\n  aA oO eE uU iI dD hH tT nN sS -_\n   ;: qQ jJ kK xX bB mM wW vV zZ\n",
+        "slanted": true
+    }
+]

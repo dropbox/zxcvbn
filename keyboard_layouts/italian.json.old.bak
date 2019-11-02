@@ -1,0 +1,7 @@
+[
+    {
+        "id": "italian_qwerty",
+        "layout_str": "\\| 1! 2\" 3\u00a3 4$ 5% 6& 7/ 8( 9) 0= '? \u00ec^\nqQ wW eE rR tT yY uU iI oO pP \u00e8\u00e9 +*\naA sS dD fF gG hH jJ kK lL \u00f2\u00e7 \u00e0\u00b0 \u00f9\u00a7\n<> zZ xX cC vV bB nN mM ,; .: -_",
+        "slanted": true
+    }
+]

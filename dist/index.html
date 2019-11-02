@@ -1,0 +1,186 @@
+<html class="gr__lowe_github_io">
+
+<head>
+  <title>zxcvbn tests</title>
+  <link href="http://fonts.googleapis.com/css?family=Lato:400,700" rel="stylesheet" type="text/css">
+  <link href="css/password-strength.css" rel="stylesheet">
+
+  <!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script> -->
+  <script src="js/jquery-latest-slim.min.js"></script>
+  <script type="text/javascript" src="js/mustache.js"></script>
+
+
+
+  <link href="css/keyboard.css" rel="stylesheet">
+  <script src="js/jquery-ui-custom.min.js"></script>
+  <script src="js/jquery.keyboard.js"></script>
+  <script src="js/jquery.keyboard.extension-typing.js"></script>
+  <script src="js/jquery.keyboard.extension-previewkeyset.js"></script>
+  <script src="layouts/keyboard-layouts-combined.js" charset="utf-8"></script>
+
+  <script data-main="demo" src="js/require.js"></script>
+  <script src="js/min.js"></script>
+  <script>
+    $(function () {
+
+      var layouts = [
+        // 'title , file name , layout name'
+        "Albanian (qwerty), albanian, albanian-qwerty",
+        "Albanian (qwertz), albanian, albanian-qwertz",
+        "Arabic (azerty), arabic, arabic-azerty",
+        "Arabic (qwerty-1), arabic, arabic-qwerty-1",
+        "Arabic (qwerty-2), arabic, arabic-qwerty-2",
+        "Arabic (qwerty-3), arabic, arabic-qwerty-3",
+        "Arabic (qwerty-4), arabic, arabic-qwerty-4",
+        "Belarusian (Belarus), belarusian, belarusian-qwerty",
+        "Bengali (qwerty-1), bengali, bengali-qwerty-1",
+        "Bengali (qwerty-2), bengali, bengali-qwerty-2",
+        "Bulgarian (qwerty), bulgarian, bulgarian-qwerty",
+        "Catalan (qwerty), catalan, catalan-qwerty",
+        "Chinese, chinese, chinese",
+        "Danish (qwerty), danish, danish-qwerty", // mmm danish
+        "Ethiopic, ethiopic, ethiopic",
+        "French (azerty-1), french, french-azerty-1",
+        "French (azerty-2), french, french-azerty-2",
+        "French (bepo v1.0rc2), french, french-bepo-V1.0rc2",
+        "German (qwertz-1), german, german-qwertz-1",
+        "German (qwertz-2), german, german-qwertz-2",
+        "Hebrew (qwerty), hebrew, hebrew-qwerty",
+        "Hindi, hindi, hindi",
+        "Magyar (qwertz-1) utf8, hungarian, hungarian-qwertz-1",
+        "Magyar (qwertz-2) utf8, hungarian, hungarian-qwertz-2",
+        "Magyar (qwertz-1) ansi, hungariansi, hungarianansi-qwertz-1",
+        "Magyar (qwertz-2) ansi, hungariansi, hungarianansi-qwertz-2",
+        "Japanese (kana), japanese, japanese-kana",
+        "Japanese (qwerty), japanese, japanese-qwerty",
+        "Latvian (qwerty), latvian, latvian-qwerty",
+        "Mongolian, mongolian, mongolian",
+        "Persian (Farsi), persian, Persian",
+        "Polish (qwerty), polish, polish-qwerty",
+        "Portuguese (qwerty), portuguese, portuguese-qwerty",
+        "Romanian (qwerty), romanian, romanian",
+        "Russian (mac), russian, russian-mac",
+        "Serbian Cyrillic (sr-Cyrl), serbian, sr-Cyrl",
+        "Serbian Latin (sr), serbian, sr",
+        "Serbian Cyrillic Keyboard Layout (српски) for Mac, serbian, sr-Cyrl-mac",
+        "Serbian Latin Keyboard Layout (Srpski) for Mac, serbian, sr-mac",
+        "Spanish (qwerty), spanish, spanish-qwerty",
+        "Spanish (qwerty) special, spanish, spanish-qwerty-sp",
+        "Swedish (qwerty), swedish, swedish-qwerty",
+        "Swedish (dvorak), swedish, swedish-dvorak",
+        "Tamil (qwerty), tamil, tamil-tamil99-mod",
+        "Thai (qwerty), thai, thai-qwerty",
+        "Turkish (q), turkish, turkish-q",
+        "Turkish (f), turkish, turkish-f",
+        "Vietnamese (qwerty), vietnamese, vietnamese-qwerty"
+      ],
+
+        t, o = '',
+
+        // Change display language, if the definitions are available
+        showKb = function (layout) {
+          var kb = $('#search-bar').getkeyboard();
+          kb.options.layout = layout;
+          // redraw keyboard with new layout
+          kb.redraw();
+        };
+
+
+      $.each(layouts.sort(), function (i, l) {
+        t = l.split(/\s*,\s*/);
+        o += '<option data-filename="' + t[1] + '" value="' + t[2] + '">' + t[0] + '</option>';
+      });
+      // $(".ui-keyboard-preview").on("change", (ev) => {
+      //   console.log('??')
+      //   $("#search-bar").val(1111)
+      // })
+      // allow theme selector to set up, otherwise it pushes the page down after the
+      // keyboard has opened and covers up the <h2> layout title
+      setTimeout(function () {
+        $('#search-bar').keyboard("#search-bar", {
+          layout: 'qwerty',
+          stayOpen: true
+        })
+          // activate the typing extension
+          .addTyping({
+            showTyping: true,
+            delay: 50
+          })
+          .previewKeyset();
+
+        $('#lang')
+          .html(o)
+          .change(function () {
+            var kb = $('#search-bar'),
+              $this = $(this),
+              $opt = $this.find('option:selected'),
+              layout = $this.val();
+            $('h2').text($opt.text());
+            showKb(layout);
+          }).trigger('change');
+
+      }, 100);
+
+    });
+  </script>
+</head>
+
+<body data-gr-c-s-loaded="true">
+  <style type="text/css">
+    body {
+      font-family: monospace;
+    }
+
+    .match-sequence table {
+      display: inline;
+      margin-right: 30px;
+    }
+
+    .match-sequence {
+      margin-bottom: 100px;
+    }
+
+    .match-sequence>table:nth-child(odd) {
+      background-color: #ccc;
+    }
+
+    .match-sequence>table:nth-child(even) {
+      background-color: #eee;
+    }
+
+    #examples-container {
+      margin-top: 200px;
+    }
+  </style>
+  <script type="text/javascript">
+    $(document).ready(function ($) {
+      $('#myPassword').strength({
+        strengthClass: 'strength',
+        strengthMeterClass: 'strength_meter',
+        strengthButtonClass: 'button_strength',
+        strengthButtonText: 'Show Password',
+        strengthButtonTextToggle: 'Hide Password'
+      })
+
+    })
+  </script>
+
+  <br>
+  <h1>
+    <span>
+      Password</span> Strength</h1>
+  <form id="myform" action="" method="get" accept-charset="utf-8">
+
+    <p> Let us analyse the password strength!!</p>
+    <span class='lang-wrap'>Choose keyboard: <select class="form-control" id="lang"></select> </span>
+    <input id="search-bar" type="text" size="50">
+
+  </form>
+
+
+  </div>
+
+  <div id="search-results"></div>
+</body>
+
+</html>

@@ -1,0 +1,337 @@
+/* keyboard - jQuery UI Widget */
+.ui-keyboard {
+	text-align: center;
+	padding: .3em;
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 16000;
+	/* see issue #484 */
+	-ms-touch-action: manipulation;
+	touch-action: manipulation;
+}
+.ui-keyboard-has-focus {
+	z-index: 16001;
+}
+.ui-keyboard div {
+	font-size: 1.1em;
+}
+.ui-keyboard[contenteditable] {
+	white-space: pre;
+}
+
+.ui-keyboard-button {
+	height: 2em;
+	min-width: 2em;
+	margin: .1em;
+	cursor: pointer;
+	overflow: hidden;
+	line-height: 2em;
+	-moz-user-focus: ignore;
+}
+.ui-keyboard-button span {
+	padding: 0;
+	margin: 0;
+	white-space: nowrap;
+	display: inline-block;
+}
+.ui-keyboard-button-endrow {
+	clear: left;
+}
+.ui-keyboard-space {
+	width: 15em;
+}
+/* see http://nicolasgallagher.com/another-css-image-replacement-technique/ */
+.ui-keyboard-space span, .ui-keyboard-empty span {
+	font: 0/0 a;
+	text-shadow: none;
+	color: transparent;
+}
+.ui-keyboard-preview-wrapper {
+	text-align: center;
+	position: relative;
+	overflow: hidden;
+}
+/* width is calculated in IE, since 99% = 99% full browser width =( */
+.ui-keyboard-preview {
+	text-align: left;
+	margin: 0 0 3px 0;
+	display: inline;
+	width: 99%;
+}
+.ui-keyboard-keyset {
+	text-align: center;
+	white-space: nowrap;
+}
+.ui-keyboard-input {
+	text-align: left;
+}
+.ui-keyboard-input-current {
+	-moz-box-shadow: 0 0 5px #4d90fe;
+	-webkit-box-shadow: 0 0 5px #4d90fe;
+	box-shadow: 0 0 5px #4d90fe;
+}
+.ui-keyboard-placeholder {
+	color: #888;
+}
+/* disabled or readonly inputs, or use
+ input[disabled='disabled'] { color: #f00; } */
+.ui-keyboard-nokeyboard {
+	color: #888;
+	border-color: #888;
+}
+.ui-keyboard-spacer {
+	display: inline-block;
+	width: 1px;
+	height: 0;
+	cursor: default;
+}
+
+.ui-keyboard-NBSP span, .ui-keyboard-ZWSP span, .ui-keyboard-ZWNJ span,
+.ui-keyboard-ZWJ span, .ui-keyboard-LRM span, .ui-keyboard-RLM span {
+	font-size: 0.5em;
+	line-height: 1.5em;
+	white-space: normal;
+}
+
+/* combo key styling - toggles diacritics on/off */
+.ui-keyboard-button.ui-keyboard-combo.ui-state-default {
+	border-color: #ffaf0f;
+}
+
+/* (in)valid inputs */
+button.ui-keyboard-accept.ui-keyboard-valid-input {
+	border-color: #0c0;
+	background: #080;
+	color: #fff;
+}
+button.ui-keyboard-accept.ui-keyboard-valid-input:not([disabled]):hover {
+	background: #0a0;
+}
+button.ui-keyboard-accept.ui-keyboard-invalid-input {
+	border-color: #c00;
+	background: #800;
+	color: #fff;
+	opacity: 0.5;
+	filter: alpha(opacity=50);
+}
+button.ui-keyboard-accept.ui-keyboard-invalid-input:not([disabled]):hover {
+	background: #a00;
+}
+
+/*** Caret extension definition ***/
+/* margin-top => is added to the caret height (top & bottom) */
+.ui-keyboard-caret {
+	background: #c00;
+	width: 1px;
+	margin-top: 3px;
+}
+
+/*** jQuery Mobile definitions ***/
+/* jQuery Mobile styles - need wider buttons because of font size and
+ text-overflow:ellipsis */
+div.ui-body.ui-keyboard button.ui-keyboard-button.ui-btn {
+	padding: 0.5em 1em;
+	border-color: transparent;
+}
+.ui-body .ui-keyboard-button {
+	width: 3em;
+	height: 3em;
+	display: inline-block;
+}
+.ui-body .ui-keyboard-widekey {
+	width: 5.5em;
+}
+.ui-body .ui-keyboard-space {
+	width: 15em;
+}
+.ui-body .ui-keyboard-space span {
+	visibility: hidden; /* hides the ellipsis */
+}
+.ui-body .ui-keyboard-keyset {
+	line-height: 0.5em;
+}
+.ui-body input.ui-input-text, .ui-body textarea.ui-input-text {
+	width: 95%;
+}
+
+/* over-ride padding set by mobile ui theme - needed because the mobile script
+ wraps button text with several more spans */
+.ui-body .ui-btn-inner {
+	height: 2em;
+	padding: 0.2em 0;
+	margin: 0;
+}
+.ui-body .ui-btn {
+	margin: 0;
+	font-size: 13px; /* mobile default size is 13px */
+}
+
+/* override Bootstrap excessive button padding */
+button.ui-keyboard-button.btn {
+	padding: 1px 6px;
+}
+
+/* enable/disable icons */
+button.ui-keyboard-toggle span {
+	width: .8em;
+	height: .8em;
+	display: inline-block;
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-size: contain;
+}
+/* unlocked icon (keyboard enabled) */
+button.ui-keyboard-toggle span {
+	/* light theme unlocked icon - fill: #111 */
+	background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgZmlsbD0iIzExMSI+PHBhdGggZD0iTTguNyw0LjRINy41SDUuMHYtMS45YzAtMS40LTEuMS0yLjUtMi41LTIuNWMtMS40LDAtMi41LDEuMS0yLjUsMi41djEuOWgxLjIgdi0xLjljMC0wLjcsMC42LTEuMiwxLjItMS4yczEuMiwwLjYsMS4yLDEuMnYxLjljLTAuNywwLTEuMiwwLjYtMS4yLDEuMlY4LjggYzAsMC43LDAuNiwxLjIsMS4yLDEuMmg1LjBDOS40LDEwLDEwLDkuNCwxMCw4LjhWNS42QzEwLDUuMCw5LjQsNC40LDguOCw0LjR6IE02LjYsNy40djEuMCBjMCwwLjItMC4xLDAuMy0wLjMsMC4zUzYuMCw4LjYsNi4wLDguNFY3LjRjLTAuMi0wLjEtMC4zLTAuMy0wLjMtMC41YzAtMC4zLDAuMy0wLjYsMC42LTAuNiBTNi45LDYuNiw2LjksNi45QzYuOSw3LjEsNi44LDcuMyw2LjYsNy40eiIvPjwvc3ZnPg==);
+}
+.ui-keyboard-dark-theme button.ui-keyboard-toggle span {
+	/* dark theme unlocked icon - fill: #eee */
+	background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgZmlsbD0iI2VlZSI+PHBhdGggZD0iTTguNyw0LjRINy41SDUuMHYtMS45YzAtMS40LTEuMS0yLjUtMi41LTIuNWMtMS40LDAtMi41LDEuMS0yLjUsMi41djEuOWgxLjIgdi0xLjljMC0wLjcsMC42LTEuMiwxLjItMS4yczEuMiwwLjYsMS4yLDEuMnYxLjljLTAuNywwLTEuMiwwLjYtMS4yLDEuMlY4LjggYzAsMC43LDAuNiwxLjIsMS4yLDEuMmg1LjBDOS40LDEwLDEwLDkuNCwxMCw4LjhWNS42QzEwLDUuMCw5LjQsNC40LDguOCw0LjR6IE02LjYsNy40djEuMCBjMCwwLjItMC4xLDAuMy0wLjMsMC4zUzYuMCw4LjYsNi4wLDguNFY3LjRjLTAuMi0wLjEtMC4zLTAuMy0wLjMtMC41YzAtMC4zLDAuMy0wLjYsMC42LTAuNiBTNi45LDYuNiw2LjksNi45QzYuOSw3LjEsNi44LDcuMyw2LjYsNy40eiIvPjwvc3ZnPg==);
+}
+
+/* locked icon (keyboard disabled) */
+button.ui-keyboard-toggle.ui-keyboard-disabled span {
+	/* light theme locked icon - fill: #111 */
+	background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgZmlsbD0iIzExMSI+PHBhdGggZD0iTTcuNCA0LjRWMi41YzAtMS40LTEuMS0yLjUtMi41LTIuNWMtMS40IDAtMi41IDEuMS0yLjUgMi41djEuOSBjLTAuNyAwLTEuMiAwLjUtMS4yIDEuMnYzLjFDMS4zIDkuNCAxLjggMTAgMi41IDEwaDQuOWMwLjcgMCAxLjItMC42IDEuMi0xLjJWNS42IEM4LjcgNC45IDguMSA0LjQgNy40IDQuNHogTTUuMyA3LjR2MS4wYzAgMC4yLTAuMSAwLjMtMC4zIDAuM2MtMC4yIDAtMC4zLTAuMS0wLjMtMC4zVjcuNCBjLTAuMi0wLjEtMC4zLTAuMy0wLjMtMC41YzAtMC4zIDAuMy0wLjYgMC42LTAuNmMwLjMgMCAwLjYgMC4zIDAuNiAwLjYgQzUuNiA3LjEgNS41IDcuMyA1LjMgNy40eiBNNi4yIDQuNEgzLjdWMi41YzAtMC43IDAuNS0xLjIgMS4yLTEuMmMwLjcgMCAxLjIgMC42IDEuMiAxLjIgVjQuNHoiLz48L3N2Zz4=);
+}
+.ui-keyboard-dark-theme button.ui-keyboard-toggle.ui-keyboard-disabled span {
+	/* dark theme locked icon - fill: #eee */
+	background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgZmlsbD0iI2VlZSI+PHBhdGggZD0iTTcuNCA0LjRWMi41YzAtMS40LTEuMS0yLjUtMi41LTIuNWMtMS40IDAtMi41IDEuMS0yLjUgMi41djEuOSBjLTAuNyAwLTEuMiAwLjUtMS4yIDEuMnYzLjFDMS4zIDkuNCAxLjggMTAgMi41IDEwaDQuOWMwLjcgMCAxLjItMC42IDEuMi0xLjJWNS42IEM4LjcgNC45IDguMSA0LjQgNy40IDQuNHogTTUuMyA3LjR2MS4wYzAgMC4yLTAuMSAwLjMtMC4zIDAuM2MtMC4yIDAtMC4zLTAuMS0wLjMtMC4zVjcuNCBjLTAuMi0wLjEtMC4zLTAuMy0wLjMtMC41YzAtMC4zIDAuMy0wLjYgMC42LTAuNmMwLjMgMCAwLjYgMC4zIDAuNiAwLjYgQzUuNiA3LjEgNS41IDcuMyA1LjMgNy40eiBNNi4yIDQuNEgzLjdWMi41YzAtMC43IDAuNS0xLjIgMS4yLTEuMmMwLjcgMCAxLjIgMC42IDEuMiAxLjIgVjQuNHoiLz48L3N2Zz4=);
+}
+
+.ui-keyboard.ui-keyboard-disabled button:not(.ui-keyboard-toggle),
+.ui-keyboard.ui-keyboard-disabled input {
+	opacity: 0.5;
+}
+
+/*** Alt-Keys Popup extension ***/
+/* clickable overlay on top of keyboard to hide the popup */
+.ui-keyboard-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	background: rgba(0, 0, 0, 0.5);
+}
+/* the actual popup styling, class names from the css.container option are also
+ added */
+.ui-keyboard-popup {
+	display: inline-block;
+	/* default buttons are 2em wide + .1em margin on either side (set in
+	.ui-keyboard-button definition); so use multiples of 2.2em for a max-width
+	if you don't want any extra white space on the sides, e.g.
+	5 buttons * 2.2em = 11em,
+	6 buttons * 2.2em = 13.2em, etc
+	*/
+	max-width: 22em; /* 10 buttons */
+}
+.ui-keyboard.ui-keyboard-popup-open .ui-keyboard-keyset .ui-keyboard-button {
+	/* Disable keys under overlay while popup is open - see #654 */
+	pointer-events: none;
+}
+
+/*** Extender keyboard extension ***/
+div.ui-keyboard-extender {
+	margin-left: 5px;
+}
+button.ui-keyboard-extender span {
+	width: .9em;
+	height: .9em;
+	display: inline-block;
+	margin-bottom: 3px;
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-size: contain;
+	/* light theme extender icon - fill: #111 */
+	background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgc3R5bGU9ImZpbGw6IzExMSI+PGc+PHBhdGggc3R5bGU9ImZpbGw6bm9uZTtzdHJva2U6IzExMSIgZD0iTSAwLjUsNC41IDE1LjUsNC41IDE1LjUsMTUuNSAwLjUsMTUuNSBaIj48L3BhdGg+PHJlY3Qgd2lkdGg9IjIiIGhlaWdodD0iMiIgeD0iMiIgeT0iNiI+PC9yZWN0PjxyZWN0IHdpZHRoPSIyIiBoZWlnaHQ9IjIiIHg9IjUiIHk9IjYiPjwvcmVjdD48cmVjdCB3aWR0aD0iMiIgaGVpZ2h0PSIyIiB4PSI4IiB5PSI2Ij48L3JlY3Q+PHBhdGggZD0ibSAxMSw2IDMsMCAwLDUgLTIsMCAwLC0zIC0xLDAgeiI+PC9wYXRoPjxyZWN0IHdpZHRoPSIyIiBoZWlnaHQ9IjIiIHg9IjEyIiB5PSIxMiI+PC9yZWN0PjxyZWN0IHdpZHRoPSI2IiBoZWlnaHQ9IjIiIHg9IjUiIHk9IjEyIj48L3JlY3Q+PHJlY3Qgd2lkdGg9IjIiIGhlaWdodD0iMiIgeD0iOSIgeT0iOSI+PC9yZWN0PjxyZWN0IHdpZHRoPSIyIiBoZWlnaHQ9IjIiIHg9IjYiIHk9IjkiPjwvcmVjdD48cmVjdCB3aWR0aD0iMiIgaGVpZ2h0PSIyIiB4PSIyIiB5PSIxMiI+PC9yZWN0PjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjIiIHg9IjIiIHk9IjkiPjwvcmVjdD48L2c+PC9zdmc+);
+}
+.ui-keyboard-dark-theme button.ui-keyboard-extender span {
+	/* dark theme extender icon - fill: #eee */
+	background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgc3R5bGU9ImZpbGw6I2VlZSI+PGc+PHBhdGggc3R5bGU9ImZpbGw6bm9uZTtzdHJva2U6I2VlZSIgZD0iTSAwLjUsNC41IDE1LjUsNC41IDE1LjUsMTUuNSAwLjUsMTUuNSBaIj48L3BhdGg+PHJlY3Qgd2lkdGg9IjIiIGhlaWdodD0iMiIgeD0iMiIgeT0iNiI+PC9yZWN0PjxyZWN0IHdpZHRoPSIyIiBoZWlnaHQ9IjIiIHg9IjUiIHk9IjYiPjwvcmVjdD48cmVjdCB3aWR0aD0iMiIgaGVpZ2h0PSIyIiB4PSI4IiB5PSI2Ij48L3JlY3Q+PHBhdGggZD0ibSAxMSw2IDMsMCAwLDUgLTIsMCAwLC0zIC0xLDAgeiI+PC9wYXRoPjxyZWN0IHdpZHRoPSIyIiBoZWlnaHQ9IjIiIHg9IjEyIiB5PSIxMiI+PC9yZWN0PjxyZWN0IHdpZHRoPSI2IiBoZWlnaHQ9IjIiIHg9IjUiIHk9IjEyIj48L3JlY3Q+PHJlY3Qgd2lkdGg9IjIiIGhlaWdodD0iMiIgeD0iOSIgeT0iOSI+PC9yZWN0PjxyZWN0IHdpZHRoPSIyIiBoZWlnaHQ9IjIiIHg9IjYiIHk9IjkiPjwvcmVjdD48cmVjdCB3aWR0aD0iMiIgaGVpZ2h0PSIyIiB4PSIyIiB5PSIxMiI+PC9yZWN0PjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjIiIHg9IjIiIHk9IjkiPjwvcmVjdD48L2c+PC9zdmc+);
+}
+
+/* Media Queries (optimized for jQuery UI themes;
+ may be slightly off in jQuery Mobile themes) */
+/* 240 x 320 (small phone)  */
+@media all and (max-width: 319px) {
+	.ui-keyboard div {
+		font-size: 9px;
+	}
+	.ui-keyboard .ui-keyboard-input {
+		font-size: 12px;
+	}
+	/* I don't own an iPhone so I have no idea how small this really is... is it
+	even clickable with your finger? */
+	.ui-body .ui-btn {
+		margin: 0;
+		font-size: 9px;
+	}
+	.ui-body .ui-keyboard-button {
+		width: 1.8em;
+		height: 2.5em;
+	}
+	.ui-body .ui-keyboard-widekey {
+		width: 4em;
+	}
+	.ui-body .ui-keyboard-space {
+		width: 8em;
+	}
+	.ui-body .ui-btn-inner {
+		height: 2.5em;
+		padding: 0.3em 0;
+	}
+}
+
+/* 320 x 480 (iPhone)  */
+@media all and (min-width: 320px) and (max-width: 479px) {
+	.ui-keyboard div {
+		font-size: 9px;
+	}
+	.ui-keyboard .ui-keyboard-input {
+		font-size: 14px;
+	}
+	/* I don't own an iPhone so I have no idea how small this really is... is it
+	even clickable with your finger? */
+	.ui-body .ui-btn {
+		margin: 0;
+		font-size: 11px;
+	}
+	.ui-body .ui-keyboard-button {
+		width: 1.8em;
+		height: 3em;
+	}
+	.ui-body .ui-keyboard-widekey {
+		width: 4.5em;
+	}
+	.ui-body .ui-keyboard-space {
+		width: 10em;
+	}
+	.ui-body .ui-btn-inner {
+		height: 3em;
+		padding: 0.7em 0;
+	}
+}
+
+/* 480 x 640 (small tablet) */
+@media all and (min-width: 480px) and (max-width: 767px) {
+	.ui-keyboard div {
+		font-size: 13px;
+	}
+	.ui-keyboard .ui-keyboard-input {
+		font-size: 14px;
+	}
+	.ui-body .ui-btn {
+		margin: 0;
+		font-size: 10px;
+	}
+	.ui-body .ui-keyboard-button {
+		height: 2.5em;
+	}
+	.ui-body .ui-btn-inner {
+		height: 2.5em;
+		padding: 0.5em 0;
+	}
+}
