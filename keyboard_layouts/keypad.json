@@ -1,0 +1,12 @@
+[
+    {
+        "id": "keypad",
+        "layout_str": "\n  / * -\n7 8 9 +\n4 5 6\n1 2 3\n  0 .\n",
+        "slanted": false
+    },
+    {
+        "id": "mac_keypad",
+        "layout_str": "\n  = / *\n7 8 9 -\n4 5 6 +\n1 2 3\n  0 .\n",
+        "slanted": false
+    }
+]

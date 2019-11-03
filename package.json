@@ -14,8 +14,13 @@
     "build-lib": "coffee -o lib --compile --bare --map src/*.coffee",
     "watch-lib": "coffee -o lib --compile --bare --map --watch src/*.coffee",
     "build-dist": "browserify --debug  --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee |   exorcist --base . dist/zxcvbn.js.map >| dist/zxcvbn.js",
+    "build-dev-dist": "browserify --debug  --standalone zxcvbn -t coffeeify --extension='.coffee' src/main.coffee |   exorcist --base . dist/zxcvbn.js.map >| dist/zxcvbn.js",
     "watch-dist": "watchify --debug -v --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee -o 'exorcist --base . dist/zxcvbn.js.map >| dist/zxcvbn.js'",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "devpub": "npm run build-lib ; npm run build-dev-dist",
+    "devpubc": "npm run bk; npm run bf; npm run build-lib ; npm run build-dev-dist",
+    "bf": "python2 data-scripts/build_frequency_lists.py  data src/frequency_lists.coffee",
+    "bk": "cd keyboard_layouts; node generate_layouts.js; cd .. ; python data-scripts/build_keyboard_adjacency_graphs.new.py keyboard_layouts src/adjacency_graphs.coffee"
   },
   "devDependencies": {
     "browserify": "^11.0.1",

@@ -14,11 +14,7 @@ RANKED_DICTIONARIES = {}
 for name, lst of frequency_lists
   RANKED_DICTIONARIES[name] = build_ranked_dict lst
 
-GRAPHS =
-  qwerty:     adjacency_graphs.qwerty
-  dvorak:     adjacency_graphs.dvorak
-  keypad:     adjacency_graphs.keypad
-  mac_keypad: adjacency_graphs.mac_keypad
+GRAPHS = Object.assign({}, adjacency_graphs)
 
 L33T_TABLE =
   a: ['4', '@']
@@ -64,6 +60,8 @@ DATE_SPLITS =
     [4, 6] # 1991 11 11
     ]
 
+checked_graph = false
+
 matching =
   empty: (obj) -> (k for k of obj).length == 0
   extend: (lst, lst2) -> lst.push.apply lst, lst2
@@ -79,6 +77,13 @@ matching =
   # ------------------------------------------------------------------------------
 
   omnimatch: (password) ->
+    if not checked_graph
+      for graph_name, graph of GRAPHS
+        if graph == undefined
+          throw Error("Graph " + graph_name + " does not exist in adjacency_graphs")
+        console.log("Loaded graph " + graph_name, graph)
+      checked_graph = true
+
     matches = []
     matchers = [
       @dictionary_match
