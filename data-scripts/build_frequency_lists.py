@@ -35,6 +35,10 @@ DICTIONARIES = dict(
     surnames          = 10000,
     male_names        = None,
     female_names      = None,
+    italian           = None,
+    russian           = None,
+    indian_males      = None,
+    indian_females    = None
 )
 
 # returns {list_name: {token: rank}}, as tokens and ranks occur in each file.
@@ -47,11 +51,21 @@ def parse_frequency_lists(data_dir):
             print msg % (freq_list_name, data_dir)
             continue
         token_to_rank = {}
-        with codecs.open(os.path.join(data_dir, filename), 'r', 'utf8') as f:
-            for i, line in enumerate(f):
-                rank = i + 1 # rank starts at 1
-                token = line.split()[0]
-                token_to_rank[token] = rank
+        if filename == 'russian.txt':
+            with codecs.open(os.path.join(data_dir, filename), 'r', 'windows-1251') as f:
+                for i, line in enumerate(f):
+                    rank = i + 1 # rank starts at 1
+                    token = line.split()[0]
+                    token_to_rank[token] = rank
+        else:
+            with codecs.open(os.path.join(data_dir, filename), 'r', 'utf-8') as f:
+                for i, line in enumerate(f):
+                    try:
+                        rank = i + 1 # rank starts at 1
+                        token = line.split()[0]
+                        token_to_rank[token] = rank
+                    except:
+                        pass
         freq_lists[freq_list_name] = token_to_rank
     for freq_list_name in DICTIONARIES:
         if freq_list_name not in freq_lists:
