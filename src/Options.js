@@ -113,10 +113,10 @@ class Options {
 
   calcAverageDegree(graph) {
     let average = 0
-    for (const key in graph) {
+    Object.keys(graph).forEach((key) => {
       const neighbors = graph[key]
       average += Object.entries(neighbors).length
-    }
+    })
     average /= Object.entries(graph).length
     return average
   }
