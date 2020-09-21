@@ -15,7 +15,7 @@ describe('spatial matching', () => {
     qwerty: adjacencyGraphs.qwerty,
   }
   Options.setOptions({
-    graphs
+    graphs,
   })
   const matchSpatial = new MatchSpatial()
   const pattern = '6tfGHJ'
@@ -57,7 +57,7 @@ describe('spatial matching specific patterns vs keyboards', () => {
     const graphs = {}
     graphs[keyboard] = adjacencyGraphs[keyboard]
     Options.setOptions({
-      graphs
+      graphs,
     })
     const matchSpatial = new MatchSpatial()
     const matches = matchSpatial.match(pattern)
