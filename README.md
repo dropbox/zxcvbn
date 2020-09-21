@@ -286,3 +286,20 @@ Wiktionary contributors for building a [frequency list of English words](http://
 Researchers at Concordia University for [studying password estimation rigorously](http://www.concordia.ca/cunews/main/stories/2015/03/25/does-your-password-pass-muster.html) and recommending zxcvbn.
 
 And [xkcd](https://xkcd.com/936/) for the inspiration :+1::horse::battery::heart:
+
+
+New Features:
+- add i18n support warning, suggestions and times are now translateable with a english default translation
+- every match type can be deactivated. For example you can deactivate the `dictionary` to stop using the really big frequency list
+- you can customize everything. Use your own l33t table, your own adjacency graphs or your complete self made dictonary
+- rewritten in es6
+- tests and coverage with jest
+- esm build for treeshaking
+- use prettier and eslint for clean code
+
+Ongoing:
+- typescript support
+- multi frequency and multi adjacency_graphs lists
+- use custom adjacency_graphs in guesses/spatial.js
+- improve data-scripts
+- remove more references 
