@@ -298,8 +298,10 @@ New Features:
 - use prettier and eslint for clean code
 - use custom adjacency_graphs in guesses/spatial.js
 - remove more references 
+- fix rewarding of capitalize first letter https://github.com/dropbox/zxcvbn/issues/232
 
 Ongoing:
 - typescript support
 - multi frequency and multi adjacency_graphs lists
 - improve data-scripts
+- working treeshaking

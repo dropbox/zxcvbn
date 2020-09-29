@@ -5,5 +5,6 @@ module.exports = {
     '" ,< .> pP yY fF gG cC rR lL /? =+ \\|
      aA oO eE uU iI dD hH tT nN sS -_
       ;: qQ jJ kK xX bB mM wW vV zZ
-  `
+  `,
+  shiftedRx: /[~!@#$%^&*(){}"<>PYFGCRL?+|AOEUIDHTNS_:QJKXBMWVZ]/,
 }
