@@ -18,6 +18,7 @@ export const ALL_LOWER = /^[a-z\xdf-\xff]+$/
 export const ALL_LOWER_INVERTED = /^[^A-Z\xbf-\xdf]+$/
 export const ONE_UPPER = /[a-z\xdf-\xff]/
 export const ONE_LOWER = /[A-Z\xbf-\xdf]/
+export const ALPHA_INVERTED = /[^A-Za-z\xbf-\xdf]/gi
 export const ALL_DIGIT = /^\d+$/
 export const REFERENCE_YEAR = new Date().getFullYear()
 export const REGEXEN = { recentYear: /19\d\d|200\d|201\d|202\d/g }

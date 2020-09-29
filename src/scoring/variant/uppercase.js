@@ -6,12 +6,16 @@ import {
   ALL_LOWER_INVERTED,
   ONE_LOWER,
   ONE_UPPER,
+  ALPHA_INVERTED,
 } from '../../data/const'
 
 export default (word) => {
-  // TODO this is a good fix https://github.com/dropbox/zxcvbn/issues/232
-  // const word = match.token.replace(/[^A-Za-z]/gi, '')
-  if (word.match(ALL_LOWER_INVERTED) || word.toLowerCase() === word) {
+  // clean words of non alpha characters to remove the reward effekt to capitalize the first letter https://github.com/dropbox/zxcvbn/issues/232
+  const cleanedWord = word.replace(ALPHA_INVERTED, '')
+  if (
+    cleanedWord.match(ALL_LOWER_INVERTED) ||
+    cleanedWord.toLowerCase() === cleanedWord
+  ) {
     return 1
   }
   // a capitalized word is the most common capitalization scheme,
@@ -21,14 +25,14 @@ export default (word) => {
   const commonCasesLength = commonCases.length
   for (let i = 0; i < commonCasesLength; i += 1) {
     const regex = commonCases[i]
-    if (word.match(regex)) {
+    if (cleanedWord.match(regex)) {
       return 2
     }
   }
   // otherwise calculate the number of ways to capitalize U+L uppercase+lowercase letters
   // with U uppercase letters or less. or, if there's more uppercase than lower (for eg. PASSwORD),
   // the number of ways to lowercase U+L letters with L lowercase letters or less.
-  const wordArray = word.split('')
+  const wordArray = cleanedWord.split('')
   const upperCaseCount = wordArray.filter((char) => char.match(ONE_UPPER))
     .length
   const lowerCaseCount = wordArray.filter((char) => char.match(ONE_LOWER))
