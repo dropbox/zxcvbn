@@ -13,7 +13,7 @@ describe('scoring guesses repeated', () => {
   ]
 
   data.forEach(([token, baseToken, repeatCount]) => {
-    const baseGuesses = scoring.most_guessable_match_sequence(
+    const baseGuesses = scoring.mostGuessableMatchSequence(
       baseToken,
       omniMatch.match(baseToken),
     ).guesses

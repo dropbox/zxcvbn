@@ -26,7 +26,6 @@ class MatchL33t {
         break
       }
       const subbedPassword = translate(password, sub)
-      // TODO don't use stuff that is imported in the main file
       const matchedDictionary = this.MatchDictionary.match(subbedPassword)
       matchedDictionary.forEach((match) => {
         const token = password.slice(match.i, +match.j + 1 || 9e9)
@@ -81,55 +80,7 @@ class MatchL33t {
   // returns the list of possible 1337 replacement dictionaries for a given password
   enumerateL33tSubs(table) {
     const tableKeys = Object.keys(table)
-    // TODO move out of function
-    const dedup = (subs) => {
-      const deduped = []
-      const members = {}
-      subs.forEach((sub) => {
-        const assoc = sub.map((k, index) => [k, index])
-        assoc.sort()
-        const label = assoc.map(([k, v]) => `${k},${v}`)
-        if (!(label in members)) {
-          members[label] = true
-          deduped.push(sub)
-        }
-      })
-      return deduped
-    }
-    let subs = [[]]
-    // TODO move out of function
-    const helper = (keys) => {
-      if (!keys.length) {
-        return null
-      }
-      const firstKey = keys[0]
-      const restKeys = keys.slice(1)
-      const nextSubs = []
-      table[firstKey].forEach((l33tChr) => {
-        subs.forEach((sub) => {
-          let dupL33tIndex = -1
-          for (let i = 0; i < sub.length; i += 1) {
-            if (sub[i][0] === l33tChr) {
-              dupL33tIndex = i
-              break
-            }
-          }
-          if (dupL33tIndex === -1) {
-            const subExtension = sub.concat([[l33tChr, firstKey]])
-            nextSubs.push(subExtension)
-          } else {
-            const subAlternative = sub.slice(0)
-            subAlternative.splice(dupL33tIndex, 1)
-            subAlternative.push([l33tChr, firstKey])
-            nextSubs.push(sub)
-            nextSubs.push(subAlternative)
-          }
-        })
-      })
-      subs = dedup(nextSubs)
-      return helper(restKeys)
-    }
-    helper(tableKeys)
+    const subs = this.getSubs(tableKeys, [[]], table)
     // convert from assoc lists to dicts
     return subs.map((sub) => {
       const subDict = {}
@@ -138,6 +89,56 @@ class MatchL33t {
       })
       return subDict
     })
+  }
+
+  getSubs(keys, subs, table) {
+    if (!keys.length) {
+      return subs
+    }
+    const firstKey = keys[0]
+    const restKeys = keys.slice(1)
+    const nextSubs = []
+    table[firstKey].forEach((l33tChr) => {
+      subs.forEach((sub) => {
+        let dupL33tIndex = -1
+        for (let i = 0; i < sub.length; i += 1) {
+          if (sub[i][0] === l33tChr) {
+            dupL33tIndex = i
+            break
+          }
+        }
+        if (dupL33tIndex === -1) {
+          const subExtension = sub.concat([[l33tChr, firstKey]])
+          nextSubs.push(subExtension)
+        } else {
+          const subAlternative = sub.slice(0)
+          subAlternative.splice(dupL33tIndex, 1)
+          subAlternative.push([l33tChr, firstKey])
+          nextSubs.push(sub)
+          nextSubs.push(subAlternative)
+        }
+      })
+    })
+    const newSubs = this.dedup(nextSubs)
+    if (restKeys.length) {
+      return this.getSubs(restKeys, newSubs, table)
+    }
+    return newSubs
+  }
+
+  dedup(subs) {
+    const deduped = []
+    const members = {}
+    subs.forEach((sub) => {
+      const assoc = sub.map((k, index) => [k, index])
+      assoc.sort()
+      const label = assoc.map(([k, v]) => `${k},${v}`)
+      if (!(label in members)) {
+        members[label] = true
+        deduped.push(sub)
+      }
+    })
+    return deduped
   }
 }
 

@@ -1,15 +1,15 @@
 import utils from '../utils'
 
-export default (match) => {
-  if (!match.l33t) {
+export default ({ l33t, sub, token }) => {
+  if (!l33t) {
     return 1
   }
   let variations = 1
-  const subs = match.sub
+  const subs = sub
   Object.keys(subs).forEach((subbed) => {
     const unsubbed = subs[subbed]
     // lower-case match.token before calculating: capitalization shouldn't affect l33t calc.
-    const chrs = match.token.toLowerCase().split('')
+    const chrs = token.toLowerCase().split('')
     // num of subbed chars
     const subbedCount = chrs.filter((char) => char === subbed).length
     // num of unsubbed chars

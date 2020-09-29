@@ -21,11 +21,7 @@ describe('scoring: variant uppercase', () => {
 
   data.forEach(([word, variants]) => {
     it(`guess multiplier of ${word} is ${variants}`, () => {
-      expect(
-        uppercase({
-          token: word,
-        }),
-      ).toEqual(variants)
+      expect(uppercase(word)).toEqual(variants)
     })
   })
 })

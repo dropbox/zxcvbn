@@ -1,5 +1,5 @@
-export default (match) => {
-  const firstChr = match.token.charAt(0)
+export default ({ token, ascending }) => {
+  const firstChr = token.charAt(0)
   let baseGuesses = 0
   const startingPoints = ['a', 'A', 'z', 'Z', '0', '1', '9']
   // lower guesses for obvious starting points
@@ -14,8 +14,8 @@ export default (match) => {
   }
   // need to try a descending sequence in addition to every ascending sequence ->
   // 2x guesses
-  if (!match.ascending) {
+  if (!ascending) {
     baseGuesses *= 2
   }
-  return baseGuesses * match.token.length
+  return baseGuesses * token.length
 }

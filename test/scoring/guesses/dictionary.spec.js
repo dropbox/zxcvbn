@@ -22,7 +22,7 @@ describe('scoring: guesses dictionary', () => {
       token: 'AAAaaa',
       rank: 32,
     }
-    const result = 32 * uppercaseVariant(match)
+    const result = 32 * uppercaseVariant(match.token)
     expect(dictionaryGuesses(match)).toEqual({
       baseGuesses: 32,
       calculation: result,
@@ -73,7 +73,7 @@ describe('scoring: guesses dictionary', () => {
         '@': 'a',
       },
     }
-    const result = 32 * l33tVariant(match) * uppercaseVariant(match)
+    const result = 32 * l33tVariant(match) * uppercaseVariant(match.token)
     expect(dictionaryGuesses(match)).toEqual({
       baseGuesses: 32,
       calculation: result,

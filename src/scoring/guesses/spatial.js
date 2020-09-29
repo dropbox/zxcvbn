@@ -1,16 +1,15 @@
 import utils from '../utils'
 import Options from '../../Options'
 
-export default (match) => {
+export default ({ graph, token, shifted_count, turns }) => {
   let startingPosition = Options.keypadStartingPositions
   let averageDegree = Options.keypadAverageDegree
-  if (Options.availbableGraphs.includes(match.graph)) {
+  if (Options.availbableGraphs.includes(graph)) {
     startingPosition = Options.keyboardStartingPositions
     averageDegree = Options.keyboardAverageDegree
   }
   let guesses = 0
-  const tokenLength = match.token.length
-  const { turns } = match
+  const tokenLength = token.length
   // # estimate the number of possible patterns w/ tokenLength or less with turns or less.
   for (let i = 2; i <= tokenLength; i += 1) {
     const possibleTurns = Math.min(turns, i - 1)
@@ -20,9 +19,9 @@ export default (match) => {
   }
   // add extra guesses for shifted keys. (% instead of 5, A instead of a.)
   // math is similar to extra guesses of l33t substitutions in dictionary matches.
-  if (match.shifted_count) {
-    const shiftedCount = match.shifted_count
-    const unShiftedCount = match.token.length - match.shifted_count
+  if (shifted_count) {
+    const shiftedCount = shifted_count
+    const unShiftedCount = token.length - shifted_count
     if (shiftedCount === 0 || unShiftedCount === 0) {
       guesses *= 2
     } else {

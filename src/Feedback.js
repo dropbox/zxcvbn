@@ -1,4 +1,4 @@
-import { START_UPPER, ALL_UPPER } from './data/const'
+import { START_UPPER, ALL_UPPER_INVERTED } from './data/const'
 import Options from './Options'
 
 /*
@@ -39,6 +39,7 @@ class Feedback {
         longestMatch = match
       }
     })
+
     let feedback = this.getMatchFeedback(longestMatch, sequence.length === 1)
     const extraFeedback = Options.translations.suggestions.anotherWord
     if (feedback !== null && feedback !== undefined) {
@@ -148,7 +149,7 @@ class Feedback {
 
     if (word.match(START_UPPER)) {
       suggestions.push(Options.translations.suggestions.capitalization)
-    } else if (word.match(ALL_UPPER) && word.toLowerCase() !== word) {
+    } else if (word.match(ALL_UPPER_INVERTED) && word.toLowerCase() !== word) {
       suggestions.push(Options.translations.suggestions.allUppercase)
     }
     if (match.reversed && match.token.length >= 4) {

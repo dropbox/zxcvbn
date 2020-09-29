@@ -10,7 +10,7 @@ describe('scoring search', () => {
   const password = '0123456789'
 
   describe('returns one bruteforce match given an empty match sequence:', () => {
-    const result = scoring.most_guessable_match_sequence(password, [])
+    const result = scoring.mostGuessableMatchSequence(password, [])
     const firstSequence = result.sequence[0]
 
     it('result.length == 1', () => {
@@ -33,7 +33,7 @@ describe('scoring search', () => {
   describe('returns match + bruteforce when match covers a prefix of password:', () => {
     const matches = [getMatch(0, 5, 1)]
     const firstMatch = matches[0]
-    const result = scoring.most_guessable_match_sequence(
+    const result = scoring.mostGuessableMatchSequence(
       password,
       matches,
       excludeAdditive,
@@ -60,7 +60,7 @@ describe('scoring search', () => {
   describe('returns bruteforce + match when match covers a suffix:', () => {
     const matches = [getMatch(3, 9, 1)]
     const firstMatch = matches[0]
-    const result = scoring.most_guessable_match_sequence(
+    const result = scoring.mostGuessableMatchSequence(
       password,
       matches,
       excludeAdditive,
@@ -86,7 +86,7 @@ describe('scoring search', () => {
 
   describe('returns bruteforce + match + bruteforce when match covers an infix:', () => {
     const matches = [getMatch(1, 8, 1)]
-    const result = scoring.most_guessable_match_sequence(
+    const result = scoring.mostGuessableMatchSequence(
       password,
       matches,
       excludeAdditive,
@@ -115,7 +115,7 @@ describe('scoring search', () => {
     const matches = [getMatch(0, 9, 1), getMatch(0, 9, 2)]
     const firstMatch = matches[0]
     const secondMatch = matches[1]
-    let result = scoring.most_guessable_match_sequence(
+    let result = scoring.mostGuessableMatchSequence(
       password,
       matches,
       excludeAdditive,
@@ -134,7 +134,7 @@ describe('scoring search', () => {
     })
 
     firstMatch.guesses = 3
-    result = scoring.most_guessable_match_sequence(
+    result = scoring.mostGuessableMatchSequence(
       password,
       matches,
       excludeAdditive,
@@ -152,7 +152,7 @@ describe('scoring search', () => {
     const thirdMatch = matches[2]
 
     describe('when m0 covers m1 and m2, choose [m0] when m0 < m1 * m2 * fact(2):', () => {
-      const result = scoring.most_guessable_match_sequence(
+      const result = scoring.mostGuessableMatchSequence(
         password,
         matches,
         excludeAdditive,
@@ -168,7 +168,7 @@ describe('scoring search', () => {
 
     describe('when m0 covers m1 and m2, choose [m1, m2] when m0 > m1 * m2 * fact(2):', () => {
       firstMatch.guesses = 5
-      const result = scoring.most_guessable_match_sequence(
+      const result = scoring.mostGuessableMatchSequence(
         password,
         matches,
         excludeAdditive,

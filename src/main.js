@@ -33,14 +33,16 @@ export default (password, userInputs = [], options) => {
   const matches = matching.match(password, {
     userInputs: sanitizedInputs,
   })
-  const result = scoring.most_guessable_match_sequence(password, matches)
-  result.calc_time = time() - start
-  const attackTimes = timeEstimates.estimateAttackTimes(result.guesses)
-  let val = ''
-  Object.keys(attackTimes).forEach((prop) => {
-    val = attackTimes[prop]
-    result[prop] = val
-  })
+  const matchSequence = scoring.mostGuessableMatchSequence(password, matches)
+  const calcTime = time() - start
+  const attackTimes = timeEstimates.estimateAttackTimes(matchSequence.guesses)
+  const result = {
+    calc_time: calcTime,
+    ...matchSequence,
+    ...attackTimes,
+    feedback: null,
+  }
+
   result.feedback = feedback.getFeedback(result.score, result.sequence)
   return result
 }

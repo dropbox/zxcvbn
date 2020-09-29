@@ -66,17 +66,16 @@ const scoringHelper = {
     }
   },
 
-  // helper: evaluate bruteforce matches ending at k.
-  // TODO find out what k is. It should be all numbers between 0 and password.length
-  bruteforceUpdate(k) {
-    // see if a single bruteforce match spanning the k-prefix is optimal.
-    let match = this.makeBruteforceMatch(0, k)
+  // helper: evaluate bruteforce matches ending at passwordCharIndex.
+  bruteforceUpdate(passwordCharIndex) {
+    // see if a single bruteforce match spanning the passwordCharIndex-prefix is optimal.
+    let match = this.makeBruteforceMatch(0, passwordCharIndex)
     this.update(match, 1)
-    for (let i = 1; i <= k; i += 1) {
-      // generate k bruteforce matches, spanning from (i=1, j=k) up to (i=k, j=k).
+    for (let i = 1; i <= passwordCharIndex; i += 1) {
+      // generate passwordCharIndex bruteforce matches, spanning from (i=1, j=passwordCharIndex) up to (i=passwordCharIndex, j=passwordCharIndex).
       // see if adding these new matches to any of the sequences in optimal[i-1]
       // leads to new bests.
-      match = this.makeBruteforceMatch(i, k)
+      match = this.makeBruteforceMatch(i, passwordCharIndex)
       const tmp = this.optimal.m[i - 1]
       // eslint-disable-next-line no-loop-func
       Object.keys(tmp).forEach((sequenceLength) => {
@@ -93,12 +92,11 @@ const scoringHelper = {
     }
   },
 
-  // TODO find out what n is. It should be the password length
   // helper: step backwards through optimal.m starting at the end,
   // constructing the final optimal match sequence.
-  unwind(n) {
+  unwind(passwordLength) {
     const optimalMatchSequence = []
-    let k = n - 1
+    let k = passwordLength - 1
     // find the final best sequence length and score
     let sequenceLength
     let g = 2e308
@@ -153,7 +151,7 @@ export default {
   //    D^(sequenceLength-1) approximates Sum(D^i for i in [1..sequenceLength-1]
   //
   // ------------------------------------------------------------------------------
-  most_guessable_match_sequence(password, matches, excludeAdditive = false) {
+  mostGuessableMatchSequence(password, matches, excludeAdditive = false) {
     scoringHelper.password = password
     scoringHelper.excludeAdditive = excludeAdditive
     const passwordLength = password.length

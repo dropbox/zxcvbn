@@ -1,3 +1,5 @@
+import { ALL_UPPER, ALL_LOWER, ALL_DIGIT } from '../data/const'
+
 /*
  *-------------------------------------------------------------------------------
  * sequences (abcdef) ------------------------------
@@ -6,6 +8,40 @@
 class MatchSequence {
   constructor() {
     this.MAX_DELTA = 5
+  }
+
+  update({ i, j, delta, password, result }) {
+    if (j - i > 1 || Math.abs(delta) === 1) {
+      const absoluteDelta = Math.abs(delta)
+      if (absoluteDelta > 0 && absoluteDelta <= this.MAX_DELTA) {
+        const token = password.slice(i, +j + 1 || 9e9)
+        // TODO conservatively stick with roman alphabet size.
+        //  (this could be improved)
+        let sequenceName = 'unicode'
+        let sequenceSpace = 26
+
+        if (ALL_LOWER.test(token)) {
+          sequenceName = 'lower'
+          sequenceSpace = 26
+        } else if (ALL_UPPER.test(token)) {
+          sequenceName = 'upper'
+          sequenceSpace = 26
+        } else if (ALL_DIGIT.test(token)) {
+          sequenceName = 'digits'
+          sequenceSpace = 10
+        }
+        return result.push({
+          pattern: 'sequence',
+          i,
+          j,
+          token: password.slice(i, +j + 1 || 9e9),
+          sequence_name: sequenceName,
+          sequence_space: sequenceSpace,
+          ascending: delta > 0,
+        })
+      }
+    }
+    return null
   }
 
   match(password) {
@@ -27,40 +63,7 @@ class MatchSequence {
     if (password.length === 1) {
       return []
     }
-    // TODO move out of function
-    const update = (i, j, delta) => {
-      if (j - i > 1 || Math.abs(delta) === 1) {
-        const absoluteDelta = Math.abs(delta)
-        if (absoluteDelta > 0 && absoluteDelta <= this.MAX_DELTA) {
-          const token = password.slice(i, +j + 1 || 9e9)
-          // conservatively stick with roman alphabet size.
-          // (this could be improved)
-          let sequenceName = 'unicode'
-          let sequenceSpace = 26
 
-          if (/^[a-z]+$/.test(token)) {
-            sequenceName = 'lower'
-            sequenceSpace = 26
-          } else if (/^[A-Z]+$/.test(token)) {
-            sequenceName = 'upper'
-            sequenceSpace = 26
-          } else if (/^\d+$/.test(token)) {
-            sequenceName = 'digits'
-            sequenceSpace = 10
-          }
-          return result.push({
-            pattern: 'sequence',
-            i,
-            j,
-            token: password.slice(i, +j + 1 || 9e9),
-            sequence_name: sequenceName,
-            sequence_space: sequenceSpace,
-            ascending: delta > 0,
-          })
-        }
-      }
-      return null
-    }
     let i = 0
     let lastDelta = null
     const passwordLength = password.length
@@ -71,12 +74,24 @@ class MatchSequence {
       }
       if (delta !== lastDelta) {
         const j = k - 1
-        update(i, j, lastDelta)
+        this.update({
+          i,
+          j,
+          delta: lastDelta,
+          password,
+          result,
+        })
         i = j
         lastDelta = delta
       }
     }
-    update(i, passwordLength - 1, lastDelta)
+    this.update({
+      i,
+      j: passwordLength - 1,
+      delta: lastDelta,
+      password,
+      result,
+    })
     return result
   }
 }

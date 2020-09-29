@@ -1,1 +1,1 @@
-export default (match) => match.base_guesses * match.repeat_count
+export default ({ base_guesses, repeat_count }) => base_guesses * repeat_count
