@@ -19,9 +19,9 @@ describe('scoring guesses repeated', () => {
     ).guesses
     const match = {
       token,
-      base_token: baseToken,
-      base_guesses: baseGuesses,
-      repeat_count: repeatCount,
+      baseToken,
+      baseGuesses,
+      repeatCount,
     }
     it('asd', () => {
       expect(true).toBeTruthy()

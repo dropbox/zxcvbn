@@ -140,39 +140,39 @@ Add to your .html:
 [try zxcvbn interactively](https://lowe.github.io/tryzxcvbn/) to see these docs in action.
 
 ``` javascript
-zxcvbn(password, user_inputs=[])
+zxcvbn(password, userInputs=[])
 ```
 
 `zxcvbn()` takes one required argument, a password, and returns a result object with several properties:
 
 ``` coffee
 result.guesses            # estimated guesses needed to crack password
-result.guesses_log10      # order of magnitude of result.guesses
+result.guessesLog10      # order of magnitude of result.guesses
 
-result.crack_times_seconds # dictionary of back-of-the-envelope crack time
+result.crackTimesSeconds # dictionary of back-of-the-envelope crack time
                           # estimations, in seconds, based on a few scenarios:
 {
   # online attack on a service that ratelimits password auth attempts.
-  online_throttling_100_per_hour
+  onlineThrottling100PerHour
 
   # online attack on a service that doesn't ratelimit,
   # or where an attacker has outsmarted ratelimiting.
-  online_no_throttling_10_per_second
+  onlineThrottling10PerSecond
 
   # offline attack. assumes multiple attackers,
   # proper user-unique salting, and a slow hash function
   # w/ moderate work factor, such as bcrypt, scrypt, PBKDF2.
-  offline_slow_hashing_1e4_per_second
+  offlineSlowHashing1e4PerSecond
 
   # offline attack with user-unique salting but a fast hash
   # function like SHA-1, SHA-256 or MD5. A wide range of
   # reasonable numbers anywhere from one billion - one trillion
   # guesses per second, depending on number of cores and machines.
   # ballparking at 10B/sec.
-  offline_fast_hashing_1e10_per_second
+  offlineFastHashing1e10PerSecond
 }
 
-result.crack_times_display # same keys as result.crack_times_seconds,
+result.crackTimesDisplay # same keys as result.crackTimesSeconds,
                            # with friendlier display string values:
                            # "less than a second", "3 hours", "centuries", etc.
 
@@ -199,11 +199,11 @@ result.feedback   # verbal feedback to help choose better passwords. set when sc
 result.sequence   # the list of patterns that zxcvbn based the
                   # guess calculation on.
 
-result.calc_time  # how long it took zxcvbn to calculate an answer,
+result.calcTime  # how long it took zxcvbn to calculate an answer,
                   # in milliseconds.
 ````
 
-The optional `user_inputs` argument is an array of strings that zxcvbn will treat as an extra dictionary. This can be whatever list of strings you like, but is meant for user inputs from other fields of the form, like name and email. That way a password that includes a user's personal information can be heavily penalized. This list is also good for site-specific vocabulary — Acme Brick Co. might want to include ['acme', 'brick', 'acmebrick', etc].
+The optional `userInputs` argument is an array of strings that zxcvbn will treat as an extra dictionary. This can be whatever list of strings you like, but is meant for user inputs from other fields of the form, like name and email. That way a password that includes a user's personal information can be heavily penalized. This list is also good for site-specific vocabulary — Acme Brick Co. might want to include ['acme', 'brick', 'acmebrick', etc].
 
 # <a name="perf"></a>Performance
 
@@ -296,10 +296,10 @@ New Features:
 - tests and coverage with jest
 - esm build for treeshaking
 - use prettier and eslint for clean code
+- use custom adjacency_graphs in guesses/spatial.js
+- remove more references 
 
 Ongoing:
 - typescript support
 - multi frequency and multi adjacency_graphs lists
-- use custom adjacency_graphs in guesses/spatial.js
 - improve data-scripts
-- remove more references 

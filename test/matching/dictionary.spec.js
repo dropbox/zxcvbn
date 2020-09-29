@@ -11,9 +11,9 @@ describe('dictionary matching', () => {
     const msg = 'default dictionaries'
     const ijs = [[0, 2]]
     checkMatches(msg, matches, 'dictionary', patterns, ijs, {
-      matched_word: patterns,
+      matchedWord: patterns,
       rank: [322],
-      dictionary_name: ['us_tv_and_film'],
+      dictionaryName: ['us_tv_and_film'],
     })
   })
   describe('without user input', () => {
@@ -42,9 +42,9 @@ describe('dictionary matching', () => {
         [6, 10],
       ],
       {
-        matched_word: ['mother', 'motherboard', 'board'],
+        matchedWord: ['mother', 'motherboard', 'board'],
         rank: [2, 1, 3],
-        dictionary_name: ['d1', 'd1', 'd1'],
+        dictionaryName: ['d1', 'd1', 'd1'],
       },
     )
     matches = dm('abcdef')
@@ -60,9 +60,9 @@ describe('dictionary matching', () => {
         [2, 5],
       ],
       {
-        matched_word: ['abcd', 'cdef'],
+        matchedWord: ['abcd', 'cdef'],
         rank: [4, 5],
-        dictionary_name: ['d1', 'd1'],
+        dictionaryName: ['d1', 'd1'],
       },
     )
     matches = dm('BoaRdZ')
@@ -78,9 +78,9 @@ describe('dictionary matching', () => {
         [5, 5],
       ],
       {
-        matched_word: ['board', 'z'],
+        matchedWord: ['board', 'z'],
         rank: [3, 1],
-        dictionary_name: ['d1', 'd2'],
+        dictionaryName: ['d1', 'd2'],
       },
     )
 
@@ -92,9 +92,9 @@ describe('dictionary matching', () => {
       matches = dm(password)
       msg = 'identifies words surrounded by non-words'
       checkMatches(msg, matches, 'dictionary', [testWord], [[i, j]], {
-        matched_word: [testWord],
+        matchedWord: [testWord],
         rank: [5],
-        dictionary_name: ['d2'],
+        dictionaryName: ['d2'],
       })
     })
 
@@ -112,9 +112,9 @@ describe('dictionary matching', () => {
             [word],
             [[0, word.length - 1]],
             {
-              matched_word: [word],
+              matchedWord: [word],
               rank: [rank],
-              dictionary_name: [name],
+              dictionaryName: [name],
             },
           )
         }
@@ -128,7 +128,7 @@ describe('dictionary matching', () => {
     })
     const matches = matchDictionary
       .match('foobar')
-      .filter((match) => match.dictionary_name === 'userInputs')
+      .filter((match) => match.dictionaryName === 'userInputs')
 
     const msg = 'matches with provided user input dictionary'
     checkMatches(
@@ -141,7 +141,7 @@ describe('dictionary matching', () => {
         [3, 5],
       ],
       {
-        matched_word: ['foo', 'bar'],
+        matchedWord: ['foo', 'bar'],
         rank: [1, 2],
       },
     )

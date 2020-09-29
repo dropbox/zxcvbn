@@ -1,7 +1,7 @@
 import utils from '../utils'
 import Options from '../../Options'
 
-export default ({ graph, token, shifted_count, turns }) => {
+export default ({ graph, token, shiftedCount, turns }) => {
   let startingPosition = Options.keypadStartingPositions
   let averageDegree = Options.keypadAverageDegree
   if (Options.availbableGraphs.includes(graph)) {
@@ -19,9 +19,8 @@ export default ({ graph, token, shifted_count, turns }) => {
   }
   // add extra guesses for shifted keys. (% instead of 5, A instead of a.)
   // math is similar to extra guesses of l33t substitutions in dictionary matches.
-  if (shifted_count) {
-    const shiftedCount = shifted_count
-    const unShiftedCount = token.length - shifted_count
+  if (shiftedCount) {
+    const unShiftedCount = token.length - shiftedCount
     if (shiftedCount === 0 || unShiftedCount === 0) {
       guesses *= 2
     } else {

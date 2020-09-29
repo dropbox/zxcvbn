@@ -21,7 +21,7 @@ describe('repeat matching', () => {
     const matches = matchRepeat.match(password)
     const msg = 'matches embedded repeat patterns'
     checkMatches(msg, matches, 'sequence', [pattern], [[i, j]], {
-      base_token: ['&'],
+      baseToken: ['&'],
     })
   })
 
@@ -39,7 +39,7 @@ describe('repeat matching', () => {
         [patternChr],
         [[0, patternChr.length - 1]],
         {
-          base_token: [chr],
+          baseToken: [chr],
         },
       )
     })
@@ -60,7 +60,7 @@ describe('repeat matching', () => {
       [12, 17],
     ],
     {
-      base_token: ['B', '1', 'a', '@'],
+      baseToken: ['B', '1', 'a', '@'],
     },
   )
   matches = matchRepeat.match('2818BBBbzsdf1111@*&@!aaaaaEUDA@@@@@@1729')
@@ -77,25 +77,25 @@ describe('repeat matching', () => {
       [30, 35],
     ],
     {
-      base_token: ['B', '1', 'a', '@'],
+      baseToken: ['B', '1', 'a', '@'],
     },
   )
   pattern = 'abab'
   matches = matchRepeat.match(pattern)
   msg = 'matches multi-character repeat pattern'
   checkMatches(msg, matches, 'repeat', [pattern], [[0, pattern.length - 1]], {
-    base_token: ['ab'],
+    baseToken: ['ab'],
   })
   pattern = 'aabaab'
   matches = matchRepeat.match(pattern)
   msg = 'matches aabaab as a repeat instead of the aa prefix'
   checkMatches(msg, matches, 'repeat', [pattern], [[0, pattern.length - 1]], {
-    base_token: ['aab'],
+    baseToken: ['aab'],
   })
   pattern = 'abababab'
   matches = matchRepeat.match(pattern)
   msg = 'identifies ab as repeat string, even though abab is also repeated'
   checkMatches(msg, matches, 'repeat', [pattern], [[0, pattern.length - 1]], {
-    base_token: ['ab'],
+    baseToken: ['ab'],
   })
 })

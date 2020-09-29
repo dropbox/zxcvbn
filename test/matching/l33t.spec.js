@@ -96,9 +96,9 @@ describe('l33t matching', () => {
         {
           l33t: [true],
           sub: [sub],
-          matched_word: [word],
+          matchedWord: [word],
           rank: [rank],
-          dictionary_name: [dictionaryName],
+          dictionaryName: [dictionaryName],
         },
       )
     })
@@ -129,9 +129,9 @@ describe('l33t matching', () => {
             '0': 'o',
           },
         ],
-        matched_word: ['aac', 'cgo', 'cgo'],
+        matchedWord: ['aac', 'cgo', 'cgo'],
         rank: [1, 1, 1],
-        dictionary_name: ['words', 'words2', 'words2'],
+        dictionaryName: ['words', 'words2', 'words2'],
       },
     )
   })

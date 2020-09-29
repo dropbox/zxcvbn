@@ -65,7 +65,7 @@ should_include = (password, xato_rank) ->
     matching.spatial_match
     matching.repeat_match
     matching.sequence_match
-    matching.regex_match
+    matching.regexMatch
     matching.date_match
     ]
     matches.push.apply matches, matcher.call(matching, password)

@@ -73,7 +73,7 @@ class Feedback {
         }
       case 'repeat':
         warning = Options.translations.warnings.extendedRepeat
-        if (match.base_token.length === 1) {
+        if (match.baseToken.length === 1) {
           warning = Options.translations.warnings.simpleRepeat
         }
 
@@ -87,7 +87,7 @@ class Feedback {
           suggestions: [Options.translations.suggestions.sequences],
         }
       case 'regex':
-        if (match.regex_name === 'recent_year') {
+        if (match.regexName === 'recentYear') {
           return {
             warning: Options.translations.warnings.recentYears,
             suggestions: [
@@ -118,7 +118,7 @@ class Feedback {
     let warning = ''
     const suggestions = []
     const word = match.token
-    const dictName = match.dictionary_name
+    const dictName = match.dictionaryName
     if (dictName === 'passwords') {
       if (isSoleMatch && !match.l33t && !match.reversed) {
         if (match.rank <= 10) {
@@ -128,7 +128,7 @@ class Feedback {
         } else {
           warning = Options.translations.warnings.common
         }
-      } else if (match.guesses_log10 <= 4) {
+      } else if (match.guessesLog10 <= 4) {
         warning = Options.translations.warnings.similarToCommon
       }
     } else if (dictName.includes('wikipedia')) {
@@ -137,8 +137,8 @@ class Feedback {
       }
     } else if (
       dictName === 'surnames' ||
-      dictName === 'male_names' ||
-      dictName === 'female_names'
+      dictName === 'maleNames' ||
+      dictName === 'femaleNames'
     ) {
       if (isSoleMatch) {
         warning = Options.translations.warnings.namesByThemselves

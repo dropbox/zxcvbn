@@ -31,7 +31,7 @@ describe('spatial matching', () => {
     {
       graph: ['qwerty'],
       turns: [2],
-      shifted_count: [3],
+      shiftedCount: [3],
     },
   )
 })
@@ -71,7 +71,7 @@ describe('spatial matching specific patterns vs keyboards', () => {
       {
         graph: [keyboard],
         turns: [turns],
-        shifted_count: [shifts],
+        shiftedCount: [shifts],
       },
     )
   })

@@ -16,10 +16,10 @@ class TimeEstimates {
 
   estimateAttackTimes(guesses) {
     const crackTimesSeconds = {
-      online_throttling_100_per_hour: guesses / (100 / 3600),
-      online_no_throttling_10_per_second: guesses / 10,
-      offline_slow_hashing_1e4_per_second: guesses / 1e4,
-      offline_fast_hashing_1e10_per_second: guesses / 1e10,
+      onlineThrottling100PerHour: guesses / (100 / 3600),
+      onlineThrottling10PerSecond: guesses / 10,
+      offlineSlowHashing1e4PerSecond: guesses / 1e4,
+      offlineFastHashing1e10PerSecond: guesses / 1e10,
     }
     const crackTimesDisplay = {}
     Object.keys(crackTimesSeconds).forEach((scenario) => {

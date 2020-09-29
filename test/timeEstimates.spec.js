@@ -8,16 +8,16 @@ describe('timeEstimates', () => {
     const attackTimes = timeEstimates.estimateAttackTimes(10)
     expect(attackTimes).toEqual({
       crackTimesDisplay: {
-        offline_fast_hashing_1e10_per_second: 'less than a second',
-        offline_slow_hashing_1e4_per_second: 'less than a second',
-        online_no_throttling_10_per_second: '1 second',
-        online_throttling_100_per_hour: '6 minutes',
+        offlineFastHashing1e10PerSecond: 'less than a second',
+        offlineSlowHashing1e4PerSecond: 'less than a second',
+        onlineThrottling10PerSecond: '1 second',
+        onlineThrottling100PerHour: '6 minutes',
       },
       crackTimesSeconds: {
-        offline_fast_hashing_1e10_per_second: 1e-9,
-        offline_slow_hashing_1e4_per_second: 0.001,
-        online_no_throttling_10_per_second: 1,
-        online_throttling_100_per_hour: 360,
+        offlineFastHashing1e10PerSecond: 1e-9,
+        offlineSlowHashing1e4PerSecond: 0.001,
+        onlineThrottling10PerSecond: 1,
+        onlineThrottling100PerHour: 360,
       },
       score: 0,
     })
@@ -27,16 +27,16 @@ describe('timeEstimates', () => {
     const attackTimes = timeEstimates.estimateAttackTimes(100000)
     expect(attackTimes).toEqual({
       crackTimesDisplay: {
-        offline_fast_hashing_1e10_per_second: 'less than a second',
-        offline_slow_hashing_1e4_per_second: '10 seconds',
-        online_no_throttling_10_per_second: '3 hours',
-        online_throttling_100_per_hour: '1 month',
+        offlineFastHashing1e10PerSecond: 'less than a second',
+        offlineSlowHashing1e4PerSecond: '10 seconds',
+        onlineThrottling10PerSecond: '3 hours',
+        onlineThrottling100PerHour: '1 month',
       },
       crackTimesSeconds: {
-        offline_fast_hashing_1e10_per_second: 0.00001,
-        offline_slow_hashing_1e4_per_second: 10,
-        online_no_throttling_10_per_second: 10000,
-        online_throttling_100_per_hour: 3600000,
+        offlineFastHashing1e10PerSecond: 0.00001,
+        offlineSlowHashing1e4PerSecond: 10,
+        onlineThrottling10PerSecond: 10000,
+        onlineThrottling100PerHour: 3600000,
       },
       score: 1,
     })
@@ -46,16 +46,16 @@ describe('timeEstimates', () => {
     const attackTimes = timeEstimates.estimateAttackTimes(10000000)
     expect(attackTimes).toEqual({
       crackTimesDisplay: {
-        offline_fast_hashing_1e10_per_second: 'less than a second',
-        offline_slow_hashing_1e4_per_second: '17 minutes',
-        online_no_throttling_10_per_second: '12 days',
-        online_throttling_100_per_hour: '11 years',
+        offlineFastHashing1e10PerSecond: 'less than a second',
+        offlineSlowHashing1e4PerSecond: '17 minutes',
+        onlineThrottling10PerSecond: '12 days',
+        onlineThrottling100PerHour: '11 years',
       },
       crackTimesSeconds: {
-        offline_fast_hashing_1e10_per_second: 0.001,
-        offline_slow_hashing_1e4_per_second: 1000,
-        online_no_throttling_10_per_second: 1000000,
-        online_throttling_100_per_hour: 360000000,
+        offlineFastHashing1e10PerSecond: 0.001,
+        offlineSlowHashing1e4PerSecond: 1000,
+        onlineThrottling10PerSecond: 1000000,
+        onlineThrottling100PerHour: 360000000,
       },
       score: 2,
     })
@@ -64,16 +64,16 @@ describe('timeEstimates', () => {
     const attackTimes = timeEstimates.estimateAttackTimes(1000000000)
     expect(attackTimes).toEqual({
       crackTimesDisplay: {
-        offline_fast_hashing_1e10_per_second: 'less than a second',
-        offline_slow_hashing_1e4_per_second: '1 day',
-        online_no_throttling_10_per_second: '3 years',
-        online_throttling_100_per_hour: 'centuries',
+        offlineFastHashing1e10PerSecond: 'less than a second',
+        offlineSlowHashing1e4PerSecond: '1 day',
+        onlineThrottling10PerSecond: '3 years',
+        onlineThrottling100PerHour: 'centuries',
       },
       crackTimesSeconds: {
-        offline_fast_hashing_1e10_per_second: 0.1,
-        offline_slow_hashing_1e4_per_second: 100000,
-        online_no_throttling_10_per_second: 100000000,
-        online_throttling_100_per_hour: 36000000000,
+        offlineFastHashing1e10PerSecond: 0.1,
+        offlineSlowHashing1e4PerSecond: 100000,
+        onlineThrottling10PerSecond: 100000000,
+        onlineThrottling100PerHour: 36000000000,
       },
       score: 3,
     })
@@ -83,16 +83,16 @@ describe('timeEstimates', () => {
     const attackTimes = timeEstimates.estimateAttackTimes(100000000000)
     expect(attackTimes).toEqual({
       crackTimesDisplay: {
-        offline_fast_hashing_1e10_per_second: '10 seconds',
-        offline_slow_hashing_1e4_per_second: '4 months',
-        online_no_throttling_10_per_second: 'centuries',
-        online_throttling_100_per_hour: 'centuries',
+        offlineFastHashing1e10PerSecond: '10 seconds',
+        offlineSlowHashing1e4PerSecond: '4 months',
+        onlineThrottling10PerSecond: 'centuries',
+        onlineThrottling100PerHour: 'centuries',
       },
       crackTimesSeconds: {
-        offline_fast_hashing_1e10_per_second: 10,
-        offline_slow_hashing_1e4_per_second: 10000000,
-        online_no_throttling_10_per_second: 10000000000,
-        online_throttling_100_per_hour: 3600000000000,
+        offlineFastHashing1e10PerSecond: 10,
+        offlineSlowHashing1e4PerSecond: 10000000,
+        onlineThrottling10PerSecond: 10000000000,
+        onlineThrottling100PerHour: 3600000000000,
       },
       score: 4,
     })

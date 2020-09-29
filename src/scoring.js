@@ -207,7 +207,7 @@ export default {
     return {
       password,
       guesses,
-      guesses_log10: utils.log10(guesses),
+      guessesLog10: utils.log10(guesses),
       sequence: optimalMatchSequence,
     }
   },

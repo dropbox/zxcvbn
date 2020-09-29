@@ -90,7 +90,7 @@ class MatchSpatial {
               token: password.slice(i, j),
               graph: graphName,
               turns,
-              shifted_count: shiftedCount,
+              shiftedCount,
             })
           }
           // ...and then start a new search for the rest of the password.

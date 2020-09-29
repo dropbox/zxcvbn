@@ -36,11 +36,11 @@ describe('feedback', () => {
       const options = {
         pattern: 'dictionary',
         token: 'tests',
-        dictionary_name: 'passwords',
+        dictionaryName: 'passwords',
         reversed: false,
         l33t: false,
         rank: 10,
-        guesses_log10: 4,
+        guessesLog10: 4,
       }
       let data = feedbackClass.getFeedback(1, [
         {
@@ -106,7 +106,7 @@ describe('feedback', () => {
         {
           ...options,
           reversed: true,
-          guesses_log10: 5,
+          guessesLog10: 5,
           token: 'Tests',
         },
       ])
@@ -123,7 +123,7 @@ describe('feedback', () => {
         {
           ...options,
           reversed: true,
-          guesses_log10: 5,
+          guessesLog10: 5,
           token: 'TESTS',
         },
       ])
@@ -139,7 +139,7 @@ describe('feedback', () => {
       data = feedbackClass.getFeedback(1, [
         {
           ...options,
-          dictionary_name: 'english_wikipedia',
+          dictionaryName: 'english_wikipedia',
         },
       ])
       expect(data).toEqual({
@@ -150,22 +150,11 @@ describe('feedback', () => {
       data = feedbackClass.getFeedback(1, [
         {
           ...options,
-          dictionary_name: 'english_wikipedia',
+          dictionaryName: 'english_wikipedia',
         },
         {
           ...options,
-          dictionary_name: 'english_wikipedia',
-        },
-      ])
-      expect(data).toEqual({
-        warning: '',
-        suggestions: [translations.suggestions.anotherWord],
-      })
-
-      data = feedbackClass.getFeedback(1, [
-        {
-          ...options,
-          dictionary_name: 'test_name',
+          dictionaryName: 'english_wikipedia',
         },
       ])
       expect(data).toEqual({
@@ -176,7 +165,18 @@ describe('feedback', () => {
       data = feedbackClass.getFeedback(1, [
         {
           ...options,
-          dictionary_name: 'surnames',
+          dictionaryName: 'test_name',
+        },
+      ])
+      expect(data).toEqual({
+        warning: '',
+        suggestions: [translations.suggestions.anotherWord],
+      })
+
+      data = feedbackClass.getFeedback(1, [
+        {
+          ...options,
+          dictionaryName: 'surnames',
         },
       ])
       expect(data).toEqual({
@@ -186,7 +186,7 @@ describe('feedback', () => {
       data = feedbackClass.getFeedback(1, [
         {
           ...options,
-          dictionary_name: 'male_names',
+          dictionaryName: 'maleNames',
         },
       ])
       expect(data).toEqual({
@@ -197,7 +197,7 @@ describe('feedback', () => {
       data = feedbackClass.getFeedback(1, [
         {
           ...options,
-          dictionary_name: 'female_names',
+          dictionaryName: 'femaleNames',
         },
       ])
       expect(data).toEqual({
@@ -208,11 +208,11 @@ describe('feedback', () => {
       data = feedbackClass.getFeedback(1, [
         {
           ...options,
-          dictionary_name: 'female_names',
+          dictionaryName: 'femaleNames',
         },
         {
           ...options,
-          dictionary_name: 'female_names',
+          dictionaryName: 'femaleNames',
         },
       ])
       expect(data).toEqual({
@@ -259,7 +259,7 @@ describe('feedback', () => {
       const options = {
         pattern: 'repeat',
         token: 'tests',
-        base_token: 'a',
+        baseToken: 'a',
       }
       let data = feedbackClass.getFeedback(2, [
         {
@@ -276,7 +276,7 @@ describe('feedback', () => {
       data = feedbackClass.getFeedback(2, [
         {
           ...options,
-          base_token: 'aa',
+          baseToken: 'aa',
         },
       ])
       expect(data).toEqual({
@@ -311,7 +311,7 @@ describe('feedback', () => {
       const options = {
         pattern: 'regex',
         token: 'tests',
-        regex_name: 'recent_year',
+        regexName: 'recentYear',
       }
       const data = feedbackClass.getFeedback(2, [
         {

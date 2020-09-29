@@ -37,7 +37,7 @@ export default (password, userInputs = [], options) => {
   const calcTime = time() - start
   const attackTimes = timeEstimates.estimateAttackTimes(matchSequence.guesses)
   const result = {
-    calc_time: calcTime,
+    calcTime,
     ...matchSequence,
     ...attackTimes,
     feedback: null,

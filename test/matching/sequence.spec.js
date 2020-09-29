@@ -39,7 +39,7 @@ describe('sequence matching', () => {
     matches = matchSequence.match(password)
     msg = `matches embedded sequence patterns ${password}`
     checkMatches(msg, matches, 'sequence', [pattern], [[i, j]], {
-      sequence_name: ['lower'],
+      sequenceName: ['lower'],
       ascending: [false],
     })
   })
@@ -70,7 +70,7 @@ describe('sequence matching', () => {
       [dataPattern],
       [[0, dataPattern.length - 1]],
       {
-        sequence_name: [name],
+        sequenceName: [name],
         ascending: [isAscending],
       },
     )

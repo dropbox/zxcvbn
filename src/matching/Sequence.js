@@ -35,8 +35,8 @@ class MatchSequence {
           i,
           j,
           token: password.slice(i, +j + 1 || 9e9),
-          sequence_name: sequenceName,
-          sequence_space: sequenceSpace,
+          sequenceName,
+          sequenceSpace,
           ascending: delta > 0,
         })
       }

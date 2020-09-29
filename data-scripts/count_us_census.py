@@ -14,8 +14,8 @@ download dist.all.last, dist.female.first and dist.male.first
 Then run:
 
 %s dist.all.lst      ../data/surnames.txt
-%s dist.female.first ../data/female_names.txt
-%s dist.male.names   ../data/male_names.txt
+%s dist.female.first ../data/femaleNames.txt
+%s dist.male.names   ../data/maleNames.txt
 
 for each file.
 ''' % [sys.argv[0]] * 3

@@ -44,8 +44,8 @@ class MatchRepeat {
         i: match.index,
         j,
         token: match[0],
-        base_token: baseToken,
-        repeat_count: match[0].length / baseToken.length,
+        baseToken,
+        repeatCount: match[0].length / baseToken.length,
       })
       lastIndex = j + 1
     }

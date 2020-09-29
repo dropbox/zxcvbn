@@ -18,7 +18,7 @@ describe('scoring: guesses spatial', () => {
       token: 'zxcvbn',
       graph: 'qwerty',
       turns: 1,
-      shifted_count: 0,
+      shiftedCount: 0,
     }
 
     expect(spatialGuesses(match)).toEqual(getKeyBoardBaseGuesses(match.token))
@@ -29,7 +29,7 @@ describe('scoring: guesses spatial', () => {
       token: 'ZxCvbn',
       graph: 'qwerty',
       turns: 1,
-      shifted_count: 2,
+      shiftedCount: 2,
       guesses: null,
     }
     const result = getKeyBoardBaseGuesses(match.token) * (nCk(6, 2) + nCk(6, 1))
@@ -41,7 +41,7 @@ describe('scoring: guesses spatial', () => {
       token: 'ZXCVBN',
       graph: 'qwerty',
       turns: 1,
-      shifted_count: 6,
+      shiftedCount: 6,
       guesses: null,
     }
     const result = getKeyBoardBaseGuesses(match.token) * 2
@@ -53,7 +53,7 @@ describe('scoring: guesses spatial', () => {
       token: 'zxcft6yh',
       graph: 'qwerty',
       turns: 3,
-      shifted_count: 0,
+      shiftedCount: 0,
     }
     let guesses = 0
     const tokenLength = match.token.length
@@ -75,7 +75,7 @@ describe('scoring: guesses spatial', () => {
       token: 'zxcvbn',
       graph: 'abcdef',
       turns: 1,
-      shifted_count: 0,
+      shiftedCount: 0,
     }
 
     expect(spatialGuesses(match)).toEqual(getKeyPadBaseGuesses(match.token))

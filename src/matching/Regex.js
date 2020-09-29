@@ -10,7 +10,7 @@ class MatchRegex {
     const matches = []
     Object.keys(regexes).forEach((name) => {
       const regex = regexes[name]
-      regex.lastIndex = 0 // keeps regex_match stateless
+      regex.lastIndex = 0 // keeps regexMatch stateless
       const regexMatch = regex.exec(password)
       if (regexMatch) {
         const token = regexMatch[0]
@@ -19,8 +19,8 @@ class MatchRegex {
           token,
           i: regexMatch.index,
           j: regexMatch.index + regexMatch[0].length - 1,
-          regex_name: name,
-          regex_match: regexMatch,
+          regexName: name,
+          regexMatch,
         })
       }
     })

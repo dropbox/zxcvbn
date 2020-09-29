@@ -42,9 +42,9 @@ export default (match, password) => {
   let guesses = 0
   if (match.pattern === 'dictionary') {
     guesses = estimationResult.calculation
-    extraData.base_guesses = estimationResult.baseGuesses
-    extraData.uppercase_variations = estimationResult.uppercaseVariations
-    extraData.l33t_variations = estimationResult.l33tVariations
+    extraData.baseGuesses = estimationResult.baseGuesses
+    extraData.uppercaseVariations = estimationResult.uppercaseVariations
+    extraData.l33tVariations = estimationResult.l33tVariations
   } else {
     guesses = estimationResult
   }
@@ -54,6 +54,6 @@ export default (match, password) => {
     ...match,
     ...extraData,
     guesses: matchGuesses,
-    guesses_log10: utils.log10(matchGuesses),
+    guessesLog10: utils.log10(matchGuesses),
   }
 }

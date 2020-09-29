@@ -25,9 +25,9 @@ describe('dictionary reverse matching', () => {
       [4, 6],
     ],
     {
-      matched_word: ['321', '654'],
+      matchedWord: ['321', '654'],
       reversed: [true, true],
-      dictionary_name: ['d1', 'd1'],
+      dictionaryName: ['d1', 'd1'],
       rank: [2, 4],
     },
   )

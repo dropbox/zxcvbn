@@ -89,15 +89,15 @@ results_tmpl = '''
     <td colspan="2"><strong>{{password}}</strong></td>
   </tr>
   <tr>
-    <td>guesses_log10: </td>
-    <td colspan="2">{{guesses_log10}}</td>
+    <td>guessesLog10: </td>
+    <td colspan="2">{{guessesLog10}}</td>
   </tr>
   <tr>
     <td>score: </td>
     <td>{{score}} / 4</td>
   <tr>
     <td>function runtime (ms): </td>
-    <td colspan="2">{{calc_time}}</td>
+    <td colspan="2">{{calcTime}}</td>
   </tr>
   <tr>
     <td colspan="3">guess times:</td>
@@ -115,21 +115,21 @@ results_tmpl = '''
 guess_times_tmpl = '''
   <tr>
     <td>100 / hour:</td>
-    <td>{{online_throttling_100_per_hour}}</td>
+    <td>{{onlineThrottling100PerHour}}</td>
     <td> (throttled online attack)</td>
   </tr>
   <tr>
     <td>10&nbsp; / second:</td>
-    <td>{{online_no_throttling_10_per_second}}</td>
+    <td>{{onlineThrottling10PerSecond}}</td>
     <td> (unthrottled online attack)</td>
   </tr>
   <tr>
     <td>10k / second:</td>
-    <td>{{offline_slow_hashing_1e4_per_second}}</td>
+    <td>{{offlineSlowHashing1e4PerSecond}}</td>
     <td> (offline attack, slow hash, many cores)</td>
   <tr>
     <td>10B / second:</td>
-    <td>{{offline_fast_hashing_1e10_per_second}}</td>
+    <td>{{offlineFastHashing1e10PerSecond}}</td>
     <td> (offline attack, fast hash, many cores)</td>
   </tr>
 '''
@@ -165,8 +165,8 @@ props_tmpl = '''
     <td>{{pattern}}</td>
   </tr>
   <tr>
-    <td>guesses_log10:</td>
-    <td>{{guesses_log10}}</td>
+    <td>guessesLog10:</td>
+    <td>{{guessesLog10}}</td>
   </tr>
   {{#cardinality}}
   <tr>
@@ -180,8 +180,8 @@ props_tmpl = '''
   {{/cardinality}}
   {{#rank}}
   <tr>
-    <td>dictionary_name:</td>
-    <td>{{dictionary_name}}</td>
+    <td>dictionaryName:</td>
+    <td>{{dictionaryName}}</td>
   </tr>
   <tr>
     <td>rank:</td>
@@ -194,24 +194,24 @@ props_tmpl = '''
   {{#l33t}}
   <tr>
     <td>l33t subs:</td>
-    <td>{{sub_display}}</td>
+    <td>{{subDisplay}}</td>
   </tr>
   <tr>
     <td>un-l33ted:</td>
-    <td>{{matched_word}}</td>
+    <td>{{matchedWord}}</td>
   </tr>
   {{/l33t}}
   <tr>
     <td>base-guesses:</td>
-    <td>{{base_guesses}}</td>
+    <td>{{baseGuesses}}</td>
   </tr>
   <tr>
     <td>uppercase-variations:</td>
-    <td>{{uppercase_variations}}</td>
+    <td>{{uppercaseVariations}}</td>
   </tr>
   <tr>
     <td>l33t-variations:</td>
-    <td>{{l33t_variations}}</td>
+    <td>{{l33tVariations}}</td>
   </tr>
   {{/rank}}
   {{#graph}}
@@ -225,43 +225,43 @@ props_tmpl = '''
   </tr>
   <tr>
     <td>shifted count:</td>
-    <td>{{shifted_count}}</td>
+    <td>{{shiftedCount}}</td>
   </tr>
   {{/graph}}
-  {{#base_token}}
+  {{#baseToken}}
   <tr>
-    <td>base_token:</td>
-    <td>'{{base_token}}'</td>
+    <td>baseToken:</td>
+    <td>'{{baseToken}}'</td>
   </tr>
   <tr>
-    <td>base_guesses:</td>
-    <td>{{base_guesses}}</td>
+    <td>baseGuesses:</td>
+    <td>{{baseGuesses}}</td>
   </tr>
   <tr>
     <td>num_repeats:</td>
-    <td>{{repeat_count}}</td>
+    <td>{{repeatCount}}</td>
   </tr>
-  {{/base_token}}
-  {{#sequence_name}}
+  {{/baseToken}}
+  {{#sequenceName}}
   <tr>
     <td>sequence-name:</td>
-    <td>{{sequence_name}}</td>
+    <td>{{sequenceName}}</td>
   </tr>
   <tr>
     <td>sequence-size</td>
-    <td>{{sequence_space}}</td>
+    <td>{{sequenceSpace}}</td>
   </tr>
   <tr>
     <td>ascending:</td>
     <td>{{ascending}}</td>
   </tr>
-  {{/sequence_name}}
-  {{#regex_name}}
+  {{/sequenceName}}
+  {{#regexName}}
   <tr>
-    <td>regex_name:</td>
-    <td>{{regex_name}}</td>
+    <td>regexName:</td>
+    <td>{{regexName}}</td>
   </tr>
-  {{/regex_name}}
+  {{/regexName}}
   {{#day}}
   <tr>
     <td>day:</td>
@@ -289,9 +289,9 @@ round_to_x_digits = (n, x) ->
   Math.round(n * Math.pow(10, x)) / Math.pow(10, x)
 
 round_logs = (r) ->
-  r.guesses_log10 = round_to_x_digits(r.guesses_log10, 5)
+  r.guessesLog10 = round_to_x_digits(r.guessesLog10, 5)
   for m in r.sequence
-    m.guesses_log10 = round_to_x_digits(m.guesses_log10, 5)
+    m.guessesLog10 = round_to_x_digits(m.guessesLog10, 5)
 
 requirejs ['../dist/zxcvbn'], (zxcvbn) ->
   $ ->
@@ -301,7 +301,7 @@ requirejs ['../dist/zxcvbn'], (zxcvbn) ->
       r = zxcvbn(password)
       round_logs(r)
       r.sequence_display = Mustache.render(props_tmpl, r)
-      r.guess_times_display = Mustache.render(guess_times_tmpl, r.crack_times_display)
+      r.guess_times_display = Mustache.render(guess_times_tmpl, r.crackTimesDisplay)
       r.feedback.has_suggestions = r.feedback.suggestions.length > 0
       r.feedback_display = Mustache.render(feedback_tmpl, r.feedback)
       results_lst.push r
@@ -322,7 +322,7 @@ requirejs ['../dist/zxcvbn'], (zxcvbn) ->
         r = zxcvbn(current)
         round_logs(r)
         r.sequence_display = Mustache.render(props_tmpl, r)
-        r.guess_times_display = Mustache.render(guess_times_tmpl, r.crack_times_display)
+        r.guess_times_display = Mustache.render(guess_times_tmpl, r.crackTimesDisplay)
         r.feedback.has_suggestions = r.feedback.suggestions.length > 0
         r.feedback_display = Mustache.render(feedback_tmpl, r.feedback)
         results = {results: [r]}

@@ -30,7 +30,7 @@ class MatchL33t {
       matchedDictionary.forEach((match) => {
         const token = password.slice(match.i, +match.j + 1 || 9e9)
         // only return the matches that contain an actual substitution
-        if (token.toLowerCase() !== match.matched_word) {
+        if (token.toLowerCase() !== match.matchedWord) {
           // subset of mappings in sub that are in use for this match
           const matchSub = {}
           Object.keys(sub).forEach((subbedChr) => {
@@ -47,7 +47,7 @@ class MatchL33t {
             l33t: true,
             token,
             sub: matchSub,
-            sub_display: subDisplay,
+            subDisplay,
           })
         }
       })

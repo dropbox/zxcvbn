@@ -5,45 +5,45 @@ import passwordTests from './helper/passwordTests'
 describe('main', () => {
   it('should check without userInput', () => {
     const result = zxcvbn('test')
-    expect(result.calc_time).toBeDefined()
-    delete result.calc_time
+    expect(result.calcTime).toBeDefined()
+    delete result.calcTime
     expect(result).toEqual({
       crackTimesDisplay: {
-        offline_fast_hashing_1e10_per_second: 'less than a second',
-        offline_slow_hashing_1e4_per_second: 'less than a second',
-        online_no_throttling_10_per_second: '9 seconds',
-        online_throttling_100_per_hour: '56 minutes',
+        offlineFastHashing1e10PerSecond: 'less than a second',
+        offlineSlowHashing1e4PerSecond: 'less than a second',
+        onlineThrottling10PerSecond: '9 seconds',
+        onlineThrottling100PerHour: '56 minutes',
       },
       crackTimesSeconds: {
-        offline_fast_hashing_1e10_per_second: 9.4e-9,
-        offline_slow_hashing_1e4_per_second: 0.0094,
-        online_no_throttling_10_per_second: 9.4,
-        online_throttling_100_per_hour: 3384,
+        offlineFastHashing1e10PerSecond: 9.4e-9,
+        offlineSlowHashing1e4PerSecond: 0.0094,
+        onlineThrottling10PerSecond: 9.4,
+        onlineThrottling100PerHour: 3384,
       },
       feedback: {
         suggestions: [translations.suggestions.anotherWord],
         warning: translations.warnings.topHundred,
       },
       guesses: 94,
-      guesses_log10: 1.9731278535996983,
+      guessesLog10: 1.9731278535996983,
       password: 'test',
       score: 0,
       sequence: [
         {
-          base_guesses: 93,
-          dictionary_name: 'passwords',
+          baseGuesses: 93,
+          dictionaryName: 'passwords',
           guesses: 93,
-          guesses_log10: 1.968482948553935,
+          guessesLog10: 1.968482948553935,
           i: 0,
           j: 3,
           l33t: false,
-          l33t_variations: 1,
-          matched_word: 'test',
+          l33tVariations: 1,
+          matchedWord: 'test',
           pattern: 'dictionary',
           rank: 93,
           reversed: false,
           token: 'test',
-          uppercase_variations: 1,
+          uppercaseVariations: 1,
         },
       ],
     })
@@ -51,44 +51,44 @@ describe('main', () => {
 
   it('should check with userInput', () => {
     const result = zxcvbn('test', ['test', 12, true, []])
-    delete result.calc_time
+    delete result.calcTime
     expect(result).toEqual({
       crackTimesDisplay: {
-        offline_fast_hashing_1e10_per_second: 'less than a second',
-        offline_slow_hashing_1e4_per_second: 'less than a second',
-        online_no_throttling_10_per_second: 'less than a second',
-        online_throttling_100_per_hour: '1 minute',
+        offlineFastHashing1e10PerSecond: 'less than a second',
+        offlineSlowHashing1e4PerSecond: 'less than a second',
+        onlineThrottling10PerSecond: 'less than a second',
+        onlineThrottling100PerHour: '1 minute',
       },
       crackTimesSeconds: {
-        offline_fast_hashing_1e10_per_second: 2e-10,
-        offline_slow_hashing_1e4_per_second: 0.0002,
-        online_no_throttling_10_per_second: 0.2,
-        online_throttling_100_per_hour: 72,
+        offlineFastHashing1e10PerSecond: 2e-10,
+        offlineSlowHashing1e4PerSecond: 0.0002,
+        onlineThrottling10PerSecond: 0.2,
+        onlineThrottling100PerHour: 72,
       },
       feedback: {
         suggestions: [translations.suggestions.anotherWord],
         warning: '',
       },
       guesses: 2,
-      guesses_log10: 0.30102999566398114,
+      guessesLog10: 0.30102999566398114,
       password: 'test',
       score: 0,
       sequence: [
         {
-          base_guesses: 1,
-          dictionary_name: 'userInputs',
+          baseGuesses: 1,
+          dictionaryName: 'userInputs',
           guesses: 1,
-          guesses_log10: 0,
+          guessesLog10: 0,
           i: 0,
           j: 3,
           l33t: false,
-          l33t_variations: 1,
-          matched_word: 'test',
+          l33tVariations: 1,
+          matchedWord: 'test',
           pattern: 'dictionary',
           rank: 1,
           reversed: false,
           token: 'test',
-          uppercase_variations: 1,
+          uppercaseVariations: 1,
         },
       ],
     })
@@ -98,7 +98,7 @@ describe('main', () => {
     passwordTests.forEach((data) => {
       it(`should resolve ${data.password}`, () => {
         const result = zxcvbn(data.password)
-        delete result.calc_time
+        delete result.calcTime
         expect(JSON.stringify(result)).toEqual(JSON.stringify(data.result))
       })
     })

@@ -30,9 +30,9 @@ class MatchDictionary {
               i,
               j,
               token: password.slice(i, +j + 1 || 9e9),
-              matched_word: word,
+              matchedWord: word,
               rank,
-              dictionary_name: dictionaryName,
+              dictionaryName,
               reversed: false,
               l33t: false,
             })
