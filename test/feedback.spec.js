@@ -1,5 +1,8 @@
 import Feedback from '../src/Feedback'
 import translations from '../src/data/feedback/en'
+import Options from '~/Options'
+
+Options.setOptions()
 
 describe('feedback', () => {
   describe('with default translations', () => {

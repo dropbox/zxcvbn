@@ -4,9 +4,14 @@ import babel from '@rollup/plugin-babel'
 import commonjs from '@rollup/plugin-commonjs'
 import del from 'rollup-plugin-delete'
 import copy from 'rollup-plugin-copy'
+import typescript from '@rollup/plugin-typescript'
+import pkg from '../package.json'
 
 let generateCounter = 0
 const generateConfig = (type) => {
+  let typescriptOptions = {
+    declaration: false,
+  }
   let babelrc = true
   const output = {
     dir: 'dist/',
@@ -17,10 +22,20 @@ const generateConfig = (type) => {
     exports: 'auto',
   }
   if (type === 'esm') {
+    typescriptOptions = {
+      declarationDir: `dist/`,
+      declaration: true,
+    }
     output.entryFileNames = '[name].esm.js'
     output.assetFileNames = '[name].esm.js'
     babelrc = false
   }
+  if (type === 'iife') {
+    output.name = pkg.name
+    output.entryFileNames = '[name].browser.js'
+    output.assetFileNames = '[name].browser.js'
+  }
+
   const pluginsOnlyOnce = []
   if (generateCounter === 0) {
     pluginsOnlyOnce.push(
@@ -45,7 +60,7 @@ const generateConfig = (type) => {
   }
 
   return {
-    input: './src/main.js',
+    input: './src/main.ts',
     output,
     plugins: [
       ...pluginsOnlyOnce,
@@ -57,15 +72,20 @@ const generateConfig = (type) => {
           },
         ],
       }),
+      typescript(typescriptOptions),
       commonjs(),
       babel({
-        extensions: ['.js'],
+        extensions: ['.ts'],
         babelHelpers: 'bundled',
         babelrc,
       }),
     ],
-    preserveModules: false,
+    preserveModules: type !== 'iife',
   }
 }
 
-export default [generateConfig('esm'), generateConfig('cjs')]
+export default [
+  generateConfig('esm'),
+  generateConfig('cjs'),
+  generateConfig('iife'),
+]
