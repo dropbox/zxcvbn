@@ -1,5 +1,4 @@
-
-test_passwords = '''
+const testPasswords = `\
 zxcvbn
 qwER43@!
 Tr0ub4dour&3
@@ -78,10 +77,10 @@ verlineVANDERMARK
 
 eheuczkqyq
 rWibMFACxAUGZmxhVncy
-Ba9ZyWABu99[BK#6MBgbH88Tofv)vs$w
-'''
+Ba9ZyWABu99[BK#6MBgbH88Tofv)vs$w\
+`;
 
-results_tmpl = '''
+const resultsTmpl = `\
 {{#results}}
 <table class="result">
   <tr>
@@ -102,46 +101,46 @@ results_tmpl = '''
   <tr>
     <td colspan="3">guess times:</td>
   </tr>
-  {{& guess_times_display}}
-  {{& feedback_display }}
+  {{& guessTimesDisplay}}
+  {{& feedbackDisplay }}
   <tr>
     <td colspan="3"><strong>match sequence:</strong></td>
   </tr>
 </table>
-{{& sequence_display}}
-{{/results}}
-'''
+{{& sequenceDisplay}}
+{{/results}}\
+`;
 
-guess_times_tmpl = '''
-  <tr>
-    <td>100 / hour:</td>
-    <td>{{onlineThrottling100PerHour}}</td>
-    <td> (throttled online attack)</td>
-  </tr>
-  <tr>
-    <td>10&nbsp; / second:</td>
-    <td>{{onlineThrottling10PerSecond}}</td>
-    <td> (unthrottled online attack)</td>
-  </tr>
-  <tr>
-    <td>10k / second:</td>
-    <td>{{offlineSlowHashing1e4PerSecond}}</td>
-    <td> (offline attack, slow hash, many cores)</td>
-  <tr>
-    <td>10B / second:</td>
-    <td>{{offlineFastHashing1e10PerSecond}}</td>
-    <td> (offline attack, fast hash, many cores)</td>
-  </tr>
-'''
+const guessTimesTmpl = `\
+<tr>
+  <td>100 / hour:</td>
+  <td>{{onlineThrottling100PerHour}}</td>
+  <td> (throttled online attack)</td>
+</tr>
+<tr>
+  <td>10&nbsp; / second:</td>
+  <td>{{onlineNoThrottling10PerSecond}}</td>
+  <td> (unthrottled online attack)</td>
+</tr>
+<tr>
+  <td>10k / second:</td>
+  <td>{{offlineSlowHashing1e4PerSecond}}</td>
+  <td> (offline attack, slow hash, many cores)</td>
+<tr>
+  <td>10B / second:</td>
+  <td>{{offlineFastHashing1e10PerSecond}}</td>
+  <td> (offline attack, fast hash, many cores)</td>
+</tr>\
+`;
 
-feedback_tmpl = '''
+const feedbackTmpl = `\
 {{#warning}}
 <tr>
   <td>warning: </td>
   <td colspan="2">{{warning}}</td>
 </tr>
 {{/warning}}
-{{#has_suggestions}}
+{{#hasSuggestions}}
 <tr>
   <td style="vertical-align: top">suggestions:</td>
   <td colspan="2">
@@ -150,10 +149,10 @@ feedback_tmpl = '''
     {{/suggestions}}
   </td>
 </tr>
-{{/has_suggestions}}
-'''
+{{/hasSuggestions}}\
+`;
 
-props_tmpl = '''
+const propsTmpl = `\
 <div class="match-sequence">
 {{#sequence}}
 <table>
@@ -234,11 +233,11 @@ props_tmpl = '''
     <td>'{{baseToken}}'</td>
   </tr>
   <tr>
-    <td>baseGuesses:</td>
-    <td>{{baseGuesses}}</td>
+    <td>guesses:</td>
+    <td>{{guesses}}</td>
   </tr>
   <tr>
-    <td>num_repeats:</td>
+    <td>numRepeats:</td>
     <td>{{repeatCount}}</td>
   </tr>
   {{/baseToken}}
@@ -282,51 +281,60 @@ props_tmpl = '''
   {{/day}}
 </table>
 {{/sequence}}
-</div>
-'''
+</div>\
+`;
 
-round_to_x_digits = (n, x) ->
-  Math.round(n * Math.pow(10, x)) / Math.pow(10, x)
+const roundToXDigits = (n, x) => Math.round(n * Math.pow(10, x)) / Math.pow(10, x);
 
-round_logs = (r) ->
-  r.guessesLog10 = round_to_x_digits(r.guessesLog10, 5)
-  for m in r.sequence
-    m.guessesLog10 = round_to_x_digits(m.guessesLog10, 5)
+const roundLogs = function(r) {
+    r.guessesLog10 = roundToXDigits(r.guessesLog10, 5);
+    return Array.from(r.sequence).map((m) =>
+        (m.guessesLog10 = roundToXDigits(m.guessesLog10, 5)));
+};
 
-requirejs ['../dist/zxcvbn'], (zxcvbn) ->
-  $ ->
-    window.zxcvbn = zxcvbn
-    results_lst = []
-    for password in test_passwords.split('\n') when password
-      r = zxcvbn(password)
-      round_logs(r)
-      r.sequence_display = Mustache.render(props_tmpl, r)
-      r.guess_times_display = Mustache.render(guess_times_tmpl, r.crackTimesDisplay)
-      r.feedback.has_suggestions = r.feedback.suggestions.length > 0
-      r.feedback_display = Mustache.render(feedback_tmpl, r.feedback)
-      results_lst.push r
+$(function() {
+    console.log(zxcvbn);
+    let r;
+    window.zxcvbn = zxcvbn;
+    const resultsLst = [];
+    for (let password of testPasswords.split('\n')) {
+        if (password) {
+          r = zxcvbn(password);
+            console.log(r);
+            roundLogs(r);
+            r.sequenceDisplay = Mustache.render(propsTmpl, r);
+            r.guessTimesDisplay = Mustache.render(guessTimesTmpl, r.crackTimesDisplay);
+            r.feedback.hasSuggestions = r.feedback.suggestions.length > 0;
+            r.feedbackDisplay = Mustache.render(feedbackTmpl, r.feedback);
+            resultsLst.push(r);
+        }
+    }
 
-    rendered = Mustache.render(results_tmpl, {
-      results: results_lst,
-    })
-    $('#results').html(rendered)
+    let rendered = Mustache.render(resultsTmpl, {
+        results: resultsLst,
+    });
+    $('#results').html(rendered);
 
-    last_q = ''
-    _listener = ->
-      current = $('#search-bar').val()
-      unless current
-        $('#search-results').html('')
-        return
-      if current != last_q
-        last_q = current
-        r = zxcvbn(current)
-        round_logs(r)
-        r.sequence_display = Mustache.render(props_tmpl, r)
-        r.guess_times_display = Mustache.render(guess_times_tmpl, r.crackTimesDisplay)
-        r.feedback.has_suggestions = r.feedback.suggestions.length > 0
-        r.feedback_display = Mustache.render(feedback_tmpl, r.feedback)
-        results = {results: [r]}
-        rendered = Mustache.render(results_tmpl, results)
-        $('#search-results').html(rendered)
+    let lastQ = '';
+    const _listener = function() {
+        const current = $('#search-bar').val();
+        if (!current) {
+            $('#search-results').html('');
+            return;
+        }
+        if (current !== lastQ) {
+            lastQ = current;
+            r = zxcvbn(current);
+            roundLogs(r);
+            r.sequenceDisplay = Mustache.render(propsTmpl, r);
+            r.guessTimesDisplay = Mustache.render(guessTimesTmpl, r.crackTimesDisplay);
+            r.feedback.hasSuggestions = r.feedback.suggestions.length > 0;
+            r.feedbackDisplay = Mustache.render(feedbackTmpl, r.feedback);
+            const results = { results: [r] };
+            rendered = Mustache.render(resultsTmpl, results);
+            return $('#search-results').html(rendered);
+        }
+    };
 
-    setInterval _listener, 100
+    return setInterval(_listener, 100);
+});

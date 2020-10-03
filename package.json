@@ -10,6 +10,7 @@
   "prettier": "./prettier.js",
   "scripts": {
     "build": "rollup -c ./scripts/rollup.config.js",
+    "demo": "npm run build && npx copyfiles -f dist/main.browser.js demo && npx move-cli demo/main.browser.js demo/zxcvbn.js && http-server demo",
     "lint": "eslint --ext .js --fix --cache .",
     "test": "jest",
     "release": "npm run standard-version",
@@ -33,21 +34,22 @@
     "babel-plugin-dynamic-import-node": "2.3.3",
     "eslint": "7.8.1",
     "eslint-config-airbnb-base": "14.2.0",
+    "eslint-config-prettier": "6.11.0",
     "eslint-friendly-formatter": "4.0.1",
     "eslint-import-resolver-webpack": "0.12.2",
     "eslint-plugin-compat": "3.8.0",
     "eslint-plugin-import": "2.22.0",
     "eslint-plugin-jest": "24.0.0",
-    "eslint-config-prettier": "6.11.0",
     "eslint-plugin-prettier": "3.1.4",
+    "http-server": "^0.12.3",
     "jest": "26.4.2",
     "prettier": "2.1.1",
     "rollup": "2.26.11",
     "rollup-plugin-copy": "3.3.0",
     "rollup-plugin-delete": "2.0.0",
+    "standard-version": "9.0.0",
     "ts-jest": "26.3.0",
-    "typescript": "3.9.7",
-    "standard-version": "9.0.0"
+    "typescript": "3.9.7"
   },
   "keywords": [
     "password",

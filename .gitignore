@@ -26,3 +26,4 @@ dist_storybook
 dist
 coverage
 node_modules/
+demo/zxcvbn.js

@@ -1,54 +1,48 @@
-<html>
-  <head>
-    <title>zxcvbn tests</title>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>zxcvbn tests</title>
+        <script src="jquery.js"></script>
+        <script src="mustache.js"></script>
+        <script src="zxcvbn.js"></script>
+        <script src="demo.js"></script>
+        <style>
+            body {
+                font-family: monospace;
+            }
+            .match-sequence table {
+                display: inline;
+                margin-right: 30px;
+            }
+            .match-sequence {
+                margin-bottom: 100px;
+            }
+            .match-sequence>table:nth-child(odd) {
+                background-color: #ccc;
+            }
+            .match-sequence>table:nth-child(even) {
+                background-color: #eee;
+            }
+            #examples-container {
+                margin-top: 200px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1><a href="http://tech.dropbox.com/?p=165">introduction</a></h1>
+        <h1><a href="https://github.com/lowe/zxcvbn">zxcvbn on github</a></h1>
+        <h1>demo</h1>
 
-    <script type="text/javascript" src="jquery.js">
-    </script>
-    <script type="text/javascript" src="mustache.js">
-    </script>
-    <script data-main="demo" src="require.js">
-    </script>
-  </head>
-  <body>
-    <style type="text/css">
+        <input id="search-bar" type="text" size="50" />
 
-      body {
-        font-family: monospace;
-      }
+        <div id="search-results">
+        </div>
 
-      .match-sequence table {
-        display: inline;
-        margin-right: 30px;
-      }
+        <div id="examples-container">
+            <h1 id="examples">examples</h1>
+            <div id="results">
+            </div>
+        </div>
 
-      .match-sequence {
-        margin-bottom: 100px;
-      }
-
-      .match-sequence > table:nth-child(odd) {
-        background-color: #ccc;
-      }
-      .match-sequence > table:nth-child(even) {
-        background-color: #eee;
-      }
-
-      #examples-container {
-        margin-top: 200px;
-      }
-
-    </style>
-    <h1><a href="http://tech.dropbox.com/?p=165">introduction</a></h1>
-    <h1><a href="https://github.com/lowe/zxcvbn">zxcvbn on github</a></h1>
-    <h1>demo</h1>
-
-    <input id="search-bar" type="text" size="50" />
-    <div id="search-results">
-    </div>
-
-    <div id="examples-container">
-    <h1 id="examples">examples</h1>
-    <div id="results">
-    </div>
-
-  </body>
+    </body>
 </html>
