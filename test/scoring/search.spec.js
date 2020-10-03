@@ -1,4 +1,7 @@
-import scoring from '../../src/scoring'
+import scoring from '~/scoring'
+import Options from '~/Options'
+
+Options.setOptions()
 
 describe('scoring search', () => {
   const getMatch = (i, j, guesses) => ({

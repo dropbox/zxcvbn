@@ -1,6 +1,6 @@
-import dictionaryGuesses from '../../../src/scoring/guesses/dictionary'
-import l33tVariant from '../../../src/scoring/variant/l33t'
-import uppercaseVariant from '../../../src/scoring/variant/uppercase'
+import dictionaryGuesses from '~/scoring/guesses/dictionary'
+import l33tVariant from '~/scoring/variant/l33t'
+import uppercaseVariant from '~/scoring/variant/uppercase'
 
 describe('scoring: guesses dictionary', () => {
   it('base guesses == the rank', () => {
