@@ -32,6 +32,7 @@ At Dropbox we use zxcvbn ([Release notes](https://github.com/dropbox/zxcvbn/rele
 * [`zxcvbn-ruby`](https://github.com/envato/zxcvbn-ruby) (Ruby)
 * [`zxcvbn-js`](https://github.com/bitzesty/zxcvbn-js) (Ruby [via ExecJS])
 * [`zxcvbn-ios`](https://github.com/dropbox/zxcvbn-ios) (Objective-C)
+* [`zxcvbn-swift`](https://github.com/scr037/zxcvbn-swift/) (Swift -carthage support-)
 * [`zxcvbn-cs`](https://github.com/mickford/zxcvbn-cs) (C#/.NET)
 * [`szxcvbn`](https://github.com/tekul/szxcvbn) (Scala)
 * [`zxcvbn-php`](https://github.com/bjeavons/zxcvbn-php) (PHP)
