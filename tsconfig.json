@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "ES2019",
     "module": "esnext",
+    "target": "esnext",
     "jsx": "preserve",
     "moduleResolution": "node",
     "sourceMap": true,
@@ -15,8 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"]
-    },
-    "rootDir": "src/"
+    }
   },
   "exclude": ["node_modules", "dist", "test"]
 }
