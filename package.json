@@ -15,7 +15,7 @@
     "test": "jest",
     "release": "npm run standard-version",
     "release:dry": "standard-version --dry-run",
-    "generate:frequency_lists": "ts-node data-scripts/build_frequency_lists.ts"
+    "generate:frequency_lists": "ts-node-script -r tsconfig-paths/register -O '{\"module\":\"commonjs\"}' data-scripts/generate.ts"
   },
   "devDependencies": {
     "@babel/cli": "7.11.6",
@@ -34,6 +34,7 @@
     "babel-eslint": "10.1.0",
     "babel-jest": "26.3.0",
     "babel-plugin-dynamic-import-node": "2.3.3",
+    "byline": "^5.0.0",
     "eslint": "7.8.1",
     "eslint-config-airbnb-base": "14.2.0",
     "eslint-config-prettier": "6.11.0",
@@ -44,15 +45,17 @@
     "eslint-plugin-jest": "24.0.0",
     "eslint-plugin-prettier": "3.1.4",
     "http-server": "^0.12.3",
+    "iconv-lite": "^0.6.2",
     "jest": "26.4.2",
     "prettier": "2.1.1",
     "rollup": "2.26.11",
     "rollup-plugin-copy": "3.3.0",
     "rollup-plugin-delete": "2.0.0",
+    "sprintf-js": "^1.1.2",
     "standard-version": "9.0.0",
     "ts-jest": "26.3.0",
     "ts-node": "^9.0.0",
-    "iconv-lite": "^0.6.2",
+    "tsconfig-paths": "3.9.0",
     "typescript": "3.9.7"
   },
   "keywords": [
