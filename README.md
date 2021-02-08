@@ -37,6 +37,7 @@ At Dropbox we use zxcvbn ([Release notes](https://github.com/dropbox/zxcvbn/rele
 * [`zxcvbn-php`](https://github.com/bjeavons/zxcvbn-php) (PHP)
 * [`zxcvbn-api`](https://github.com/wcjr/zxcvbn-api) (REST)
 * [`ocaml-zxcvbn`](https://github.com/cryptosense/ocaml-zxcvbn) (OCaml bindings for `zxcvbn-c`)
+* [`zxcvbn-ts`](https://github.com/zxcvbn-ts/zxcvbn) (Typescript)
 
 Integrations with other frameworks:
 * [`angular-zxcvbn`](https://github.com/ghostbar/angular-zxcvbn) (AngularJS)
