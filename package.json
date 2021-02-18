@@ -4,7 +4,7 @@
   "description": "realistic password strength estimation",
   "author": "Dan Wheeler",
   "license": "MIT",
-  "main": "lib/main.js",
+  "main": "dist/zxcvbn.js",
   "repository": "dropbox/zxcvbn",
   "scripts": {
     "test": "coffeetape test/*.coffee | faucet",
