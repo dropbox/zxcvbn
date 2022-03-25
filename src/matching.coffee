@@ -35,7 +35,7 @@ L33T_TABLE =
   z: ['2']
 
 REGEXEN =
-  recent_year:  /19\d\d|200\d|201\d/g
+  recent_year:  /19\d\d|20[012]\d/g
 
 DATE_MAX_YEAR = 2050
 DATE_MIN_YEAR = 1000
