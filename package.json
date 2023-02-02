@@ -1,14 +1,11 @@
 {
   "name": "zxcvbn",
-  "version": "4.2.0",
+  "version": "4.4.2",
   "description": "realistic password strength estimation",
   "author": "Dan Wheeler",
   "license": "MIT",
   "main": "lib/main.js",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/dropbox/zxcvbn.git"
-  },
+  "repository": "dropbox/zxcvbn",
   "scripts": {
     "test": "coffeetape test/*.coffee | faucet",
     "test-saucelabs": "zuul -- test/*.coffee",
@@ -16,8 +13,8 @@
     "watch": "npm run watch-lib & npm run watch-dist",
     "build-lib": "coffee -o lib --compile --bare --map src/*.coffee",
     "watch-lib": "coffee -o lib --compile --bare --map --watch src/*.coffee",
-    "build-dist": "browserify --debug  --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee |   exorcist dist/zxcvbn.js.map >| dist/zxcvbn.js",
-    "watch-dist": "watchify --debug -v --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee -o 'exorcist dist/zxcvbn.js.map >| dist/zxcvbn.js'",
+    "build-dist": "browserify --debug  --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee |   exorcist --base . dist/zxcvbn.js.map >| dist/zxcvbn.js",
+    "watch-dist": "watchify --debug -v --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee -o 'exorcist --base . dist/zxcvbn.js.map >| dist/zxcvbn.js'",
     "prepublish": "npm run build"
   },
   "devDependencies": {

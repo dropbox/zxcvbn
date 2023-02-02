@@ -17,4 +17,3 @@ browserify:
    - options:
        extensions:
          - .coffee
-

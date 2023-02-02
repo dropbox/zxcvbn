@@ -41,13 +41,15 @@ scoring =
   # ------------------------------------------------------------------------------
   #
   # takes a sequence of overlapping matches, returns the non-overlapping sequence with
-  # minimum guesses. O(nml) dp alg for length-n password with m candidate matches
-  # and optimal length-l sequence.
+  # minimum guesses. the following is a O(l_max * (n + m)) dynamic programming algorithm
+  # for a length-n password with m candidate matches. l_max is the maximum optimal
+  # sequence length spanning each prefix of the password. In practice it rarely exceeds 5 and the
+  # search terminates rapidly.
   #
-  # the optimal "minimum guesses" sublist is here defined to be the sublist that
-  # minimizes:
+  # the optimal "minimum guesses" sequence is here defined to be the sequence that
+  # minimizes the following function:
   #
-  #    l! * Product(m.guesses for m in sequence) + D^(l - 1)
+  #    g = l! * Product(m.guesses for m in sequence) + D^(l - 1)
   #
   # where l is the length of the sequence.
   #
@@ -69,117 +71,125 @@ scoring =
 
   most_guessable_match_sequence: (password, matches, _exclude_additive=false) ->
 
-    # at [k][l], the product of guesses of the optimal sequence of length-l
-    # covering password[0..k].
-    optimal_product = []
+    n = password.length
 
-    # at [k][l], the final match (match.j == k) in said optimal sequence of length l.
-    backpointers = []
+    # partition matches into sublists according to ending index j
+    matches_by_j = ([] for _ in [0...n])
+    for m in matches
+      matches_by_j[m.j].push m
+    # small detail: for deterministic output, sort each sublist by i.
+    for lst in matches_by_j
+      lst.sort (m1, m2) -> m1.i - m2.i
 
-    max_l = 0        # max-length sequence ever recorded
-    optimal_l = null # length of current optimal sequence
+    optimal =
+      # optimal.m[k][l] holds final match in the best length-l match sequence covering the
+      # password prefix up to k, inclusive.
+      # if there is no length-l sequence that scores better (fewer guesses) than
+      # a shorter match sequence spanning the same prefix, optimal.m[k][l] is undefined.
+      m:  ({} for _ in [0...n])
 
-    make_bruteforce_match = (i, j) =>
-      match =
-        pattern: 'bruteforce'
-        token: password[i..j]
-        i: i
-        j: j
-      match
+      # same structure as optimal.m -- holds the product term Prod(m.guesses for m in sequence).
+      # optimal.pi allows for fast (non-looping) updates to the minimization function.
+      pi: ({} for _ in [0...n])
 
-    score = (guess_product, sequence_length) =>
-      result = @factorial(sequence_length) * guess_product
+      # same structure as optimal.m -- holds the overall metric.
+      g:  ({} for _ in [0...n])
+
+    # helper: considers whether a length-l sequence ending at match m is better (fewer guesses)
+    # than previously encountered sequences, updating state if so.
+    update = (m, l) =>
+      k = m.j
+      pi = @estimate_guesses m, password
+      if l > 1
+        # we're considering a length-l sequence ending with match m:
+        # obtain the product term in the minimization function by multiplying m's guesses
+        # by the product of the length-(l-1) sequence ending just before m, at m.i - 1.
+        pi *= optimal.pi[m.i - 1][l - 1]
+      # calculate the minimization func
+      g = @factorial(l) * pi
       unless _exclude_additive
-        result += Math.pow MIN_GUESSES_BEFORE_GROWING_SEQUENCE, sequence_length - 1
-      result
+        g += Math.pow(MIN_GUESSES_BEFORE_GROWING_SEQUENCE, l - 1)
+      # update state if new best.
+      # first see if any competing sequences covering this prefix, with l or fewer matches,
+      # fare better than this sequence. if so, skip it and return.
+      for competing_l, competing_g of optimal.g[k]
+        continue if competing_l > l
+        return if competing_g <= g
+      # this sequence might be part of the final optimal sequence.
+      optimal.g[k][l] = g
+      optimal.m[k][l] = m
+      optimal.pi[k][l] = pi
 
-    for k in [0...password.length]
-      backpointers[k] = []
-      optimal_product[k] = []
-      optimal_score = Infinity
-      for prev_l in [0..max_l]
-        # for each new k, starting scenario to try to beat: bruteforce matches
-        # involving the lowest-possible l. three cases:
-        #
-        # 1. all-bruteforce match (for length-1 sequences.)
-        # 2. extending a previous bruteforce match
-        #    (possible when optimal[k-1][l] ends in bf.)
-        # 3. starting a new single-char bruteforce match
-        #    (possible when optimal[k-1][l] exists but does not end in bf.)
-        #
-        # otherwise: there is no bruteforce starting scenario that might be better
-        # than already-discovered lower-l sequences.
-        consider_bruteforce = true
-        bf_j = k
-        if prev_l == 0
-          bf_i = 0
-          new_l = 1
-        else if backpointers[k-1]?[prev_l]?.pattern == 'bruteforce'
-          bf_i = backpointers[k-1][prev_l].i
-          new_l = prev_l
-        else if backpointers[k-1]?[prev_l]?
-          bf_i = k
-          new_l = prev_l + 1
+    # helper: evaluate bruteforce matches ending at k.
+    bruteforce_update = (k) =>
+      # see if a single bruteforce match spanning the k-prefix is optimal.
+      m = make_bruteforce_match(0, k)
+      update(m, 1)
+      for i in [1..k]
+        # generate k bruteforce matches, spanning from (i=1, j=k) up to (i=k, j=k).
+        # see if adding these new matches to any of the sequences in optimal[i-1]
+        # leads to new bests.
+        m = make_bruteforce_match(i, k)
+        for l, last_m of optimal.m[i-1]
+          l = parseInt(l)
+          # corner: an optimal sequence will never have two adjacent bruteforce matches.
+          # it is strictly better to have a single bruteforce match spanning the same region:
+          # same contribution to the guess product with a lower length.
+          # --> safe to skip those cases.
+          continue if last_m.pattern == 'bruteforce'
+          # try adding m to this length-l sequence.
+          update(m, l + 1)
+
+    # helper: make bruteforce match objects spanning i to j, inclusive.
+    make_bruteforce_match = (i, j) =>
+      pattern: 'bruteforce'
+      token: password[i..j]
+      i: i
+      j: j
+
+    # helper: step backwards through optimal.m starting at the end,
+    # constructing the final optimal match sequence.
+    unwind = (n) =>
+      optimal_match_sequence = []
+      k = n - 1
+      # find the final best sequence length and score
+      l = undefined
+      g = Infinity
+      for candidate_l, candidate_g of optimal.g[k]
+        if candidate_g < g
+          l = candidate_l
+          g = candidate_g
+
+      while k >= 0
+        m = optimal.m[k][l]
+        optimal_match_sequence.unshift m
+        k = m.i - 1
+        l--
+      optimal_match_sequence
+
+    for k in [0...n]
+      for m in matches_by_j[k]
+        if m.i > 0
+          for l of optimal.m[m.i - 1]
+            l = parseInt(l)
+            update(m, l + 1)
         else
-          consider_bruteforce = false
-
-        if consider_bruteforce
-          bf_match = make_bruteforce_match bf_i, bf_j
-          prev_j = k - bf_match.token.length # end of preceeding match
-          candidate_product = @estimate_guesses bf_match, password
-          candidate_product *= optimal_product[prev_j][new_l - 1] if new_l > 1
-          candidate_score = score candidate_product, new_l
-          if candidate_score < optimal_score
-            optimal_score = candidate_score
-            optimal_product[k][new_l] = candidate_product
-            optimal_l = new_l
-            max_l = Math.max max_l, new_l
-            backpointers[k][new_l] = bf_match
-
-        # now try beating those bruteforce starting scenarios.
-        # for each match m ending at k, see if forming a (prev_l + 1) sequence
-        # ending at m is better than the current optimum.
-        for match in matches when match.j == k
-          [i, j] = [match.i, match.j]
-          if prev_l == 0
-            # if forming a len-1 sequence [match], match.i must fully cover [0..k]
-            continue unless i == 0
-          else
-            # it's only possible to form a new potentially-optimal sequence ending at
-            # match when there's an optimal length-prev_l sequence ending at match.i-1.
-            continue unless optimal_product[i-1]?[prev_l]?
-          candidate_product = @estimate_guesses match, password
-          candidate_product *= optimal_product[i-1][prev_l] if prev_l > 0
-          candidate_score = score candidate_product, prev_l + 1
-          if candidate_score < optimal_score
-            optimal_score = candidate_score
-            optimal_product[k][prev_l+1] = candidate_product
-            optimal_l = prev_l + 1
-            max_l = Math.max max_l, prev_l+1
-            backpointers[k][prev_l+1] = match
-
-    # walk backwards and decode the optimal sequence
-    match_sequence = []
-    l = optimal_l
-    k = password.length - 1
-    while k >= 0
-      match = backpointers[k][l]
-      match_sequence.push match
-      k = match.i - 1
-      l -= 1
-    match_sequence.reverse()
+          update(m, 1)
+      bruteforce_update(k)
+    optimal_match_sequence = unwind(n)
+    optimal_l = optimal_match_sequence.length
 
     # corner: empty password
     if password.length == 0
       guesses = 1
     else
-      guesses = optimal_score
+      guesses = optimal.g[n - 1][optimal_l]
 
     # final result object
     password: password
     guesses: guesses
     guesses_log10: @log10 guesses
-    sequence: match_sequence
+    sequence: optimal_match_sequence
 
   # ------------------------------------------------------------------------------
   # guess estimation -- one function per match pattern ---------------------------
@@ -208,8 +218,10 @@ scoring =
 
   bruteforce_guesses: (match) ->
     guesses = Math.pow BRUTEFORCE_CARDINALITY, match.token.length
+    if guesses == Number.POSITIVE_INFINITY
+        guesses = Number.MAX_VALUE;
     # small detail: make bruteforce matches at minimum one guess bigger than smallest allowed
-    # submatch guesses, such that non-bruteforce submatches over the same [i..j] take precidence.
+    # submatch guesses, such that non-bruteforce submatches over the same [i..j] take precedence.
     min_guesses = if match.token.length == 1
       MIN_SUBMATCH_GUESSES_SINGLE_CHAR + 1
     else
@@ -238,7 +250,8 @@ scoring =
     base_guesses * match.token.length
 
   MIN_YEAR_SPACE: 20
-  REFERENCE_YEAR: 2000
+  REFERENCE_YEAR: new Date().getFullYear()
+
   regex_guesses: (match) ->
     char_class_bases =
       alpha_lower:  26
@@ -260,9 +273,7 @@ scoring =
   date_guesses: (match) ->
     # base guesses: (year distance from REFERENCE_YEAR) * num_days * num_years
     year_space = Math.max(Math.abs(match.year - @REFERENCE_YEAR), @MIN_YEAR_SPACE)
-    guesses = year_space * 31 * 12
-    # double for four-digit years
-    guesses *= 2 if match.has_full_year
+    guesses = year_space * 365
     # add factor of 4 for separator selection (one of ~4 choices)
     guesses *= 4 if match.separator
     guesses
@@ -316,7 +327,7 @@ scoring =
 
   uppercase_variations: (match) ->
     word = match.token
-    return 1 if word.match @ALL_LOWER
+    return 1 if word.match(@ALL_LOWER) or word.toLowerCase() == word
     # a capitalized word is the most common capitalization scheme,
     # so it only doubles the search space (uncapitalized + capitalized).
     # allcaps and end-capitalized are common enough too, underestimate as 2x factor to be safe.

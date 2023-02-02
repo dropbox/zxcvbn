@@ -2,9 +2,4 @@ sudo: false
 language: node_js
 node_js:
   - node
-script: npm run test-saucelabs
-env:
-  global:
-    - secure: HayVPsMiZwrVLVg5XOUs8Ee3mW3IMvOpFzBcN9bocJAHSwzPNArZrlUX4Qr8mp7RxE4Znoj8Yu6/HRpqCD1S4LxmUXzFFslCWHyZEjxeLkxF8gPqgVA2aVrWxfRpQQW9jT2M/aiGSNO6bgI7GQP/uQkH+Au2v3DWXrGNvMNhVbI=
-    - secure: giszMTdqUHRey+TDdoO3OnTdj64A27emUKRgX6SwuN0uu2D3av7624skgJqfAgJMPpho1WgkW6ujqRu3CeCBMQWcGeADtKkGvAYu7gHru6nYm5RifjadMQyrUH7hF/SkEHv44rPaHPiVEQ0N7pN192jmTXgptUHqfvfdJR6bD+M=
-
+script: npm run test
