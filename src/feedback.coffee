@@ -1,5 +1,5 @@
 scoring = require('./scoring')
-translations = require('./translations-pt-br')
+translations = require('./translations-keys')
 
 feedback =
   default_feedback:
