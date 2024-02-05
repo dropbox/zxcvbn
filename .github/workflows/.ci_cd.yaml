@@ -1,6 +1,15 @@
 name: CI/CD
 on: push
 jobs:
+  test:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run SonarCloud
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   build:
     runs-on: self-hosted
     # if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
