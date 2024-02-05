@@ -1,0 +1,32 @@
+name: CI/CD
+on: push
+jobs:
+  test:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run SonarCloud
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  build:
+    runs-on: self-hosted
+    # if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+      - name: Run npm install
+        run: npm install
+      - name: Run npm build
+        run: npm run build
+      - name: Run run release
+        run: npm run release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_USERNAME: ${{ secrets.NEXUS_USER }}
+          NPM_PASSWORD: ${{ secrets.NEXUS_PASS }}
+          NPM_EMAIL: ${{ secrets.NEXUS_USER }}

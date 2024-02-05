@@ -1,0 +1,66 @@
+version: 2
+mergeable:
+  - when: pull_request.*
+    validate:
+      - do: description
+        no_empty:
+          enabled: true
+          message: Description matter and should not be empty. Provide detail with **what** was changed, **why** it was changed, and **how** it was changed.
+
+  - when: pull_request.*
+    validate:
+      - do: or
+        validate:
+          - do: description
+            must_include:
+              regex: '[A-Z][A-Z0-9]+[-_]\d+'
+              message: 'The Jira ticket does not exist'
+          - do: title
+            must_include:
+              regex: '[A-Z][A-Z0-9]+[-_]\d+'
+              message: 'The Jira ticket does not exist'
+          - do: headRef
+            must_include:
+              regex: '[A-Z][A-Z0-9]+[-_]\d+'
+              message: 'The Jira ticket does not exist'
+    pass:
+      - do: labels
+        delete: 'NO_JIRA'
+    fail:
+      - do: labels
+        add: 'NO_JIRA'
+      - do: comment
+        payload:
+          body: This is NO_JIRA. Is it relevant now, really, why?
+
+  - when: pull_request.*, pull_request_review.*
+    name: 'Approval check'
+    validate:
+      - do: approvals
+        min:
+          count: 2
+
+  - when: schedule.repository
+    validate:
+      - do: stale
+        days: 20
+        type: pull_request
+    pass:
+      - do: comment
+        payload:
+          body: This is old. Is it still relevant?
+          
+  - when: schedule.repository
+    filter:
+      - do: author
+        must_exclude:
+            regex: 'dependabot'
+    validate:
+      - do: stale
+        days: 40
+        type: pull_request
+    pass:
+      - do: comment
+        payload:
+          body: This is old. This PR will be closed now.
+      - do: close

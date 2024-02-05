@@ -1,11 +1,11 @@
 {
   "name": "zxcvbn",
   "version": "4.4.2",
-  "description": "realistic password strength estimation",
+  "description": "realistic password strength estimation forked from dropbox/zxcvbn",
   "author": "Dan Wheeler",
   "license": "MIT",
-  "main": "lib/main.js",
-  "repository": "dropbox/zxcvbn",
+  "main": "dist/zxcvbn.js",
+  "repository": "gympass/zxcvbn",
   "scripts": {
     "test": "coffeetape test/*.coffee | faucet",
     "test-saucelabs": "zuul -- test/*.coffee",
@@ -15,7 +15,7 @@
     "watch-lib": "coffee -o lib --compile --bare --map --watch src/*.coffee",
     "build-dist": "browserify --debug  --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee |   exorcist --base . dist/zxcvbn.js.map >| dist/zxcvbn.js",
     "watch-dist": "watchify --debug -v --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee -o 'exorcist --base . dist/zxcvbn.js.map >| dist/zxcvbn.js'",
-    "prepublish": "npm run build"
+    "release": "semantic-release"
   },
   "devDependencies": {
     "browserify": "^11.0.1",
@@ -26,6 +26,10 @@
     "exorcist": "^0.4.0",
     "faucet": "^0.0.1",
     "istanbul": "^0.3.18",
+    "rollup": "^4.6.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "semantic-release": "^22.0.8",
     "tape": "^4.2.0",
     "uglifyify": "^3.0.1",
     "watchify": "^3.3.1",
