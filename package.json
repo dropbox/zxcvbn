@@ -24,7 +24,7 @@
     "coffeeify": "^1.1.0",
     "coffeetape": "^1.0.1",
     "exorcist": "^0.4.0",
-    "faucet": "^0.0.1",
+    "faucet": "^0.0.4",
     "istanbul": "^0.3.18",
     "tape": "^4.2.0",
     "uglifyify": "^3.0.1",
