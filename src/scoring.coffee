@@ -32,8 +32,13 @@ scoring =
   factorial: (n) ->
     # unoptimized, called only on small n
     return 1 if n < 2
+    # Prevent overflow: factorial(171) overflows Number.MAX_VALUE
+    return Number.MAX_VALUE if n > 170
     f = 1
     f *= i for i in [2..n]
+    # Check for overflow after calculation
+    if !isFinite(f)
+      return Number.MAX_VALUE
     f
 
   # ------------------------------------------------------------------------------
@@ -108,7 +113,11 @@ scoring =
       # calculate the minimization func
       g = @factorial(l) * pi
       unless _exclude_additive
-        g += Math.pow(MIN_GUESSES_BEFORE_GROWING_SEQUENCE, l - 1)
+        # Prevent overflow in sequence penalty calculation
+        penalty = Math.pow(MIN_GUESSES_BEFORE_GROWING_SEQUENCE, l - 1)
+        if !isFinite(penalty)
+          penalty = Number.MAX_VALUE
+        g += penalty
       # update state if new best.
       # first see if any competing sequences covering this prefix, with l or fewer matches,
       # fare better than this sequence. if so, skip it and return.
@@ -217,8 +226,12 @@ scoring =
     match.guesses
 
   bruteforce_guesses: (match) ->
-    guesses = Math.pow BRUTEFORCE_CARDINALITY, match.token.length
-    if guesses == Number.POSITIVE_INFINITY
+    # Cap password length to prevent overflow
+    max_safe_length = 308 # Math.pow(10, 308) is near Number.MAX_VALUE
+    effective_length = Math.min(match.token.length, max_safe_length)
+    guesses = Math.pow BRUTEFORCE_CARDINALITY, effective_length
+    # Fix: use isFinite() instead of comparing to Number.POSITIVE_INFINITY
+    if !isFinite(guesses)
         guesses = Number.MAX_VALUE;
     # small detail: make bruteforce matches at minimum one guess bigger than smallest allowed
     # submatch guesses, such that non-bruteforce submatches over the same [i..j] take precedence.
@@ -261,7 +274,11 @@ scoring =
       digits:       10
       symbols:      33
     if match.regex_name of char_class_bases
-      Math.pow(char_class_bases[match.regex_name], match.token.length)
+      guesses = Math.pow(char_class_bases[match.regex_name], match.token.length)
+      # Prevent overflow in regex pattern calculations
+      if !isFinite(guesses)
+        guesses = Number.MAX_VALUE
+      guesses
     else switch match.regex_name
       when 'recent_year'
         # conservative estimate of year space: num years from REFERENCE_YEAR.
@@ -299,7 +316,14 @@ scoring =
     for i in [2..L]
       possible_turns = Math.min(t, i - 1)
       for j in [1..possible_turns]
-        guesses += @nCk(i - 1, j - 1) * s * Math.pow(d, j)
+        pow_result = Math.pow(d, j)
+        # Prevent overflow in spatial pattern calculations
+        if !isFinite(pow_result)
+          pow_result = Number.MAX_VALUE
+        guesses += @nCk(i - 1, j - 1) * s * pow_result
+    # Cap total guesses to prevent overflow
+    if !isFinite(guesses) or guesses > Number.MAX_VALUE
+      guesses = Number.MAX_VALUE
     # add extra guesses for shifted keys. (% instead of 5, A instead of a.)
     # math is similar to extra guesses of l33t substitutions in dictionary matches.
     if match.shifted_count
