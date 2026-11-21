@@ -9,12 +9,12 @@
   "scripts": {
     "test": "coffeetape test/*.coffee | faucet",
     "test-saucelabs": "zuul -- test/*.coffee",
-    "build": "npm run build-lib ; npm run build-dist",
+    "build": "npm run build-lib && npm run build-dist",
     "watch": "npm run watch-lib & npm run watch-dist",
-    "build-lib": "coffee -o lib --compile --bare --map src/*.coffee",
-    "watch-lib": "coffee -o lib --compile --bare --map --watch src/*.coffee",
-    "build-dist": "browserify --debug  --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee |   exorcist --base . dist/zxcvbn.js.map >| dist/zxcvbn.js",
-    "watch-dist": "watchify --debug -v --standalone zxcvbn -t coffeeify --extension='.coffee' -t uglifyify src/main.coffee -o 'exorcist --base . dist/zxcvbn.js.map >| dist/zxcvbn.js'",
+    "build-lib": "coffee -o lib --compile --bare --map src/adjacency_graphs.coffee src/feedback.coffee src/frequency_lists.coffee src/main.coffee src/matching.coffee src/scoring.coffee src/time_estimates.coffee",
+    "watch-lib": "coffee -o lib --compile --bare --map --watch src/adjacency_graphs.coffee src/feedback.coffee src/frequency_lists.coffee src/main.coffee src/matching.coffee src/scoring.coffee src/time_estimates.coffee",
+    "build-dist": "browserify --debug --standalone zxcvbn -t uglifyify lib/main.js | exorcist --base . dist/zxcvbn.js.map > dist/zxcvbn.js",
+    "watch-dist": "watchify --debug -v --standalone zxcvbn -t uglifyify lib/main.js -o 'exorcist --base . dist/zxcvbn.js.map > dist/zxcvbn.js'",
     "prepublish": "npm run build"
   },
   "devDependencies": {
