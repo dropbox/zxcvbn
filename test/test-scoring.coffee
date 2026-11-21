@@ -197,10 +197,11 @@ test 'regex guesses', (t) ->
   msg = "guesses of |year - REFERENCE_YEAR| for distant year matches"
   t.equal scoring.regex_guesses(match), Math.abs(scoring.REFERENCE_YEAR - 1972), msg
 
+  close_year = (scoring.REFERENCE_YEAR - 1).toString()
   match =
-    token: '2005'
+    token: close_year
     regex_name: 'recent_year'
-    regex_match: ['2005']
+    regex_match: [close_year]
   msg = "guesses of MIN_YEAR_SPACE for a year close to REFERENCE_YEAR"
   t.equal scoring.regex_guesses(match), scoring.MIN_YEAR_SPACE, msg
   t.end()
